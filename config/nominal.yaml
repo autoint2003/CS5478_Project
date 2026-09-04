@@ -1,0 +1,67 @@
+sim: config/sim.yaml
+
+mass: 0.08
+friction: 1.0
+randomize: false
+use_contact: true
+xy_jitter: 0.0
+
+cartesian:
+  kp_pos: 180.0
+  kd_pos: 28.0
+  kp_ori: 16.0
+  kd_ori: 2.4
+  kp_null: 4.0
+  kd_null: 0.8
+
+reach:
+  duration: 4.0
+  n_trials: 20
+  pos_tol: 0.02
+  ori_tol_deg: 10.0
+  min_success_rate: 0.80
+  x_range: [0.35, 0.55]
+  y_range: [-0.20, 0.20]
+  z_range: [0.50, 0.65]
+  yaw_range_deg: [-20.0, 20.0]
+  pitch_range_deg: [-15.0, 15.0]
+
+fsm:
+  approach_offset_z: 0.22
+  grasp_offset_z: 0.103
+  lift_offset_z: 0.18
+  lift_clearance: 0.08
+  pos_tol: 0.015
+  ori_tol_deg: 12.0
+  dwell_approach: 0.35
+  dwell_descend: 0.30
+  dwell_close: 0.40
+  close_timeout: 1.50
+  pinch_opening: 0.028
+  hold_success: 1.00
+  hold_xy_tol: 0.08
+  episode_timeout: 12.0
+
+gripper:
+  open_tau: 8.0
+  close_tau: -18.0
+  close_boost: -32.0
+  touch_threshold: 0.02
+  contact_aware: true
+
+reward:
+  reach: 1.0
+  contact: 0.2
+  lift: 4.0
+  success: 8.0
+  residual_l2: 0.002
+  drop: 2.0
+
+sac:
+  learning_starts: 2048
+  batch_size: 256
+  buffer_size: 200000
+  tau: 0.005
+  gamma: 0.99
+  total_timesteps: 200000
+  probe_mass_jitter: 0.01

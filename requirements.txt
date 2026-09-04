@@ -1,0 +1,7 @@
+mujoco>=3.2.0
+numpy
+pyyaml
+matplotlib
+gymnasium
+stable-baselines3
+tensorboard

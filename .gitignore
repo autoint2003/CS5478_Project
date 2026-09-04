@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.env
+.python-version
+
+# Testing / coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editors / OS
+.idea/
+.vscode/
+.cursor/
+*.swp
+*~
+Thumbs.db
+.DS_Store
+
+# Third-party robot models (clone locally; see README)
+mujoco_menagerie/
+
+# Training and evaluation artifacts
+results/checkpoints/
+results/logs/
+results/videos/
+results/figures/
+tb_logs/
+*.pt
+*.pth
+*.ckpt
+wandb/
+
+# MuJoCo
+*.mjb
+MUJOCO_LOG.TXT

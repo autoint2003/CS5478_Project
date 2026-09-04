@@ -1,0 +1,32 @@
+sim: config/sim.yaml
+
+mass: 0.08
+friction: 1.0
+randomize: true
+use_contact: true
+
+train:
+  mass_range: [0.05, 0.25]
+  friction_range: [0.40, 1.20]
+  xy_range_x: [0.45, 0.55]
+  xy_range_y: [-0.08, 0.08]
+
+ood:
+  mass_range: [0.35, 0.60]
+  friction_range: [0.12, 0.28]
+
+reward:
+  reach: 1.0
+  contact: 0.2
+  lift: 4.0
+  success: 8.0
+  residual_l2: 0.002
+  drop: 2.0
+
+sac:
+  learning_starts: 4096
+  batch_size: 256
+  buffer_size: 300000
+  tau: 0.005
+  gamma: 0.99
+  total_timesteps: 300000
