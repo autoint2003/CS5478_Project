@@ -2,17 +2,7 @@
 
 CS5478 Intelligent Robots course project. A Franka Panda in MuJoCo follows a **nominal** torque controller for reach-and-grasp. Soft Actor-Critic later adds a **bounded residual** $\Delta\tau$. Object mass $m$ and friction $\mu$ never enter the observation.
 
-$$
-
-\tau_{\mathrm{applied}}
-=
-\mathrm{sat}\big(
-\tau_{\mathrm{nominal}}(s_t)
-+
-\Delta\tau_{\mathrm{requested}}
-\big)
-
-$$
+$$\tau_{\mathrm{applied}}=\mathrm{sat}\big(\tau_{\mathrm{nominal}}(s_t)+\Delta\tau_{\mathrm{requested}}\big)$$
 
 **Question.** Can a model-free residual policy use interaction feedback to adapt grasping to unseen mass and friction?
 
