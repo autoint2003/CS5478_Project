@@ -5,28 +5,101 @@ friction: 1.0
 randomize: true
 use_contact: false
 
+cartesian:
+  kp_pos: 180.0
+  kd_pos: 28.0
+  kp_ori: 16.0
+  kd_ori: 2.4
+  kp_null: 4.0
+  kd_null: 0.8
+
 train:
   mass_range: [0.05, 0.25]
   friction_range: [0.40, 1.20]
-  xy_range_x: [0.45, 0.55]
-  xy_range_y: [-0.08, 0.08]
+  grasp_offset_xy: 0.012
+  grasp_offset_z: 0.005
 
-ood:
-  mass_range: [0.35, 0.60]
-  friction_range: [0.12, 0.28]
+heldout:
+  mass_range: [0.16, 0.22]
+  friction_range: [0.45, 0.70]
+  grasp_offset_xy: [0.006, 0.012]
+
+fsm:
+  approach_offset_z: 0.22
+  grasp_offset_z: 0.103
+  lift_offset_z: 0.18
+  lift_clearance: 0.08
+  lift_speed: 0.08
+  pos_tol: 0.015
+  ori_tol_deg: 12.0
+  dwell_approach: 0.35
+  dwell_descend: 0.30
+  dwell_close: 0.40
+  close_timeout: 1.50
+  pinch_opening: 0.022
+  hold_success: 1.00
+  hold_xy_tol: 0.08
+  episode_timeout: 12.0
+
+gripper:
+  open_tau: 8.0
+  close_tau: -18.0
+  close_boost: -32.0
+  touch_threshold: 0.02
+  contact_aware: true
+  fg_nom: 18.0
+  fg_min: 8.0
+  fg_max: 45.0
+
+deterioration:
+  p_scale: 0.02
+  v_scale: 0.08
+  theta_scale: 0.25
+  omega_scale: 1.0
+  w_p: 1.0
+  w_v: 1.0
+  w_theta: 1.0
+  w_omega: 0.5
+  w_c: 1.0
+  contact_eps: 0.05
+  lost_contact_force: 0.5
+  D_enter: 0.85
+  D_exit: 0.40
+  N_stable: 10
+  drop_z_margin: 0.004
+  workspace_xy: 0.18
+
+recovery:
+  timeout: 4.0
+  action: 2d
+  dv_max: [0.06, 0.06, 0.12]
+  dw_max: [0.6, 0.6, 0.6]
+  dfg_max: 16.0
+  dv_rate: 0.80
+  dw_rate: 4.0
+  dfg_rate: 80.0
+  mild_max: 1.40
+  moderate_max: 2.40
 
 reward:
-  reach: 1.0
-  contact: 0.0
-  lift: 4.0
-  success: 8.0
-  residual_l2: 0.002
-  drop: 2.0
+  lambda_D: 1.0
+  lambda_f: 0.00015
+  lambda_c: 0.15
+  lambda_t: 0.01
+  recovered: 8.0
+  drop: 8.0
+  gamma: 0.99
+
+heuristic:
+  kp_F: 8.0
+  kd_F: 1.5
+  kp_v: 0.10
+  kd_v: 0.02
 
 sac:
-  learning_starts: 4096
+  learning_starts: 2048
   batch_size: 256
   buffer_size: 300000
   tau: 0.005
   gamma: 0.99
-  total_timesteps: 300000
+  total_timesteps: 120000

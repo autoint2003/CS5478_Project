@@ -28,3 +28,14 @@ def gripper_torque(phase: str, touch: np.ndarray, cfg: dict) -> float:
     if g.get("contact_aware", True) and float(np.max(touch)) > float(g["touch_threshold"]):
         tau = float(g["close_boost"])
     return tau
+
+
+def fg_to_tau(fg: float, ids: PandaIds) -> float:
+    """Map positive squeeze effort to closing tendon torque."""
+    tau = -float(fg)
+    return float(np.clip(tau, ids.ctrl_low[7], ids.ctrl_high[7]))
+
+
+def clip_fg(fg: float, cfg: dict) -> float:
+    g = cfg["gripper"]
+    return float(np.clip(fg, float(g.get("fg_min", 0.0)), float(g.get("fg_max", 50.0))))

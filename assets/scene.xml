@@ -17,12 +17,12 @@
   <worldbody>
     <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
     <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
-    <geom name="table" type="box" size="0.06 0.06 0.02" pos="0.5 0.0 0.38"
+    <geom name="table" type="box" size="0.12 0.12 0.02" pos="0.5 0.0 0.38"
       friction="1.0 0.005 0.0001" rgba="0.45 0.32 0.18 1"/>
-    <body name="cube" pos="0.5 0.0 0.43">
-      <freejoint name="cube_joint"/>
-      <inertial mass="0.08" pos="0 0 0" diaginertia="4.2667e-5 4.2667e-5 2.1333e-5"/>
-      <geom name="cube" type="box" size="0.02 0.02 0.03" condim="4"
+    <body name="object" pos="0.5 0.0 0.43">
+      <freejoint name="object_joint"/>
+      <inertial mass="0.08" pos="0 0 0" diaginertia="3.048e-5 3.048e-5 1.296e-5"/>
+      <geom name="object" type="cylinder" size="0.018 0.03" condim="4"
         friction="1.0 0.005 0.0001" rgba="0.15 0.75 0.35 1" solref="0.01 1"/>
     </body>
   </worldbody>

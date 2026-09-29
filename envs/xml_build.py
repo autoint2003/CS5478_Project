@@ -69,7 +69,7 @@ def write_panda_torque(dest: Path | None = None) -> Path:
   </sensor>
 """
     text = text.replace("  <keyframe>", sensors + "  <keyframe>", 1)
-    # Scene.xml owns the 16-DoF home key (arm + cube). Drop the 9-DoF
+    # Scene.xml owns the 16-DoF home key (arm + object). Drop the 9-DoF
     # Menagerie key so include does not register a duplicate name="home".
     text = re.sub(
         r"\n  <keyframe>.*?</keyframe>\n",

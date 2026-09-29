@@ -1,0 +1,226 @@
+"""Shared Panda grasp simulation used by collection, env, and eval."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import numpy as np
+import mujoco
+
+from controllers.nominal import GraspFSM, object_pos
+from controllers.residual import ResidualCommand, ResidualLimiter
+from envs.config_util import ROOT
+from envs.contact import touch_values
+from envs.deterioration import DeteriorationMeter, object_dropped, unrecoverable
+from envs.dynamics import set_object_dynamics
+from envs.ids import resolve_ids
+from envs.xml_build import write_panda_torque
+
+SCENE = ROOT / "assets" / "scene.xml"
+
+
+def reset_home(model: mujoco.MjModel, data: mujoco.MjData) -> None:
+    key = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_KEY, "home")
+    if key >= 0:
+        mujoco.mj_resetDataKeyframe(model, data, key)
+    else:
+        mujoco.mj_resetData(model, data)
+    mujoco.mj_forward(model, data)
+
+
+def load_model(cfg: dict) -> tuple[mujoco.MjModel, mujoco.MjData]:
+    write_panda_torque()
+    model = mujoco.MjModel.from_xml_path(str(SCENE))
+    model.opt.timestep = float(cfg["physics_dt"])
+    data = mujoco.MjData(model)
+    return model, data
+
+
+def mat6(r: np.ndarray) -> np.ndarray:
+    return r.reshape(9)[:6].astype(np.float32)
+
+
+class GraspSim:
+    def __init__(self, cfg: dict):
+        self.cfg = cfg
+        self.model, self.data = load_model(cfg)
+        self.ids = resolve_ids(self.model)
+        self.fsm = GraspFSM(cfg)
+        self.meter = DeteriorationMeter(cfg)
+        self.limiter = ResidualLimiter(cfg)
+        self.n_sub = int(cfg.get("n_substeps", 10))
+        self.dt_policy = float(self.model.opt.timestep) * self.n_sub
+        self.mass = float(cfg.get("mass", cfg.get("nominal_mass", 0.08)))
+        self.friction = float(cfg.get("friction", cfg.get("nominal_friction", 1.0)))
+        self.captured = False
+
+    def reset(
+        self,
+        mass: float | None = None,
+        friction: float | None = None,
+        grasp_offset: np.ndarray | None = None,
+    ) -> None:
+        self.mass = float(self.cfg.get("mass", 0.08) if mass is None else mass)
+        self.friction = float(
+            self.cfg.get("friction", 1.0) if friction is None else friction
+        )
+        reset_home(self.model, self.data)
+        set_object_dynamics(self.model, self.ids, self.mass, self.friction, self.data)
+        mujoco.mj_forward(self.model, self.data)
+        off = np.zeros(3) if grasp_offset is None else np.asarray(grasp_offset, dtype=float)
+        self.fsm.reset(off)
+        self.meter.reset()
+        self.limiter.reset()
+        self.captured = False
+
+    def load_snapshot(self, snap: dict) -> None:
+        self.reset(snap["mass"], snap["friction"], snap["grasp_offset"])
+        self.data.qpos[:] = snap["qpos"]
+        self.data.qvel[:] = snap["qvel"]
+        self.data.ctrl[:] = snap["ctrl"]
+        self.data.time = float(snap.get("time", 0.0))
+        mujoco.mj_forward(self.model, self.data)
+        self.fsm.phase = "lift"
+        self.fsm.lift_started = True
+        self.fsm.p_des = np.asarray(snap["p_des"], dtype=float).copy()
+        self.fsm.r_des = np.asarray(snap["r_des"], dtype=float).reshape(3, 3).copy()
+        self.fsm.grasp_xy = np.asarray(snap["grasp_xy"], dtype=float).copy()
+        self.fsm.grasp_z = float(snap["grasp_z"])
+        self.meter.prel_ref = np.asarray(snap["prel_ref"], dtype=float).copy()
+        self.meter.r_rel_ref = np.asarray(snap["r_rel_ref"], dtype=float).reshape(3, 3).copy()
+        self.meter.prev_D = float(snap["D"])
+        self.meter.in_recovery = True
+        self.meter.exit_count = 0
+        self.captured = True
+
+    def snapshot(self) -> dict:
+        return {
+            "qpos": self.data.qpos.copy(),
+            "qvel": self.data.qvel.copy(),
+            "ctrl": self.data.ctrl.copy(),
+            "time": float(self.data.time),
+            "mass": self.mass,
+            "friction": self.friction,
+            "grasp_offset": self.fsm.grasp_offset.copy(),
+            "p_des": self.fsm.p_des.copy(),
+            "r_des": self.fsm.r_des.copy(),
+            "grasp_xy": (
+                self.fsm.grasp_xy.copy()
+                if self.fsm.grasp_xy is not None
+                else object_pos(self.data, self.ids)[:2]
+            ),
+            "grasp_z": float(self.fsm.grasp_z),
+            "prel_ref": np.zeros(3) if self.meter.prel_ref is None else self.meter.prel_ref.copy(),
+            "r_rel_ref": (
+                np.eye(3) if self.meter.r_rel_ref is None else self.meter.r_rel_ref.copy()
+            ),
+            "D": float(self.meter.last.D),
+        }
+
+    def physics_step(self, residual: ResidualCommand | None = None, in_recovery: bool = False) -> None:
+        mujoco.mj_forward(self.model, self.data)
+        dv = None if residual is None else residual.dv
+        dw = None if residual is None else residual.dw
+        dfg = 0.0 if residual is None else residual.dfg
+        self.fsm.step(
+            self.model,
+            self.data,
+            self.ids,
+            residual_dv=dv,
+            residual_dw=dw,
+            residual_dfg=dfg,
+            in_recovery=in_recovery,
+        )
+        mujoco.mj_step(self.model, self.data)
+
+    def maybe_capture_reference(self) -> None:
+        if self.fsm.phase == "lift" and not self.captured:
+            self.meter.capture_reference(self.model, self.data, self.ids)
+            self.captured = True
+
+    def policy_tick(self, residual: ResidualCommand | None, in_recovery: bool) -> None:
+        self.maybe_capture_reference()
+        for _ in range(self.n_sub):
+            self.physics_step(residual, in_recovery=in_recovery)
+
+    def observe(self, use_contact: bool = True) -> np.ndarray:
+        d = self.data
+        ids = self.ids
+        q = d.qpos[ids.arm_jnt]
+        qd = d.qvel[ids.arm_dof]
+        r_ee = d.xmat[ids.hand_body].reshape(3, 3)
+        r_obj = d.xmat[ids.object_body].reshape(3, 3)
+        from envs.deterioration import body_twist
+
+        v_ee, w_ee = body_twist(self.model, d, ids.hand_body)
+        v_obj, w_obj = body_twist(self.model, d, ids.object_body)
+        snap = self.meter.last
+        touch = touch_values(d, ids)
+        contact = np.array(
+            [snap.f_left, snap.f_right, touch[0], touch[1]], dtype=np.float32
+        )
+        if not use_contact:
+            contact = np.zeros_like(contact)
+        unom = np.concatenate(
+            [
+                self.fsm.v_cmd,
+                self.fsm.w_cmd,
+                [self.fsm.fg_cmd],
+            ]
+        )
+        obs = np.concatenate(
+            [
+                q,
+                qd,
+                d.xpos[ids.hand_body],
+                mat6(r_ee),
+                v_ee,
+                w_ee,
+                d.xpos[ids.object_body],
+                mat6(r_obj),
+                v_obj,
+                w_obj,
+                snap.p_rel,
+                snap.v_rel,
+                [snap.theta_rel],
+                snap.omega_rel,
+                contact,
+                unom,
+                [snap.D, snap.Ddot],
+            ]
+        ).astype(np.float32)
+        return obs
+
+    def dropped(self) -> bool:
+        return object_dropped(
+            self.data,
+            self.ids,
+            self.cfg,
+            phase=self.fsm.phase,
+            t_phase=self.fsm.t_phase,
+        )
+
+    def bad_state(self) -> bool:
+        return unrecoverable(self.data, self.ids, self.cfg)
+
+
+def run_to_lift_or_deterioration(
+    sim: GraspSim,
+    max_time: float | None = None,
+) -> str:
+    """Advance nominal control until lift trigger, drop, success, or timeout."""
+    timeout = float(sim.cfg["fsm"]["episode_timeout"] if max_time is None else max_time)
+    n_steps = int(round(timeout / sim.model.opt.timestep))
+    for i in range(n_steps):
+        sim.physics_step(None, in_recovery=False)
+        sim.maybe_capture_reference()
+        if sim.fsm.phase == "lift" and sim.captured and (i + 1) % sim.n_sub == 0:
+            snap = sim.meter.compute(sim.model, sim.data, sim.ids, sim.dt_policy)
+            sim.meter.update_mode(snap.D)
+            if snap.D > sim.meter.D_enter:
+                return "deteriorate"
+        if sim.dropped():
+            return "drop"
+        if sim.fsm.success:
+            return "success"
+    return "timeout"

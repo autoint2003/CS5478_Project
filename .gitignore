@@ -36,6 +36,8 @@ results/checkpoints/
 results/logs/
 results/videos/
 results/figures/
+results/buffers/
+results/tb/
 tb_logs/
 *.pt
 *.pth

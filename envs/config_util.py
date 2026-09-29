@@ -18,4 +18,7 @@ def merge_sim_config(cfg: dict) -> dict:
     sim = load_yaml(sim_ref)
     out = dict(sim)
     out.update({k: v for k, v in cfg.items() if k != "sim"})
+    if "cartesian" not in out:
+        nom = load_yaml(ROOT / "config" / "nominal.yaml")
+        out["cartesian"] = nom.get("cartesian", {})
     return out

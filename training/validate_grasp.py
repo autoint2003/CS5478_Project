@@ -15,7 +15,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from controllers.gripper_controller import finger_opening, read_touch  # noqa: E402
-from controllers.nominal import GraspFSM, cube_pos  # noqa: E402
+from controllers.nominal import GraspFSM, object_pos  # noqa: E402
 from envs.config_util import load_yaml, merge_sim_config  # noqa: E402
 from envs.ids import resolve_ids  # noqa: E402
 from envs.xml_build import write_panda_torque  # noqa: E402
@@ -43,22 +43,22 @@ def run_episode(
     fsm.reset()
     timeout = float(cfg["fsm"]["episode_timeout"])
     n_steps = int(round(timeout / model.opt.timestep))
-    max_z = float(cube_pos(data, ids)[2])
+    max_z = float(object_pos(data, ids)[2])
     peak_touch = 0.0
     for _ in range(n_steps):
         mujoco.mj_forward(model, data)
         fsm.step(model, data, ids)
         mujoco.mj_step(model, data)
-        z = float(cube_pos(data, ids)[2])
+        z = float(object_pos(data, ids)[2])
         max_z = max(max_z, z)
         peak_touch = max(peak_touch, float(np.max(read_touch(data, ids))))
         if fsm.success:
             break
-    cube = cube_pos(data, ids)
+    obj = object_pos(data, ids)
     return {
         "success": bool(fsm.success),
         "phase": fsm.phase,
-        "cube_z": float(cube[2]),
+        "cube_z": float(obj[2]),
         "max_cube_z": max_z,
         "held": float(fsm.t_held),
         "opening": finger_opening(data, ids),

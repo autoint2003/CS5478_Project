@@ -1,11 +1,11 @@
 physics_dt: 0.002
 n_substeps: 10
-residual_scale: 1.0
-delta_tau_max_frac: 0.25
 max_episode_steps: 400
 home_qpos: [0.0, 0.0, 0.0, -1.57079, 0.0, 1.57079, -0.7853, 0.04, 0.04]
 nominal_mass: 0.08
 nominal_friction: 1.0
-cube_xy: [0.50, 0.00]
+object_xy: [0.50, 0.00]
+object_radius: 0.018
+object_half_height: 0.03
 cube_half_height: 0.03
 table_top: 0.40

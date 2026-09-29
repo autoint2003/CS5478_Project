@@ -58,6 +58,8 @@ def cartesian_torque(
     kp_null: float = _DEFAULTS["kp_null"],
     kd_null: float = _DEFAULTS["kd_null"],
     q_home: np.ndarray | None = None,
+    v_des: np.ndarray | None = None,
+    w_des: np.ndarray | None = None,
 ) -> np.ndarray:
     p = data.xpos[ids.hand_body].copy()
     r = data.xmat[ids.hand_body].reshape(3, 3).copy()
@@ -67,9 +69,12 @@ def cartesian_torque(
     j = jacobian_6d(model, data, ids)
     qdot = data.qvel[ids.arm_dof]
     xdot = j @ qdot
+    vd = np.zeros(3) if v_des is None else np.asarray(v_des, dtype=float).reshape(3)
+    wd = np.zeros(3) if w_des is None else np.asarray(w_des, dtype=float).reshape(3)
+    xdot_des = np.concatenate([vd, wd])
     kp = np.array([kp_pos, kp_pos, kp_pos, kp_ori, kp_ori, kp_ori])
     kd = np.array([kd_pos, kd_pos, kd_pos, kd_ori, kd_ori, kd_ori])
-    wrench = kp * e - kd * xdot
+    wrench = kp * e + kd * (xdot_des - xdot)
     tau = j.T @ wrench + arm_bias(model, data, ids)
     q_ref = ids.home_qpos[ids.arm_jnt] if q_home is None else q_home
     lam = 1e-3
@@ -86,11 +91,15 @@ def apply_cartesian_ctrl(
     p_des: np.ndarray,
     r_des: np.ndarray,
     gripper_tau: float = 0.0,
+    v_des: np.ndarray | None = None,
+    w_des: np.ndarray | None = None,
     **gains,
 ) -> np.ndarray:
     """Write 8-D ctrl: Cartesian arm torque + gripper tendon force."""
     ctrl = np.zeros(ids.n_act)
-    ctrl[:7] = cartesian_torque(model, data, ids, p_des, r_des, **gains)
+    ctrl[:7] = cartesian_torque(
+        model, data, ids, p_des, r_des, v_des=v_des, w_des=w_des, **gains
+    )
     ctrl[7] = float(np.clip(gripper_tau, ids.ctrl_low[7], ids.ctrl_high[7]))
     data.ctrl[:] = ctrl
     return ctrl
