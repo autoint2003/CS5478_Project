@@ -79,19 +79,32 @@ class GraspSim:
         self.data.qvel[:] = snap["qvel"]
         self.data.ctrl[:] = snap["ctrl"]
         self.data.time = float(snap.get("time", 0.0))
+        if "qacc_warmstart" in snap:
+            self.data.qacc_warmstart[:] = np.asarray(snap["qacc_warmstart"], dtype=float)
         mujoco.mj_forward(self.model, self.data)
-        self.fsm.phase = "lift"
-        self.fsm.lift_started = True
+        # Old recovery buffers omit FSM clocks; default keeps prior lift+t_phase=0 behaviour.
+        self.fsm.phase = str(snap.get("phase", "lift"))
+        self.fsm.t_phase = float(snap.get("t_phase", 0.0))
+        self.fsm.t_stable = float(snap.get("t_stable", 0.0))
+        self.fsm.t_held = float(snap.get("t_held", 0.0))
+        self.fsm.lift_started = bool(snap.get("lift_started", self.fsm.phase == "lift"))
+        self.fsm.success = bool(snap.get("success", False))
         self.fsm.p_des = np.asarray(snap["p_des"], dtype=float).copy()
         self.fsm.r_des = np.asarray(snap["r_des"], dtype=float).reshape(3, 3).copy()
         self.fsm.grasp_xy = np.asarray(snap["grasp_xy"], dtype=float).copy()
         self.fsm.grasp_z = float(snap["grasp_z"])
+        if "fg_cmd" in snap:
+            self.fsm.fg_cmd = float(snap["fg_cmd"])
+        if "v_cmd" in snap:
+            self.fsm.v_cmd = np.asarray(snap["v_cmd"], dtype=float).reshape(3).copy()
+        if "w_cmd" in snap:
+            self.fsm.w_cmd = np.asarray(snap["w_cmd"], dtype=float).reshape(3).copy()
         self.meter.prel_ref = np.asarray(snap["prel_ref"], dtype=float).copy()
         self.meter.r_rel_ref = np.asarray(snap["r_rel_ref"], dtype=float).reshape(3, 3).copy()
         self.meter.prev_D = float(snap["D"])
-        self.meter.in_recovery = True
-        self.meter.exit_count = 0
-        self.captured = True
+        self.meter.in_recovery = bool(snap.get("in_recovery", True))
+        self.meter.exit_count = int(snap.get("exit_count", 0))
+        self.captured = bool(snap.get("captured", True))
 
     def snapshot(self) -> dict:
         return {
@@ -115,6 +128,21 @@ class GraspSim:
                 np.eye(3) if self.meter.r_rel_ref is None else self.meter.r_rel_ref.copy()
             ),
             "D": float(self.meter.last.D),
+            "object_z": float(self.data.xpos[self.ids.object_body][2]),
+            "hand_z": float(self.data.xpos[self.ids.hand_body][2]),
+            "phase": self.fsm.phase,
+            "t_phase": float(self.fsm.t_phase),
+            "t_stable": float(self.fsm.t_stable),
+            "t_held": float(self.fsm.t_held),
+            "lift_started": bool(self.fsm.lift_started),
+            "success": bool(self.fsm.success),
+            "fg_cmd": float(self.fsm.fg_cmd),
+            "v_cmd": self.fsm.v_cmd.copy(),
+            "w_cmd": self.fsm.w_cmd.copy(),
+            "captured": bool(self.captured),
+            "in_recovery": bool(self.meter.in_recovery),
+            "exit_count": int(self.meter.exit_count),
+            "qacc_warmstart": self.data.qacc_warmstart.copy(),
         }
 
     def physics_step(self, residual: ResidualCommand | None = None, in_recovery: bool = False) -> None:
@@ -217,7 +245,9 @@ def run_to_lift_or_deterioration(
         if sim.fsm.phase == "lift" and sim.captured and (i + 1) % sim.n_sub == 0:
             snap = sim.meter.compute(sim.model, sim.data, sim.ids, sim.dt_policy)
             sim.meter.update_mode(snap.D)
-            if snap.D > sim.meter.D_enter:
+            z = float(sim.data.xpos[sim.ids.object_body][2])
+            z_min = float(sim.cfg.get("recovery", {}).get("z_recovery_min", 0.0))
+            if snap.D > sim.meter.D_enter and z >= z_min:
                 return "deteriorate"
         if sim.dropped():
             return "drop"

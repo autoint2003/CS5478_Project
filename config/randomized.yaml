@@ -80,6 +80,7 @@ recovery:
   dfg_rate: 80.0
   mild_max: 1.40
   moderate_max: 2.40
+  z_recovery_min: 0.48
 
 reward:
   lambda_D: 1.0
@@ -105,7 +106,7 @@ sac:
   total_timesteps: 120000
 
 collect:
-  max_episodes: 80
+  max_episodes: 400
   n_train: 36
   n_eval: 12
   min_per_bin: 3

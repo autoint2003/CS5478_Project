@@ -82,6 +82,7 @@ recovery:
   dfg_rate: 80.0
   mild_max: 1.40
   moderate_max: 2.40
+  z_recovery_min: 0.48
 
 reward:
   lambda_D: 1.0

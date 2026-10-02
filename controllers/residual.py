@@ -53,6 +53,16 @@ class ResidualLimiter:
         if kind == "2d":
             cmd.dv = np.array([0.0, 0.0, float(a[0]) * self.dv_max[2]])
             cmd.dfg = float(a[1]) * self.dfg_max
+        elif kind == "3d":
+            # Diagnostic [dv_y, dv_z, dfg]; official 2d/7d mappings unchanged.
+            cmd.dv = np.array(
+                [
+                    0.0,
+                    float(a[0]) * self.dv_max[1],
+                    float(a[1]) * self.dv_max[2],
+                ]
+            )
+            cmd.dfg = float(a[2]) * self.dfg_max
         else:
             cmd.dv = a[0:3] * self.dv_max
             cmd.dw = a[3:6] * self.dw_max
@@ -63,6 +73,15 @@ class ResidualLimiter:
         if kind == "2d":
             return np.array(
                 [
+                    cmd.dv[2] / (self.dv_max[2] + 1e-8),
+                    cmd.dfg / (self.dfg_max + 1e-8),
+                ],
+                dtype=np.float32,
+            )
+        if kind == "3d":
+            return np.array(
+                [
+                    cmd.dv[1] / (self.dv_max[1] + 1e-8),
                     cmd.dv[2] / (self.dv_max[2] + 1e-8),
                     cmd.dfg / (self.dfg_max + 1e-8),
                 ],

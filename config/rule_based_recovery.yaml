@@ -1,0 +1,26 @@
+kp_pos: 180.0
+kd_pos: 28.0
+kp_ori: 16.0
+kd_ori: 2.4
+e_tol: 0.003
+e_tol_note: "Centered airborne |e_x|~0.13 mm. Stick-sweep used 2 mm of relative motion.\
+  \ The 3 T_brake probes stopped captured-slip at 2.54\u20132.70 mm residual. e_tol=3\
+  \ mm is that residual band, not an arbitrary eval cutoff."
+t_stabilize: 0.15
+t_align_max: 0.6
+t_slip_max: 1.2
+t_brake: 0.20000000000000004
+t_brake_hold: 0.12
+t_check: 0.2
+t_secure: 0.5
+t_open_max: 0.2
+t_reclose: 0.12
+fall_lim: 0.025
+tau_secure: -18.0
+tau_slip: -2.0
+tau_open: -1.0
+v_open: 0.06
+v_rel_tol: 0.08
+g_hx_min: 8.0
+t_brake_justification: 3 probes x0=+7.5,-7.5,+5 mm. Raw |e|/|edot| while closing and |e|>3mm was 0.65/0.61/0.65 s; that T would brake at slip entry. Frozen T_brake=0.20 s = clip upper bound that still allowed a slip pass through the 3 mm band on those same 3 trajectories.
+frozen: true

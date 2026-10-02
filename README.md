@@ -1,10 +1,10 @@
-# Adaptive Grasp Recovery (Mode-Switched Residual SAC)
+# CS5478 Grasp Recovery
 
-CS5478 Intelligent Robots course project. A Franka Panda in MuJoCo follows a **nominal** Cartesian grasp-and-lift controller. When a ground-truth deterioration score \(D_t\) exceeds a threshold, Soft Actor-Critic adds a **bounded residual** to end-effector velocity and gripping force. Object mass \(m\) and friction \(\mu\) never enter the observation.
+Franka Panda in MuJoCo. A **nominal** Cartesian grasp-and-lift controller runs at 500 Hz. Recovery is a **mode switch**: freeze-hold plus a separate recovery policy, not residual torque mixed into the lift controller.
 
-Research question: how can a recovery-specific SAC policy adapt its corrective actions to different grasp-deterioration states under uncertainty in mass, friction, and grasp placement?
+The scientific comparison is **ZERO vs frozen RULE vs SAC** on the same held-out initial conditions. Object mass and friction are never observed.
 
-Primary evidence is **recovery rate** among grasps that trigger recovery, compared with a tuned heuristic on the same detector and action bounds.
+The recovery problem of record is **captured, airborne, hand-frame \(x\) grasp offset**. Impact ICs are a transfer check only.
 
 ## Setup
 
@@ -15,61 +15,82 @@ pip install -r requirements.txt
 git clone https://github.com/google-deepmind/mujoco_menagerie.git
 ```
 
-`mujoco_menagerie/` is **not** in this git repo. Only `franka_emika_panda` is required. Do not edit `mujoco_menagerie/franka_emika_panda/panda.xml`. Torque actuators are generated:
+`mujoco_menagerie/` is not in git. Only `franka_emika_panda` is required. Do not edit the Menagerie XML. Generate torque actuators with:
 
 ```text
 python -c "from envs.xml_build import write_panda_torque; write_panda_torque()"
 ```
 
-`assets/panda_torque.xml` is generated. `assets/scene.xml` includes it (floor, table, cylinder, lighting).
+Physics: **500 Hz** (`physics_dt: 0.002`). Policy / recovery decisions: **50 Hz** (`n_substeps: 10`).
 
-Physics: **500 Hz** (`physics_dt: 0.002`). SAC / recovery decisions run at **50 Hz** (`n_substeps: 10`) with residuals held and \(\tau_{\mathrm{nominal}}\) recomputed every physics step.
+## Frozen RULE
 
-Optional viewers:
+Do not retune these files:
+
+- `config/rule_based_recovery.yaml`
+- `controllers/rule_based_recovery.py`
+
+FSM: `STABILIZE → SLIP_ALIGN → CONTROLLED_SLIP → BRAKE → CHECK → [OPEN_REGRASP / RECLOSE] → SECURE → RESUME`.
+
+Grip tendon commands of record: secure \(\tau=-18\), controlled slip \(\tau=-2\), open \(\tau=-1\). Offset success is \(|e_x|\le 3\,\mathrm{mm}\), bilateral contact, low relative motion, scene-free.
+
+Replay helpers live in `training/replay_core.py`. Hashes are checked by `training/eval_heldout.py` and `training/test_mainline_replay.py`.
+
+## Held-out evaluation (do not train on these)
+
+| Set | Path | Use |
+|---|---|---|
+| Offset N=80 | `results/eval_sets/airborne_offset_eval.npz` | Primary ZERO vs RULE vs (later) SAC |
+| Impact four speeds | `results/eval_sets/impact_severity_four.npz` | Impact transfer only |
 
 ```text
-python training/validate_grasp.py --viewer
+python training/eval_heldout.py --which both
+python training/test_mainline_replay.py
 ```
 
-## Checkpoints
+## Nominal stack
 
-Gated: finish CP\(n\) before CP\(n+1\). CP1–4 are the torque/Jacobian/contact foundation (historically run on a cube; CP5 re-validates the FSM on the cylinder).
+| Piece | Path |
+|---|---|
+| Grasp FSM | `controllers/nominal.py` |
+| Cartesian PD | `controllers/jacobian_controller.py` |
+| Gripper | `controllers/gripper_controller.py` |
+| Sim | `envs/grasp_sim.py` |
+| Scene | `assets/scene.xml` |
+| Config | `config/nominal.yaml`, `config/randomized.yaml` |
 
-| CP | Status | Command | Gate |
-|---|---|---|---|
-| 1 Torque hold | done | `python training/validate_hold.py` | Home pose \(\ge 5\,\mathrm{s}\), arm drift \(< 0.05\,\mathrm{rad}\) |
-| 2 6D reaching | done | `python training/validate_reach.py` | Pos \(< 2\,\mathrm{cm}\), ori \(< 10^\circ\) |
-| 3 Grasp FSM | done | `python training/validate_grasp.py` | Lift and hold \(1\,\mathrm{s}\), no RL |
-| 4 Contact log | done | `python training/log_contact.py` | Touch \(\approx 0\) in free space; rises on pinch; stays during lift |
-| 5 Cylinder lift | `python training/validate_grasp.py` | Lift/hold on the cylinder, centered grasp |
-| 6 Detector | `python training/calibrate_detector.py` | \(D_t\) below enter on stable lifts; exceeds enter before drop |
-| 7 Recovery buffer | `python training/collect_recovery_states.py` | Mild/moderate/severe bins; frozen eval split |
-| 8 Recovery env | `python training/validate_recovery_env.py` | `check_env`; zero residual = nominal; heuristic rollout |
-| 9 2D SAC | `python training/train_recovery.py --action 2d` | Pipeline stable; do **not** require beating the heuristic |
-| 10 Eval | `python evaluation/evaluate_recovery.py` | Recovery rate vs nominal and heuristic on held-out in-range conditions |
-| 11 Optional | `--action 7d` / `--no-contact-obs` | Cartesian residual and contact-obs ablation if 2D is insufficient |
+Smoke:
 
-Out of scope: perception, mass/friction estimation, regrasp after a full drop, cross-object geometry.
+```text
+python training/validate_hold.py
+python training/validate_reach.py
+python training/validate_grasp.py
+```
 
-## Control
+## SAC pipeline (not redesigned yet)
 
-- **CP1.** \(\tau = b(q,\dot{q})\) from `data.qfrc_bias`.
-- **CP2+.** \(\tau_{\mathrm{arm}} = J^\top\big(K_p e + K_d(v_{\mathrm{des}}-\dot{x})\big) + b(q,\dot{q})\). Approach/descend/close use \(v_{\mathrm{des}}=0\). Lift/recovery track a Cartesian velocity command.
-- **CP3/5.** FSM `approach → descend → close → lift` plus contact-aware gripper squeeze.
-- **CP6+.** Same ground-truth \(D_t\) for every method. Recovery when \(D_t > D_{\mathrm{enter}}\); return to nominal lift when \(D_t < D_{\mathrm{exit}}\) for \(N_{\mathrm{stable}}\) steps.
-- **CP8+.** Stage-3 action \(a\in[-1,1]^2\) maps to \((\Delta v_z,\Delta F_g)\). Optional 7-D residual \((\Delta v,\Delta\omega,\Delta F_g)\). Never observe \(m\) or \(\mu\).
+Entry: `python training/train_recovery.py --action 2d`.
+
+Current training ICs still come from `training/collect_recovery_states.py` (nominal lifts gated by \(D_t > D_{\mathrm{enter}}\)). `RecoveryEnv` still uses a \(D_t\) potential reward and \(D_{\mathrm{exit}}\) success. That is **not** the frozen RULE trigger and is **not** the intended final training distribution.
+
+SAC must not read the held-out npz files above. Intended redesign: \(D_t\) may shape **reward only**; recovery ICs must be constructed physical recovery-required states.
+
+Optional CP checks: `training/calibrate_detector.py`, `training/validate_recovery_env.py`, `evaluation/evaluate_recovery.py`.
 
 ## Layout
 
 ```text
-CS5478_Project/
-├── assets/           scene.xml, generated panda_torque.xml
-├── controllers/      bias, Cartesian PD + velocity, gripper, grasp FSM, heuristic
-├── envs/             XML builder, ids, contact, deterioration, recovery Gym env
-├── training/         validate_*, calibrate_detector, collect_recovery_states, train_recovery
-├── evaluation/       evaluate_recovery
-├── config/           sim.yaml, nominal.yaml, randomized.yaml, no_contact.yaml
-└── results/          logs, figures, buffers, checkpoints
+assets/          scene.xml, generated panda_torque.xml, impact diagnostic scene
+config/          sim + grasp YAML; frozen rule_based_recovery.yaml
+controllers/     nominal FSM, Jacobian PD, gripper, residual limiter, frozen RULE
+envs/            GraspSim, RecoveryEnv, deterioration score
+training/        validate_*, collect, train_recovery, replay_core, eval_heldout
+evaluation/      SAC vs heuristic vs nominal on the D_enter collect split
+results/eval_sets/   frozen offset + impact ICs
 ```
 
-Clone [MuJoCo Menagerie](https://github.com/google-deepmind/mujoco_menagerie) into `mujoco_menagerie/` beside these folders. Cursor metadata (`.cursor/`) is gitignored.
+Course PDFs in the repo root are the proposal/preproposal slides, not runtime code.
+
+## Out of scope
+
+Perception, mass/friction estimation, regrasp after a full drop, retuning physics or Cartesian gains to chase recovery metrics.

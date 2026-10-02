@@ -34,7 +34,7 @@ class RecoveryEnv(gym.Env):
         self.limiter = self.sim.limiter
         self.snapshots = snapshots or []
         self._i = 0
-        n_act = 2 if action_kind == "2d" else 7
+        n_act = {"2d": 2, "3d": 3}.get(action_kind, 7)
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(n_act,), dtype=np.float32)
         self.sim.reset()
         self.sim.meter.compute(
@@ -138,8 +138,12 @@ class RecoveryEnv(gym.Env):
             "Ddot": d.Ddot,
             "fg": self.sim.fsm.fg_cmd,
             "vz": float(self.sim.fsm.v_cmd[2]),
+            "dvy_requested": float(raw.dv[1]),
+            "dvy": float(cmd.dv[1]),
             "dvz": float(cmd.dv[2]),
             "dfg": float(cmd.dfg),
+            "v_cmd_y": float(self.sim.fsm.v_cmd[1]),
+            "v_cmd_z": float(self.sim.fsm.v_cmd[2]),
             "residual_mag": float(np.linalg.norm(cmd.dv) + np.linalg.norm(cmd.dw) + abs(cmd.dfg)),
             "slip": slip,
             "term": kind or "",
