@@ -82,7 +82,7 @@ These are **constructions + raw logs + (where noted) visual checks**. They are n
 |---|---|---|
 | Contact-preserving / secure manipulation | Wrist rotation at \(\tau=-18\) while bilateral contact holds | raw-log verified; legal \(\lvert\omega_y\rvert\le 3\) |
 | Controlled gravitational slip + braking | Secure \(+120^\circ\) → \(\tau=-5\) (0.70 s) → \(\tau=-18\) brake → return/hold on CENTER-6 EARLY | raw-log verified; **privileged** timing/angle; visually used in the comparison video |
-| Temporary full release + airborne recapture | Diagnostic \(\omega_y=+4\), OPEN ~70°, genuine `FIRST_BOTH_OFF`, privileged CLOSE, \(\tau=-18\) hold | raw-log verified; **user-visually-verified** candidate; **privileged + diagnostic ω** |
+| Temporary full release + airborne recapture | Diagnostic \(\omega_y=+4\), OPEN ~70°, genuine `FIRST_BOTH_OFF`, privileged CLOSE, \(\tau=-18\) catch, **SO(3) return to \(R_\mathrm{nominal}\)**, resume lift/hold | raw-log complete recovery; **privileged + diagnostic ω**; presentation camera shows the gap; **awaiting user visual check of the new return+camera video** |
 
 **Not yet learned.** **Not hardware validated.**
 
@@ -119,12 +119,12 @@ training/
   demo_dynamic_recatch.py             # throw/recatch viewers
   omega4_throw_test.py                # diagnostic ω=4 override
   release_state_map_omega4.py         # EARLY × 70° recatch
-  demo_ballistic_recovery_comparison.py   # ZERO | SLIP | AIRBORNE
+  demo_ballistic_recovery_comparison.py   # ZERO | SLIP | AIRBORNE (+ return/hold)
   train_recovery.py / eval_heldout.py     # future SAC (do not run yet)
 results/
-  diagnostics/    contact, slip, ballistic, airborne, obs audits
-  comparison/ballistic_recovery/      final comparison report + raw npz
-  videos/         ballistic_*.mp4
+  diagnostics/    noslip, ballistic, slip, airborne reports (+ snap_early, recatch json)
+  comparison/ballistic_recovery/
+  videos/         ballistic_*.mp4  (gitignored; generate locally)
 CLEANUP_MANIFEST.md
 ```
 
@@ -189,8 +189,7 @@ python training/validate_recovery_env.py
 # python training/eval_heldout.py --which offset
 ```
 
-Held-out offset set: `results/eval_sets/airborne_offset_eval.npz`.  
-`results/eval_sets/impact_severity_four.npz` is **quarantined** (old ball-mass semantics). Do not train on it.
+Held-out offset set: `results/eval_sets/airborne_offset_eval.npz`.
 
 ---
 

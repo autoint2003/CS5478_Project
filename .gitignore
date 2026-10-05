@@ -31,18 +31,42 @@ Thumbs.db
 # Third-party robot models (clone locally; see README)
 mujoco_menagerie/
 
-# Training and evaluation artifacts
+# Training / evaluation runtime artifacts (local only)
 results/checkpoints/
 results/logs/
 results/videos/
 results/figures/
 results/buffers/
 results/tb/
+results/debug_qacc_dof19/
 tb_logs/
+tensorboard/
+**/tb/
 *.pt
 *.pth
 *.ckpt
 wandb/
+
+# Presentation / render outputs (keep on disk; do not version)
+*.mp4
+**/_frames_*/
+results/comparison/**/cam_stills/
+
+# Intermediate diagnostic dumps (regenerable). Canonical exceptions below.
+results/diagnostics/**/raw/
+results/diagnostics/**/figures/
+results/diagnostics/**/videos/
+results/diagnostics/**/*.npz
+results/diagnostics/**/*.pkl
+results/diagnostics/**/*.csv
+
+# Canonical snapshots / eval ICs that the pipeline actually reads
+!results/diagnostics/ballistic_recovery_transfer/raw/
+!results/diagnostics/ballistic_recovery_transfer/raw/snap_early.pkl
+!results/diagnostics/ballistic_recovery_transfer/raw/stages.json
+!results/diagnostics/dynamic_airborne_recatch/raw/
+!results/diagnostics/dynamic_airborne_recatch/raw/release_map_recatch.json
+!results/eval_sets/airborne_offset_eval.npz
 
 # MuJoCo
 *.mjb

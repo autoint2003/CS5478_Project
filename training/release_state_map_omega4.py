@@ -464,7 +464,7 @@ def mark_event(ctl, name, m=None, extra=""):
     print(f"EVENT {name} {t} {nlr} {ang} {rhx} {extra}".strip(), flush=True)
 
 
-def recatch_one(sim, gains, restore_fn, open_deg, t_close, ctl=None):
+def recatch_one(sim, gains, restore_fn, open_deg, t_close, ctl=None, hold_s=2.0):
     restore_fn()
     Rh0 = np.array(sim.data.xmat[sim.ids.hand_body].reshape(3, 3), float).copy()
     log = []
@@ -542,7 +542,7 @@ def recatch_one(sim, gains, restore_fn, open_deg, t_close, ctl=None):
                         ev["HOLD_START"] = m["t"]
                         mark_event(ctl, "HOLD_START", m)
                         captured = True
-                        t_end = m["t"] + 2.0
+                        t_end = m["t"] + float(hold_s)
             if "HOLD_START" in ev:
                 if m["nL"] == 0 or m["nR"] == 0:
                     lost += dt
@@ -553,7 +553,7 @@ def recatch_one(sim, gains, restore_fn, open_deg, t_close, ctl=None):
                         break
                 else:
                     lost = 0.0
-                if m["t"] + 1e-12 >= ev["HOLD_START"] + 2.0:
+                if m["t"] + 1e-12 >= ev["HOLD_START"] + float(hold_s):
                     ev["HOLD_COMPLETE"] = m["t"]
                     mark_event(ctl, "HOLD_COMPLETE", m)
     if captured and "HOLD_LOST" not in ev:

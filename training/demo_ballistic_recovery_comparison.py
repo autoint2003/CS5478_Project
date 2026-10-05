@@ -33,7 +33,14 @@ from controllers.jacobian_controller import gains_from_cfg
 from controllers.residual import RECOVERY4D_W_HY_MAX
 from envs.config_util import load_yaml, merge_sim_config
 from envs.physical_recovery import TABLE_DROP, physical_pack
-from training.ballistic_large_angle import BRAKE_S, return_to_nominal, rotate_to, tick_log
+from training.ballistic_large_angle import (
+    BRAKE_S,
+    RETURN_HAND_STOP_DEG,
+    return_to_nominal,
+    rotate_to,
+    so3_angle_deg,
+    tick_log,
+)
 from training.ballistic_slip_sufficiency import DURS
 from training.demo_ballistic_impact import TAU_SEC, dump_json, make_sim, write_frames, z_tgt_of
 from training.demo_ballistic_recovery import (
@@ -48,7 +55,7 @@ from training.demo_ballistic_recovery import (
 from training.demo_dynamic_recatch import EARLY_PKL
 from training.grav_reposition_v2_viz import apply_camera_preset, make_reset_cam_callback
 from training.impact_visualization_utils import mjv_camera_from_preset
-from training.map_ballistic_disturbance import CAM, _viewer_overlay
+from training.map_ballistic_disturbance import _viewer_overlay
 from training.release_state_map_omega4 import CLAIMED_OPEN_DEG, claimed_t_close, recatch_one
 from training.replay_core import freeze, tick_vw
 from training.write_ballistic_impact_scene import BALL_M
@@ -63,10 +70,28 @@ SLIP_S = 0.70
 SLIP_TAU = -5.0
 SLIP_THETA = 120.0
 HOLD_AFTER_S = 2.0
+CATCH_CONFIRM_S = 0.25
 ZERO_AFTER_TABLE_S = 1.50
 VIDEO_FPS = 25
 RENDER_W, RENDER_H = 640, 480
 MODES = ("zero", "controlled_slip", "airborne_recatch")
+
+# Presentation camera: look at the grasp (not the table). Side/oblique so
+# the cylinder stays visible in the finger gap after ~70–90° wrist-y rotation.
+CAM = {
+    "lookat": np.array([0.55, 0.00, 0.58]),
+    "distance": 0.48,
+    "azimuth": 250.0,
+    "elevation": 12.0,
+}
+CAM_PROBE = (
+    ("az250", CAM),
+    ("az270", {**CAM, "azimuth": 270.0}),
+    ("az220", {**CAM, "azimuth": 220.0}),
+    ("az80", {**CAM, "azimuth": 80.0}),
+    ("az10", {**CAM, "azimuth": 10.0, "elevation": 18.0}),
+    ("az170", {**CAM, "azimuth": 170.0, "elevation": 15.0}),
+)
 
 
 def t_early_default() -> float:
@@ -373,38 +398,116 @@ def run_slip(sim, gains, snap, rec=None, vwr=None, speed=0.45):
     }
 
 
-def run_airborne(sim, gains, snap, rec=None, vwr=None, speed=0.45, t_close=None):
+def run_airborne(sim, gains, snap, rec=None, vwr=None, speed=0.45, t_close=None, stills=None):
     restore_ballistic(sim, snap)
+    R_nom = np.asarray(sim.fsm.r_des, float).reshape(3, 3).copy()
+    Rh0 = np.array(sim.data.xmat[sim.ids.hand_body].reshape(3, 3), float).copy()
+    z_tgt = float(snap.get("z_tgt", z_tgt_of(sim)))
     start = branch_arrays(sim)
     ctl = {"speed": speed, "overlay": {}, "label": "AIRBORNE"}
     phase_map = {
-        "ROTATE": "RECOVERY",
-        "OPEN": "RELEASE",
-        "BALLISTIC": "RELEASE",
+        "ROTATE": "ROTATE",
+        "OPEN": "THROW",
+        "BALLISTIC": "AIRBORNE",
         "CLOSE": "RECAPTURE",
-        "HOLD": "HOLD",
-        "HOLD_START": "HOLD",
-        "HOLD_COMPLETE": "HOLD",
-        "FIRST_BOTH_OFF": "RELEASE",
+        "HOLD": "SECURE",
+        "HOLD_START": "SECURE",
+        "HOLD_COMPLETE": "SECURE",
+        "FIRST_BOTH_OFF": "AIRBORNE",
         "FIRST_RECONTACT": "RECAPTURE",
         "FIRST_BILATERAL": "RECAPTURE",
         "CLOSE_COMMAND": "RECAPTURE",
-        "OPEN_COMMAND": "RELEASE",
+        "OPEN_COMMAND": "THROW",
+        "RETURN": "RETURN UPRIGHT",
+        "RETURN_SETTLE": "RETURN UPRIGHT",
     }
+    saved_stills = set()
+
+    def maybe_still(tag: str):
+        if stills is None or rec is None or tag in saved_stills:
+            return
+        saved_stills.add(tag)
+        rec.renderer.update_scene(rec.sim.data, rec.cam)
+        stills[tag] = rec.renderer.render().copy()
+        if tag in ("OPEN_COMMAND", "FIRST_BOTH_OFF", "CLOSE_COMMAND", "FIRST_BILATERAL"):
+            for name, params in CAM_PROBE:
+                cam = mjv_camera_from_preset(params)
+                rec.renderer.update_scene(rec.sim.data, cam)
+                stills[f"{tag}__{name}"] = rec.renderer.render().copy()
+            rec.renderer.update_scene(rec.sim.data, rec.cam)
 
     def sync():
         ov = ctl.get("overlay") or {}
         raw = str(ov.get("phase") or ov.get("event") or "RECOVERY")
-        force = phase_map.get(raw, "RECOVERY")
+        force = phase_map.get(raw, ctl.get("force_phase", "RECOVERY"))
         overlay_sync(sim, ctl, rec, vwr, "AIRBORNE RECAPTURE", force_phase=force)
+        ev = str(ov.get("event") or "")
+        if ev in ("OPEN_COMMAND", "FIRST_BOTH_OFF", "CLOSE_COMMAND", "FIRST_BILATERAL", "HOLD_START"):
+            maybe_still(ev)
 
     ctl["sync"] = sync
 
     def restore_fn():
         restore_ballistic(sim, snap)
 
-    out = recatch_one(sim, gains, restore_fn, CLAIMED_OPEN_DEG, t_close, ctl=ctl)
+    out = recatch_one(
+        sim, gains, restore_fn, CLAIMED_OPEN_DEG, t_close, ctl=ctl, hold_s=CATCH_CONFIRM_S
+    )
     out["start"] = start
+    out["R_nominal"] = R_nom
+    out["return"] = None
+    out["resume"] = None
+    out["complete_recovery"] = False
+    out["catch_ok"] = bool(out.get("captured") and out.get("ok_hold") and "HOLD_LOST" not in (out.get("events") or {}))
+    if not out["catch_ok"]:
+        out["fail_stage"] = "catch"
+        return out
+    maybe_still("POST_CATCH")
+    ctl["force_phase"] = "RETURN UPRIGHT"
+    ret_log = out["log"]
+    ret = return_to_nominal(sim, gains, R_nom, Rh0, ret_log, ctl=ctl)
+    out["return"] = {
+        "t_table": ret.get("t_table"),
+        "arrived_des": ret.get("arrived_des"),
+        "dt": ret.get("dt"),
+        "end": ret.get("end"),
+        "ori_log": ret.get("ori_log"),
+    }
+    maybe_still("RETURN")
+    lost_return = ret.get("t_table") is not None
+    end_m = ret.get("end_measure") or {}
+    nL = int(end_m.get("nL", 0))
+    nR = int(end_m.get("nR", 0))
+    if lost_return or nL == 0 or nR == 0:
+        out["fail_stage"] = "return"
+        out["events"]["RETURN_LOST"] = float(sim.data.time)
+        return out
+    err_h = float((ret.get("end") or {}).get("err_hand_deg", 99.0))
+    out["return_err_hand_deg"] = err_h
+    out["return_ok"] = bool(ret.get("arrived_des") and err_h <= max(RETURN_HAND_STOP_DEG, 5.0))
+    if not out["return_ok"]:
+        out["fail_stage"] = "return_orientation"
+        return out
+    maybe_still("UPRIGHT")
+    ctl["force_phase"] = "LIFT / HOLD"
+    t_table = continue_zero(sim, gains, HOLD_AFTER_S, ret_log, Rh0, z_tgt, ctl)
+    out["resume"] = {"t_table": t_table, "t_end": float(sim.data.time)}
+    maybe_still("HOLD")
+    end = measure(sim, -18.0, Rh0)
+    persist = (
+        t_table is None
+        and int(end["nL"]) > 0
+        and int(end["nR"]) > 0
+        and float(np.linalg.norm(end["v_rel_h"])) < 0.08
+        and float(end["obj_z"]) >= TABLE_DROP
+    )
+    out["resume_ok"] = bool(persist)
+    out["end_err_hand_deg"] = float(so3_angle_deg(R_nom, np.array(sim.data.xmat[sim.ids.hand_body].reshape(3, 3), float)))
+    if not persist:
+        out["fail_stage"] = "resume"
+        return out
+    out["complete_recovery"] = True
+    out["fail_stage"] = None
     return out
 
 
@@ -490,9 +593,16 @@ def dump_traj(path: Path, log):
     nL = np.array([r["nL"] for r in log], int)
     nR = np.array([r["nR"] for r in log], int)
     obj_z = np.array([r["obj_z"] for r in log], float)
-    vrel = np.array(
-        [np.linalg.norm(r.get("v_rel_h", r.get("v_rel", np.zeros(3)))) for r in log], float
-    )
+
+    def _vrel(r):
+        if "v_rel_h" in r:
+            return float(np.linalg.norm(r["v_rel_h"]))
+        v = r.get("v_rel", np.nan)
+        if np.isscalar(v):
+            return float(v)
+        return float(np.linalg.norm(v))
+
+    vrel = np.array([_vrel(r) for r in log], float)
     ap = np.array([r.get("aperture", np.nan) for r in log], float)
     ctrl7 = np.array([r.get("ctrl7", np.nan) for r in log], float)
     np.savez_compressed(path, t=t, rh=rh, nL=nL, nR=nR, obj_z=obj_z, vrel=vrel, aperture=ap, ctrl7=ctrl7)
@@ -589,7 +699,11 @@ def write_report(meta: dict) -> None:
     ap(f"- OPEN command at `{CLAIMED_OPEN_DEG:.0f}°` (`tau = +2`)")
     ap("- genuine `FIRST_BOTH_OFF` and nonzero contact-free interval")
     ap(f"- privileged CLOSE at `t_close = {meta.get('t_close')}` (`tau = -18`)")
-    ap("- bilateral recapture, then ≥2 s hold")
+    ap("- bilateral recapture + short secure confirmation (`tau=-18`)")
+    ap("- **then** SO(3) `return_to_nominal` (legal `|omega_y|<=3`, latch `r_des=R_nominal`)")
+    ap("- **then** resume nominal lift/hold (`continue_zero`)")
+    ap("")
+    ap("Post-catch RETURN is new work; catch was previously stopped at the rotated pose.")
     ap("")
     ev = meta.get("air_events") or {}
     ap("This replay events:")
@@ -602,8 +716,21 @@ def write_report(meta: dict) -> None:
         "HOLD_START",
         "HOLD_COMPLETE",
         "APEX",
+        "RETURN_LOST",
     ):
         ap(f"- `{k}`: {ev.get(k)}")
+    ap("")
+    cr = meta.get("air_complete") or {}
+    ap("### Completeness (logged separately; not one SUCCESS bit)")
+    ap("")
+    ap(f"- genuine FIRST_BOTH_OFF: `{cr.get('both_off')}`")
+    ap(f"- new bilateral contact: `{cr.get('bilateral')}`")
+    ap(f"- recaptured grasp stable: `{cr.get('catch_ok')}`")
+    ap(f"- SO(3) return to R_nominal: `{cr.get('return_ok')}`  (hand error `{cr.get('return_err_hand_deg')}` deg)")
+    ap(f"- secure resumed lift/hold: `{cr.get('resume_ok')}`")
+    ap(f"- **complete airborne recovery**: `{cr.get('complete_recovery')}`")
+    ap(f"- fail_stage: `{cr.get('fail_stage')}`")
+    ap(f"- end orientation error: `{cr.get('end_err_hand_deg')}` deg")
     ap("")
     ap("## Raw outcome table")
     ap("")
@@ -679,7 +806,7 @@ def interactive_one(mode: str, speed: float):
             time.sleep(0.03)
 
 
-def run_headless(write_videos: bool) -> dict:
+def run_headless(write_videos: bool, stills_only: bool = False) -> dict:
     RAW.mkdir(parents=True, exist_ok=True)
     cfg = merge_sim_config(load_yaml(ROOT / "config" / "nominal.yaml"))
     gains = gains_from_cfg(cfg)
@@ -688,7 +815,7 @@ def run_headless(write_videos: bool) -> dict:
     sim, _ = make_sim()
     renderer = None
     rec = None
-    if write_videos:
+    if write_videos or stills_only:
         VID.mkdir(parents=True, exist_ok=True)
         renderer = mujoco.Renderer(sim.model, RENDER_H, RENDER_W)
         rec = FrameRec(sim, renderer, mjv_camera_from_preset(CAM))
@@ -725,34 +852,68 @@ def run_headless(write_videos: bool) -> dict:
         raise RuntimeError("branch-point states differ; refusing to write a comparison video")
 
     recz = recs = reca = None
-    if write_videos:
+    if write_videos or stills_only:
         recz = FrameRec(sim, renderer, mjv_camera_from_preset(CAM))
         recz.last = prefix_t_last
-    print("ZERO", flush=True)
-    z = run_zero(sim, gains, snap, rec=recz)
-    dump_traj(RAW / "zero.npz", z["log"])
+    if not stills_only:
+        print("ZERO", flush=True)
+        z = run_zero(sim, gains, snap, rec=recz)
+        dump_traj(RAW / "zero.npz", z["log"])
+    else:
+        z = {"log": [{"t": t_early, "rh": [0, 0, 0], "nL": 1, "nR": 1, "obj_z": 0.5, "v_rel_h": [0, 0, 0]}], "t_table": None}
 
-    if write_videos:
+    if write_videos or stills_only:
         recs = FrameRec(sim, renderer, mjv_camera_from_preset(CAM))
         recs.last = prefix_t_last
-    print("CONTROLLED_SLIP", flush=True)
-    s = run_slip(sim, gains, snap, rec=recs)
-    dump_traj(RAW / "controlled_slip.npz", s["log"])
+    if not stills_only:
+        print("CONTROLLED_SLIP", flush=True)
+        s = run_slip(sim, gains, snap, rec=recs)
+        dump_traj(RAW / "controlled_slip.npz", s["log"])
+    else:
+        s = {"log": z["log"], "t_table": None}
 
-    if write_videos:
+    if write_videos or stills_only:
         reca = FrameRec(sim, renderer, mjv_camera_from_preset(CAM))
         reca.last = prefix_t_last
     print("AIRBORNE t_close", t_close, flush=True)
-    air = run_airborne(sim, gains, snap, rec=reca, t_close=t_close)
+    stills = {}
+    air = run_airborne(sim, gains, snap, rec=reca, t_close=t_close, stills=stills)
+    if stills:
+        sp = OUT / "cam_stills"
+        sp.mkdir(parents=True, exist_ok=True)
+        import matplotlib.image as mpimg
+
+        for k, fr in stills.items():
+            mpimg.imsave(str(sp / f"{k}.png"), fr)
+            print("still", k, flush=True)
     dump_traj(RAW / "airborne_recatch.npz", air["log"])
     dump_json(RAW / "airborne_events.json", json.loads(json.dumps(air["events"], default=str)))
+    dump_json(
+        RAW / "airborne_return.json",
+        {
+            "catch_ok": air.get("catch_ok"),
+            "return_ok": air.get("return_ok"),
+            "resume_ok": air.get("resume_ok"),
+            "complete_recovery": air.get("complete_recovery"),
+            "fail_stage": air.get("fail_stage"),
+            "return_err_hand_deg": air.get("return_err_hand_deg"),
+            "end_err_hand_deg": air.get("end_err_hand_deg"),
+            "return": air.get("return"),
+            "resume": air.get("resume"),
+        },
+    )
 
     t0 = float(live_arr["t"][0])
     sm_z = summarize("zero", z["log"], z["t_table"], t0=t0)
     sm_s = summarize("controlled_slip", s["log"], s["t_table"], t0=t0)
     air_ev = dict(air["events"])
     air_ev["ok_hold"] = air.get("ok_hold")
-    sm_a = summarize("airborne_recatch", air["log"], None, events=air_ev, t0=t0)
+    sm_a = summarize("airborne_recatch", air["log"], (air.get("resume") or {}).get("t_table"), events=air_ev, t0=t0)
+    if air.get("complete_recovery"):
+        sm_a["outcome"] = "COMPLETE"
+        sm_a["contact_mode"] = "airborne_recapture_return_hold"
+    elif air.get("catch_ok") and not air.get("return_ok"):
+        sm_a["outcome"] = "CATCH_RETURN_FAIL"
     dump_json(RAW / "summaries.json", [sm_z, sm_s, sm_a])
 
     videos = []
@@ -800,6 +961,18 @@ def run_headless(write_videos: bool) -> dict:
         "air_events": air["events"],
         "air_ok_hold": air.get("ok_hold"),
         "air_captured": air.get("captured"),
+        "air_complete": {
+            "both_off": (air.get("events") or {}).get("FIRST_BOTH_OFF"),
+            "bilateral": (air.get("events") or {}).get("FIRST_BILATERAL"),
+            "catch_ok": air.get("catch_ok"),
+            "return_ok": air.get("return_ok"),
+            "resume_ok": air.get("resume_ok"),
+            "complete_recovery": air.get("complete_recovery"),
+            "fail_stage": air.get("fail_stage"),
+            "return_err_hand_deg": air.get("return_err_hand_deg"),
+            "end_err_hand_deg": air.get("end_err_hand_deg"),
+        },
+        "camera": CAM,
         "videos": videos,
         "zero_semantics": {
             "p_des": "nominal lift until z_tgt, then hold",
@@ -822,9 +995,10 @@ def main():
     p.add_argument("--write-videos", action="store_true")
     p.add_argument("--headless", action="store_true")
     p.add_argument("--speed", type=float, default=0.45)
+    p.add_argument("--stills-only", action="store_true")
     args = p.parse_args()
-    if args.write_videos or args.headless:
-        run_headless(write_videos=bool(args.write_videos))
+    if args.write_videos or args.headless or args.stills_only:
+        run_headless(write_videos=bool(args.write_videos), stills_only=bool(args.stills_only))
         return
     if args.mode == "all":
         for m in MODES:
