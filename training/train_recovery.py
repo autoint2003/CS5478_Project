@@ -23,10 +23,11 @@ CKPT = ROOT / "results" / "checkpoints"
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="config/randomized.yaml")
-    parser.add_argument("--action", default="2d", choices=("2d", "7d"))
+    parser.add_argument("--action", default="recovery4d", choices=("recovery4d", "2d", "7d"))
     parser.add_argument("--no-contact-obs", action="store_true")
     parser.add_argument("--timesteps", type=int, default=None)
-    parser.add_argument("--buffer", default=str(TRAIN_PATH))
+    parser.add_argument("--buffer", default=str(ROOT / "results" / "buffers" / "recovery_train_smoke.npz"))
+    parser.add_argument("--reward-mode", default=None, choices=("oracle", "observable_tactile"))
     args = parser.parse_args()
 
     cfg = merge_sim_config(load_yaml(args.config))
@@ -41,6 +42,7 @@ def main() -> int:
             snapshots=snaps,
             action_kind=args.action,
             use_contact_obs=not args.no_contact_obs,
+            reward_mode=args.reward_mode,
         )
     )
     sac_cfg = cfg.get("sac", {})

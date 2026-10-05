@@ -1,6 +1,9 @@
 physics_dt: 0.002
 n_substeps: 10
 max_episode_steps: 400
+# Frozen contact-model correction (calibration, not recovery-rate). See README.
+noslip_iterations: 1
+noslip_tolerance: 1.0e-6
 home_qpos: [0.0, 0.0, 0.0, -1.57079, 0.0, 1.57079, -0.7853, 0.04, 0.04]
 nominal_mass: 0.08
 nominal_friction: 1.0

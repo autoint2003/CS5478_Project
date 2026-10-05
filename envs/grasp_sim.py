@@ -28,10 +28,23 @@ def reset_home(model: mujoco.MjModel, data: mujoco.MjData) -> None:
     mujoco.mj_forward(model, data)
 
 
+def apply_solver_from_cfg(model: mujoco.MjModel, cfg: dict) -> None:
+    """Apply frozen solver/contact options from merged sim config.
+
+    Contact-model freeze: noslip_iterations / noslip_tolerance only.
+    Does not write solref, solimp, mu, condim, integrator, or Newton iterations.
+    """
+    model.opt.timestep = float(cfg["physics_dt"])
+    if "noslip_iterations" in cfg:
+        model.opt.noslip_iterations = int(cfg["noslip_iterations"])
+    if "noslip_tolerance" in cfg:
+        model.opt.noslip_tolerance = float(cfg["noslip_tolerance"])
+
+
 def load_model(cfg: dict) -> tuple[mujoco.MjModel, mujoco.MjData]:
     write_panda_torque()
     model = mujoco.MjModel.from_xml_path(str(SCENE))
-    model.opt.timestep = float(cfg["physics_dt"])
+    apply_solver_from_cfg(model, cfg)
     data = mujoco.MjData(model)
     return model, data
 
@@ -81,6 +94,8 @@ class GraspSim:
         self.data.time = float(snap.get("time", 0.0))
         if "qacc_warmstart" in snap:
             self.data.qacc_warmstart[:] = np.asarray(snap["qacc_warmstart"], dtype=float)
+        if len(snap.get("act", [])):
+            self.data.act[:] = np.asarray(snap["act"], dtype=float)
         mujoco.mj_forward(self.model, self.data)
         # Old recovery buffers omit FSM clocks; default keeps prior lift+t_phase=0 behaviour.
         self.fsm.phase = str(snap.get("phase", "lift"))
@@ -143,6 +158,12 @@ class GraspSim:
             "in_recovery": bool(self.meter.in_recovery),
             "exit_count": int(self.meter.exit_count),
             "qacc_warmstart": self.data.qacc_warmstart.copy(),
+            "act": (
+                np.array(self.data.act, float).copy()
+                if int(getattr(self.model, "na", 0) or 0)
+                else np.zeros(0)
+            ),
+            "tau_grip": float(self.data.ctrl[7]) if self.data.ctrl.size > 7 else 0.0,
         }
 
     def physics_step(self, residual: ResidualCommand | None = None, in_recovery: bool = False) -> None:
@@ -170,6 +191,37 @@ class GraspSim:
         self.maybe_capture_reference()
         for _ in range(self.n_sub):
             self.physics_step(residual, in_recovery=in_recovery)
+
+    def recovery4d_tick(self, v_world: np.ndarray, w_world: np.ndarray, tau: float) -> None:
+        """Absolute Cartesian command. No nominal lift, no clip_fg."""
+        from controllers.jacobian_controller import apply_cartesian_ctrl, gains_from_cfg
+        from controllers.nominal import _integrate_rot
+
+        dt = float(self.model.opt.timestep)
+        v = np.asarray(v_world, float).reshape(3)
+        w = np.asarray(w_world, float).reshape(3)
+        tau = float(np.clip(tau, self.ids.ctrl_low[7], self.ids.ctrl_high[7]))
+        gains = gains_from_cfg(self.cfg)
+        for _ in range(self.n_sub):
+            self.fsm.p_des = self.fsm.p_des + v * dt
+            self.fsm.r_des = _integrate_rot(self.fsm.r_des, w, dt)
+            self.fsm.v_cmd = v.copy()
+            self.fsm.w_cmd = w.copy()
+            self.fsm.v_des = v.copy()
+            self.fsm.w_des = w.copy()
+            self.fsm.fg_cmd = float(-tau)
+            apply_cartesian_ctrl(
+                self.model,
+                self.data,
+                self.ids,
+                self.fsm.p_des,
+                self.fsm.r_des,
+                gripper_tau=tau,
+                v_des=v,
+                w_des=w,
+                **gains,
+            )
+            mujoco.mj_step(self.model, self.data)
 
     def observe(self, use_contact: bool = True) -> np.ndarray:
         d = self.data

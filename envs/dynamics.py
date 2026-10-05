@@ -30,6 +30,55 @@ def set_object_dynamics(
             mujoco.mj_forward(model, data)
 
 
+def finger_pad_geom_ids(model: mujoco.MjModel, ids: PandaIds) -> tuple[list[int], list[int]]:
+    """Collision geoms on left_finger / right_finger only (not palm, table, arm)."""
+    left = [g for g in range(model.ngeom) if int(model.geom_bodyid[g]) == int(ids.left_body)]
+    right = [g for g in range(model.ngeom) if int(model.geom_bodyid[g]) == int(ids.right_body)]
+    return left, right
+
+
+def set_finger_object_sliding_mu(
+    model: mujoco.MjModel,
+    ids: PandaIds,
+    mu: float,
+    data: mujoco.MjData | None = None,
+) -> dict:
+    """Realize YAML mu as finger–object *sliding* pair friction.
+
+    Writes geom_friction[0] only on:
+      - the cylinder object geom
+      - geoms whose body is left_finger or right_finger
+    Leaves torsional/rolling (friction[1], friction[2]) unchanged.
+    Does not touch table, floor, palm, or arm geoms.
+    """
+    mu = float(mu)
+    changed = []
+    targets = [int(ids.object_geom)]
+    left, right = finger_pad_geom_ids(model, ids)
+    targets.extend(left)
+    targets.extend(right)
+    for gid in targets:
+        vec = np.array(model.geom_friction[gid], float).copy()
+        before = float(vec[0])
+        vec[0] = mu
+        model.geom_friction[gid] = vec
+        changed.append({"geom": int(gid), "slide_before": before, "slide_after": mu})
+    if data is not None:
+        try:
+            mujoco.mj_setConst(model, data)
+        except Exception:
+            mujoco.mj_forward(model, data)
+    return {
+        "mu": mu,
+        "n_geoms": len(changed),
+        "object_geom": int(ids.object_geom),
+        "left_geoms": left,
+        "right_geoms": right,
+        "changed": changed,
+        "torsional_rolling_unchanged": True,
+    }
+
+
 def in_heldout(mass: float, friction: float, offset: np.ndarray, cfg: dict) -> bool:
     h = cfg.get("heldout")
     if not h:

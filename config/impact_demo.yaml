@@ -1,0 +1,44 @@
+physical:
+  ball_mass: 0.35
+  mode: guided_approach_free_flight
+  v_hit_lateral: 3.0
+  v_cruise: 0.28
+  t_accel: 0.18
+  free_flight: 0.20
+  desired_impact_time: 4.382
+  intended_contact_region:
+  - 0.49742
+  - 0.00031
+  - 0.49974
+  cylinder_mass: 0.2
+  cylinder_mu: 1.0
+  impact_direction:
+  - 0.0
+  - 1.0
+  - 0.0
+timing:
+  t_first_finger_object_contact: 2.696
+  t_close_start: 2.674
+  t_close_complete: 3.098
+  t_lift_start: 3.098
+  t_first_airborne: 3.934
+  t_stable_airborne: 4.182
+  stable_airborne_hold: 0.25
+  impact_margin: 0.20
+  post_impact_duration: 2.0
+  definitions:
+    t_stable_airborne: first time obj_z>=Z_AIR (0.48m) has held 0.25s in lift+captured
+    T_impact: t_stable_airborne + impact_margin
+    guided_approach: mocap weld from t=0 to t_release = T_impact - free_flight
+    free_flight: unactuated MuJoCo dynamics from t_release until impact
+visualization:
+  camera_preset: impact
+  playback_speed: 0.25
+  post_impact_seconds: 5.0
+  post_drop_seconds: 1.5
+  post_recovery_seconds: 2.0
+  show_contact_points: false
+  show_contact_forces: false
+  show_raw_contacts: false
+  show_cop: true
+  show_hand_x: true

@@ -1,4 +1,8 @@
-"""Collect deteriorating lift states and freeze train/eval buffers."""
+"""LEGACY / unsupported for the final SAC pipeline.
+
+D-gated collector: nominal lift until D > D_enter. Do not use this to
+build the recovery4d training buffer. Use training/build_recovery_train_set.py.
+"""
 
 from __future__ import annotations
 

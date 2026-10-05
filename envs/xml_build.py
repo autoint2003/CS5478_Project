@@ -23,7 +23,7 @@ def write_panda_torque(dest: Path | None = None) -> Path:
     )
     text = text.replace(
         '<option integrator="implicitfast"/>',
-        '<option integrator="implicitfast" timestep="0.002" gravity="0 0 -9.81"/>',
+        '<option integrator="implicitfast" timestep="0.002" gravity="0 0 -9.81" noslip_iterations="1" noslip_tolerance="1e-6"/>',
         1,
     )
 

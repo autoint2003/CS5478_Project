@@ -24,6 +24,8 @@ from training.replay_core import (  # noqa: E402
     obs_from_sim,
     pack_replay,
     params_from_frozen,
+    ball_is_parked,
+    prepare_replay,
     restore_replay,
     rollout_from_replay,
     verify_frozen_hashes,
@@ -87,7 +89,7 @@ def test_offset_zero_rule_smoke():
     params, _ = params_from_frozen()
     sim = make_offset_sim(cfg)
     ic = load_offset_ic(0)
-    restore_replay(sim, ic)
+    prepare_replay(sim, ic)
     o = obs_from_sim(sim)
     assert o["nL"] > 0 and o["nR"] > 0
     _, z = rollout_from_replay(sim, ic, gains, params, True, 0.4)
@@ -104,12 +106,19 @@ def test_impact_replay_smoke():
     sim = make_impact_sim(cfg)
     ic = load_impact_ic(8.5)
     restore_replay(sim, ic)
+    assert not ball_is_parked(sim), "impact IC itself should contain the unparked ball"
+    prepare_replay(sim, ic)
+    assert ball_is_parked(sim)
     o = obs_from_sim(sim)
     assert o["nL"] > 0 and o["nR"] > 0
     bcs = dump_ball_contacts(sim)
     assert all(c["kind"] != "ball-finger" for c in bcs)
-    _, z = rollout_from_replay(sim, ic, gains, params, True, 0.4)
+    q_ball = np.array(sim.data.qpos[sim.ball_qadr : sim.ball_qadr + 3], float).copy()
+    _, z = rollout_from_replay(sim, ic, gains, params, True, 0.4, restore=False)
+    assert ball_is_parked(sim)
+    assert float(np.max(np.abs(np.array(sim.data.qpos[sim.ball_qadr : sim.ball_qadr + 3], float) - q_ball))) < 1e-9
     _, r = rollout_from_replay(sim, ic, gains, params, False, 4.0)
+    assert ball_is_parked(sim)
     print("impact smoke ZERO keep", z["grasp_retention"], "RULE rec", r["recovery_success"])
 
 

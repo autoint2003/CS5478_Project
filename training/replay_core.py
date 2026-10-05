@@ -18,7 +18,7 @@ from controllers.residual import ResidualLimiter
 from controllers.rule_based_recovery import RuleBasedRecovery, RuleParams, g_hand
 from envs.deterioration import DeteriorationMeter, body_twist
 from envs.dynamics import set_object_dynamics
-from envs.grasp_sim import GraspSim, reset_home
+from envs.grasp_sim import GraspSim, apply_solver_from_cfg, reset_home
 from envs.ids import resolve_ids
 from envs.xml_build import write_panda_torque
 from training.write_impact_scene import write_impact_scene
@@ -34,12 +34,13 @@ G_HOLD = -18.0
 KP, KD = 180.0, 28.0
 TABLE_TOP = 0.40
 BALL_R = 0.012
-EXPECTED_YAML = "062212ed82bd59928137cd88d74113b9ebd7e4c1bf201c1296c16c61bbd9f8fe"
-EXPECTED_PY = "c0013432a60d5eac5d04d566c1b6e88e9754a00ddfbc91c40c6b6a010f27abca"
+BALL_PARK_POS = np.array([1.00, 0.80, 1.20])
+EXPECTED_YAML = "6a0b8103e5b9d8c4a4a4e6634aca43adb0b37bd39242d39269f27785a4d574b8"
+EXPECTED_PY = "63600516d616e289412806eb46faff31fd3cbc5cc9a623946aefe2b43160f86b"
 
 
 def sha256_file(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def verify_frozen_hashes() -> dict:
@@ -92,6 +93,8 @@ def tick_vw(sim, v_w, w_w, tau, gains):
         gripper_tau=tau, v_des=v, w_des=w, **gains,
     )
     mujoco.mj_step(sim.model, sim.data)
+    if hasattr(sim, "park_ball"):
+        sim.park_ball()
 
 
 def pack_replay(sim) -> dict:
@@ -126,6 +129,33 @@ def restore_replay(sim, ic: dict) -> None:
     sim.fsm.phase = ic.get("phase", "lift")
     sim.captured = bool(ic.get("captured", True))
     mujoco.mj_forward(sim.model, sim.data)
+
+
+def park_impact_ball(sim) -> None:
+    """Park/remove the diagnostic ball. No-op on scenes without a ball."""
+    if not hasattr(sim, "park_ball"):
+        return
+    sim.park_ball()
+    # Hold the parked ball (diagnostic only; cylinder/hand physics unchanged).
+    if hasattr(sim.model, "body_gravcomp") and hasattr(sim, "ball_body"):
+        sim.model.body_gravcomp[int(sim.ball_body)] = 1.0
+    mujoco.mj_forward(sim.model, sim.data)
+
+
+def prepare_replay(sim, ic: dict) -> None:
+    """Restore snapshot, then park the impact ball. Never restore after park."""
+    restore_replay(sim, ic)
+    park_impact_ball(sim)
+
+
+def ball_is_parked(sim) -> bool:
+    if not hasattr(sim, "ball_qadr"):
+        return True
+    q = int(sim.ball_qadr)
+    d = int(sim.ball_dadr)
+    pos = np.array(sim.data.qpos[q : q + 3], float)
+    vel = np.array(sim.data.qvel[d : d + 6], float)
+    return bool(np.allclose(pos, BALL_PARK_POS, atol=1e-6) and np.linalg.norm(vel) < 1e-8)
 
 
 def geom_name(model, gid: int) -> str:
@@ -286,7 +316,7 @@ class ImpactSim(GraspSim):
         write_panda_torque()
         self.cfg = cfg
         self.model = mujoco.MjModel.from_xml_path(str(scene))
-        self.model.opt.timestep = float(cfg["physics_dt"])
+        apply_solver_from_cfg(self.model, cfg)
         self.data = mujoco.MjData(self.model)
         self.ids = resolve_ids(self.model)
         self.fsm = GraspFSM(cfg)
@@ -302,12 +332,32 @@ class ImpactSim(GraspSim):
         self.ball_jnt = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, "ball_joint")
         self.ball_qadr = int(self.model.jnt_qposadr[self.ball_jnt])
         self.ball_dadr = int(self.model.jnt_dofadr[self.ball_jnt])
+        self.guide_body = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, "ball_guide")
+        self.guide_eq = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_EQUALITY, "ball_guide_weld")
+        self.guide_mocap = int(self.model.body_mocapid[self.guide_body]) if self.guide_body >= 0 else -1
+
+    def set_guide_weld(self, on: bool) -> None:
+        if self.guide_eq < 0:
+            return
+        flag = int(bool(on))
+        if hasattr(self.data, "eq_active"):
+            self.data.eq_active[self.guide_eq] = flag
+        if hasattr(self.model, "eq_active0"):
+            self.model.eq_active0[self.guide_eq] = flag
+
+    def set_guide_pos(self, p) -> None:
+        if self.guide_mocap < 0:
+            return
+        self.data.mocap_pos[self.guide_mocap] = np.asarray(p, float).reshape(3)
+        self.data.mocap_quat[self.guide_mocap] = np.array([1.0, 0.0, 0.0, 0.0])
 
     def set_ball_mass(self, m: float) -> None:
         m = float(max(m, 1e-6))
         i = 0.4 * m * BALL_R * BALL_R
         self.model.body_mass[self.ball_body] = m
         self.model.body_inertia[self.ball_body] = np.array([i, i, i])
+        # body_mass edits do not rebuild qM; without this, gravity accel is m_xml/m_qM * g.
+        mujoco.mj_setConst(self.model, self.data)
 
     def park_ball(self) -> None:
         q = self.ball_qadr
@@ -321,6 +371,7 @@ class ImpactSim(GraspSim):
         self.friction = float(MU if friction is None else friction)
         reset_home(self.model, self.data)
         set_object_dynamics(self.model, self.ids, self.mass, self.friction, self.data)
+        self.set_guide_weld(False)
         self.park_ball()
         mujoco.mj_forward(self.model, self.data)
         off = np.zeros(3) if grasp_offset is None else np.asarray(grasp_offset, dtype=float)
@@ -330,8 +381,21 @@ class ImpactSim(GraspSim):
         self.captured = False
 
 
-def rollout_from_replay(sim, ic: dict, gains, params: RuleParams, zero: bool, timeout: float = 2.0):
-    restore_replay(sim, ic)
+def rollout_from_replay(
+    sim,
+    ic: dict,
+    gains,
+    params: RuleParams,
+    zero: bool,
+    timeout: float = 2.0,
+    *,
+    restore: bool = True,
+):
+    """If restore: snapshot then park ball (impact), then recover. No later restore."""
+    if restore:
+        prepare_replay(sim, ic)
+    if hasattr(sim, "park_ball") and not ball_is_parked(sim):
+        raise RuntimeError("impact ball not parked at recovery start")
     ctrl = RuleBasedRecovery(params)
     ctrl.reset(grasp_orientation())
     dt = float(sim.model.opt.timestep)
@@ -433,4 +497,5 @@ def make_impact_sim(cfg) -> ImpactSim:
     isolate_ball_object_only(sim)
     sim.set_ball_mass(0.50)
     sim.park_ball()
+    mujoco.mj_forward(sim.model, sim.data)
     return sim

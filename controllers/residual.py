@@ -99,3 +99,39 @@ class ResidualLimiter:
 def _rate(prev: np.ndarray, target: np.ndarray, max_delta: float) -> np.ndarray:
     delta = np.clip(target - prev, -max_delta, max_delta)
     return prev + delta
+
+
+# recovery4d: independent of 7d dw_max=0.6. RULE 90 deg about hand-y in
+# t_align_max=0.6 s needs ~2.62 rad/s; 3.0 rad/s reaches 90 deg in 0.52 s.
+RECOVERY4D_W_HY_MAX = 3.0  # rad/s, body y of r_des
+RECOVERY4D_V_HX_MAX = 0.08  # m/s, hand-frame x
+RECOVERY4D_V_Z_MAX = 0.08  # m/s, world z, symmetric about 0
+RECOVERY4D_TAU_SECURE = -18.0
+RECOVERY4D_TAU_OPEN = 2.0  # a3=-1 active open; a3=+1 secure -18
+
+
+def map_recovery4d(action: np.ndarray, r_des: np.ndarray, r_hand: np.ndarray) -> dict:
+    """a in [-1,1]^4 -> world v, world w, tendon tau. No RULE FSM."""
+    a = np.clip(np.asarray(action, float).reshape(-1), -1.0, 1.0)
+    if a.size < 4:
+        raise ValueError("recovery4d action must have 4 components")
+    w_hy = float(a[0]) * RECOVERY4D_W_HY_MAX
+    v_hx = float(a[1]) * RECOVERY4D_V_HX_MAX
+    v_z = float(a[2]) * RECOVERY4D_V_Z_MAX
+    tau = RECOVERY4D_TAU_OPEN + 0.5 * (float(a[3]) + 1.0) * (
+        RECOVERY4D_TAU_SECURE - RECOVERY4D_TAU_OPEN
+    )
+    r_h = np.asarray(r_hand, float).reshape(3, 3)
+    r_d = np.asarray(r_des, float).reshape(3, 3)
+    v_world = r_h @ np.array([v_hx, 0.0, 0.0])
+    v_world = v_world + np.array([0.0, 0.0, v_z])
+    w_world = r_d @ np.array([0.0, w_hy, 0.0])
+    return {
+        "a": a[:4].copy(),
+        "v_hx": v_hx,
+        "v_z": v_z,
+        "w_hy": w_hy,
+        "v_world": v_world,
+        "w_world": w_world,
+        "tau": float(tau),
+    }

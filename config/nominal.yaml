@@ -73,7 +73,7 @@ deterioration:
 
 recovery:
   timeout: 4.0
-  action: 2d
+  action: recovery4d
   dv_max: [0.06, 0.06, 0.12]
   dw_max: [0.6, 0.6, 0.6]
   dfg_max: 16.0
@@ -83,9 +83,22 @@ recovery:
   mild_max: 1.40
   moderate_max: 2.40
   z_recovery_min: 0.48
+  w_hy_max: 3.0
+  v_hx_max: 0.08
+  v_z_max: 0.08
+  tau_secure: -18.0
+  tau_open: -1.0
+  success_hold: 0.20
+  contact_loss_hold: 0.15
 
 reward:
-  lambda_D: 1.0
+  mode: oracle  # oracle | observable_tactile
+  t_progress: 0.100  # PROVISIONAL; tactile audit 100 ms FP=0
+  e_hat_dot_tol: 0.02  # PROVISIONAL; |Δe_hat|/dt_policy, not GT v_rel
+  lambda_D: 0.0
+  e_scale: 0.0075
+  lambda_cap: 0.02
+  lambda_a: 0.01  # recovery4d: a0^2+a1^2+a2^2 only; secure a3=+1 unpenalized
   lambda_f: 0.00015
   lambda_c: 0.15
   lambda_t: 0.01

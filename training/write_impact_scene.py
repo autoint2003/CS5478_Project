@@ -44,7 +44,16 @@ XML = """<mujoco model="panda grasp impact diagnostic">
         friction="0.40 0.005 0.0001" rgba="0.85 0.25 0.15 1" solref="0.004 1"
         contype="2" conaffinity="2"/>
     </body>
+    <body name="ball_guide" mocap="true" pos="1.00 0.80 1.20">
+      <geom name="ball_guide_geom" type="sphere" size="0.009" contype="0" conaffinity="0"
+        group="3" rgba="0.15 0.40 0.95 0.12"/>
+    </body>
   </worldbody>
+
+  <equality>
+    <weld name="ball_guide_weld" body1="impact_ball" body2="ball_guide"
+      solimp="0.99 0.999 0.0001" solref="0.004 1"/>
+  </equality>
 
   <keyframe>
     <key name="home"

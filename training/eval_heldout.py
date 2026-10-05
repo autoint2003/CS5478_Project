@@ -14,13 +14,14 @@ from controllers.jacobian_controller import gains_from_cfg  # noqa: E402
 from envs.config_util import load_yaml, merge_sim_config  # noqa: E402
 from training.replay_core import (  # noqa: E402
     KP,
+    ball_is_parked,
     load_impact_ic,
     load_offset_ic,
     make_impact_sim,
     make_offset_sim,
     obs_from_sim,
     params_from_frozen,
-    restore_replay,
+    prepare_replay,
     rollout_from_replay,
     verify_frozen_hashes,
 )
@@ -42,7 +43,7 @@ def main() -> int:
     if args.which in ("offset", "both"):
         sim = make_offset_sim(cfg)
         ic = load_offset_ic(args.offset_idx)
-        restore_replay(sim, ic)
+        prepare_replay(sim, ic)
         o = obs_from_sim(sim)
         print("offset IC e_x_mm", 1e3 * o["e_x"], "n", o["nL"], o["nR"])
         _, z = rollout_from_replay(sim, ic, gains, params, True, 2.0)
@@ -53,11 +54,14 @@ def main() -> int:
     if args.which in ("impact", "both"):
         sim = make_impact_sim(cfg)
         ic = load_impact_ic(args.impact_v)
-        restore_replay(sim, ic)
+        prepare_replay(sim, ic)
+        assert ball_is_parked(sim), "ball reintroduced after prepare_replay"
         o = obs_from_sim(sim)
-        print("impact IC v", args.impact_v, "e_x_mm", 1e3 * o["e_x"], "n", o["nL"], o["nR"])
-        _, z = rollout_from_replay(sim, ic, gains, params, True, 2.0)
+        print("impact IC v", args.impact_v, "e_x_mm", 1e3 * o["e_x"], "n", o["nL"], o["nR"], "ball_parked", True)
+        _, z = rollout_from_replay(sim, ic, gains, params, True, 2.0, restore=False)
+        assert ball_is_parked(sim)
         _, r = rollout_from_replay(sim, ic, gains, params, False, 4.0)
+        assert ball_is_parked(sim)
         print("IMPACT ZERO keep", z["grasp_retention"], "rec", z["recovery_success"], "ef", round(z["e_final_mm"], 2))
         print("IMPACT RULE keep", r["grasp_retention"], "rec", r["recovery_success"], "path", r["path"], "ef", round(r["e_final_mm"], 2), r["modes"])
     return 0
