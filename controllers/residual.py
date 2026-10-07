@@ -101,9 +101,11 @@ def _rate(prev: np.ndarray, target: np.ndarray, max_delta: float) -> np.ndarray:
     return prev + delta
 
 
-# recovery4d: independent of 7d dw_max=0.6. RULE 90 deg about hand-y in
-# t_align_max=0.6 s needs ~2.62 rad/s; 3.0 rad/s reaches 90 deg in 0.52 s.
-RECOVERY4D_W_HY_MAX = 3.0  # rad/s, body y of r_des
+# recovery4d: independent of 7d dw_max=0.6.
+# SIMULATION recovery-policy bound: a[0]=±1 maps to omega_y=±4 rad/s.
+# This is NOT established as hardware-safe for a real Panda.
+# Must match config recovery.w_hy_max (RecoveryEnv asserts equality).
+RECOVERY4D_W_HY_MAX = 4.0  # rad/s, body y of r_des; simulation policy only
 RECOVERY4D_V_HX_MAX = 0.08  # m/s, hand-frame x
 RECOVERY4D_V_Z_MAX = 0.08  # m/s, world z, symmetric about 0
 RECOVERY4D_TAU_SECURE = -18.0

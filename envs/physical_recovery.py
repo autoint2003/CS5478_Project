@@ -30,7 +30,7 @@ SCALE_EY = 0.0075  # r_h.y; same lateral resolution
 RH_Z_NOM = 0.099  # m, nominal centered grasp geometry
 SCALE_RH_Z = 0.020  # m, axial deviation about RH_Z_NOM
 SCALE_V = 0.080  # m/s, recovery4d v_hx/v_z command range
-SCALE_W = 2.0  # rad/s
+SCALE_W = 5.0  # rad/s; simulated recovery |omega_y|<=4 plus modest headroom. Not hardware.
 SCALE_G = 9.81  # m/s^2
 SCALE_AP = 0.040  # m
 TAU_SECURE = -18.0
