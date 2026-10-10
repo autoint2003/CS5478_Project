@@ -1,8 +1,12 @@
 """Balanced unified recovery. Airborne recatch is one family, not the objective.
 
-The observation, tokenizer, Transformer, v3 action map, and tracking gains stay
-fixed. Family names balance the dataloader and never enter the policy.
-The score is physical retention through absolute t = 12.
+The active observation is the 39-D `observe_airborne` vector. The tokenizer,
+Transformer, v3 action map, and tracking gains stay fixed. Family names balance
+the dataloader and never enter the policy. The score is physical retention
+through absolute t = 12.
+
+`main` does not train. It would overwrite the published 45-D comparison report.
+The 39-D trainer is `training/final_39d_balanced_policy.py`.
 """
 
 from __future__ import annotations
@@ -43,6 +47,8 @@ from training.replay_core import park_impact_ball
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "balanced_unified_recovery"
 REPORT = ROOT / "results" / "diagnostics" / "BALANCED_UNIFIED_RECOVERY_EVALUATION.md"
+CKPT_45 = RAW / "ckpt.pt"
+CKPT_39 = RAW / "ckpt_39d.pt"
 CKPT = ROOT / "results" / "diagnostics" / "raw" / "natural_loss_controlled_dagger" / "ckpt_round0.pt"
 EPOCHS = 120
 STEPS_PER_EPOCH = 80
@@ -368,7 +374,13 @@ def write_report(blob):
 
 
 def main():
-    import torch
+    raise SystemExit(
+        "The active balanced policy is the 39-D observation. "
+        "Train and evaluate it with training/final_39d_balanced_policy.py. "
+        "This module still holds the 24-case definitions and train_equal. "
+        "Running it here would reload a 45-D checkpoint and rewrite "
+        "BALANCED_UNIFIED_RECOVERY_EVALUATION.md, so that entry point is closed."
+    )
 
     RAW.mkdir(parents=True, exist_ok=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

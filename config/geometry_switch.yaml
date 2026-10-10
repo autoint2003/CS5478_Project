@@ -1,0 +1,19 @@
+# Canonical online recovery switch.
+# Nominal control runs until this entry rule fires. The 39-D policy then runs
+# until the exit rule fires. Nominal control resumes on the same episode clock.
+# Orientation is not an entry signal. The deterioration score is not a trigger.
+#
+# control_period_s matches the policy step (0.020 s).
+# Entry persistence of 0.040 s is three control samples: the position error
+# must still be above the threshold 40 ms after it first crosses.
+# Exit stability of 0.100 s is five control samples.
+
+control_period_s: 0.020
+
+entry_position_threshold_m: 0.006
+entry_persistence_s: 0.040
+
+exit_position_threshold_m: 0.0147
+exit_orientation_threshold_rad: 0.35
+exit_relative_speed_threshold_mps: 0.08
+exit_stability_window_s: 0.100

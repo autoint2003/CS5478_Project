@@ -202,14 +202,14 @@ def obs_match(sim, hist):
     raw = np.array([
         *rel["p_rel_h"] / SCALE_PREL, *rel["v_rel_h"] / SCALE_VREL,
         *rel["rot_rel"] / SCALE_ROT, *rel["w_rel_h"] / SCALE_WREL,
-        *rel["v_hand_h"] / SCALE_VREL, *rel["w_hand_h"] / SCALE_WREL,
     ], np.float32)
     clipped = np.clip(raw, -1.0, 1.0)
+    extra = obs[27:]
     return obs, {
         "finite": bool(np.isfinite(obs).all()) and obs.shape[0] == OBS_DIM_AIR,
-        "match": float(np.max(np.abs(obs[27:] - clipped))),
-        "absmax": float(np.max(np.abs(obs[27:]))),
-        "saturated": [OBS_NAMES_AIR[27 + i] for i in range(18) if abs(float(obs[27 + i])) > 0.999],
+        "match": float(np.max(np.abs(extra - clipped))),
+        "absmax": float(np.max(np.abs(extra))),
+        "saturated": [OBS_NAMES_AIR[27 + i] for i in range(extra.shape[0]) if abs(float(extra[i])) > 0.999],
         "raw_absmax": float(np.max(np.abs(raw))),
     }
 
@@ -642,6 +642,35 @@ def build_model(proto, device):
 
     model = Policy().to(device)
     return model
+
+
+def load_airborne_policy(path, device):
+    """Load a checkpoint trained for the current observation width.
+
+    A checkpoint whose first layer was built for a different observation,
+    including the retired 45-D vector, is refused. Weights are not resized.
+    """
+    import torch
+
+    saved = torch.load(path, map_location=device, weights_only=False)
+    if "obs_dim" in saved and int(saved["obs_dim"]) != OBS_DIM_AIR:
+        raise RuntimeError(
+            f"{path} records obs_dim {saved['obs_dim']}; the active observation is {OBS_DIM_AIR}-D"
+        )
+    proto = np.asarray(saved["proto"], np.float32)
+    model = build_model(proto, device)
+    weight = saved["model"]["in_proj.weight"]
+    expected = tuple(model.in_proj.weight.shape)
+    if tuple(weight.shape) != expected:
+        raise RuntimeError(
+            f"{path} in_proj weight is {tuple(weight.shape)}; "
+            f"the active model expects {expected} "
+            f"({OBS_DIM_AIR}-D observation plus the 7-D previous command). "
+            "The checkpoint is not adapted."
+        )
+    model.load_state_dict(saved["model"])
+    model.eval()
+    return model, proto, saved
 
 
 def train_model(trajs, proto, device, use_amp):

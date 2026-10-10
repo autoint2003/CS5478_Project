@@ -53,6 +53,8 @@ gripper:
   fg_min: 8.0
   fg_max: 45.0
 
+# The deterioration score is not the recovery trigger.
+# Online entry and exit live in config/geometry_switch.yaml.
 deterioration:
   p_scale: 0.02
   v_scale: 0.08

@@ -1,9 +1,13 @@
 """Ground-truth airborne observation. State only, no images.
 
-The historical 27-D observable is kept as a prefix and is not redefined.
-Its hand-velocity channels still use the 0.08 m/s scale, so a chase faster
-than that saturates them. The airborne block carries the relative object
-state, and the hand twist, at scales that cover the demonstrated catch.
+The policy vector is 39-D: the 27-D tactile and proprioceptive prefix, then
+12 object-relative pose and twist channels. The wide-scale hand twist that
+used to occupy indices 39-44 repeated proprioception already in the prefix
+and is not part of this vector. The previous 7-D command is controller state
+and is concatenated by the network, not by this function.
+
+Object pose and twist are MuJoCo body state. They are a noise-free stand-in
+for an RGB-D tracker. This module does not read a camera.
 """
 
 from __future__ import annotations
@@ -14,7 +18,7 @@ from envs.deterioration import body_twist
 from envs.observable_obs import OBS_NAMES, observe_observable
 from envs.observable_reward import read_tactile
 
-OBS_VERSION = "obs_gt_airborne_v2"
+OBS_VERSION = "obs_gt_airborne_39"
 
 # Metres, m/s, rad, rad/s. Chosen so the verified catch (about 1 m/s, a few
 # centimetres of relative motion) sits inside (-1, 1) after scaling.
@@ -36,12 +40,6 @@ AIR_NAMES = [
     "w_rel_hx",
     "w_rel_hy",
     "w_rel_hz",
-    "v_hand_hx",
-    "v_hand_hy",
-    "v_hand_hz",
-    "w_hand_hx",
-    "w_hand_hy",
-    "w_hand_hz",
 ]
 
 OBS_NAMES_AIR = list(OBS_NAMES) + AIR_NAMES
@@ -96,8 +94,6 @@ def observe_airborne(model, data, ids, fsm, hist) -> np.ndarray:
             *rel["v_rel_h"] / SCALE_VREL,
             *rel["rot_rel"] / SCALE_ROT,
             *rel["w_rel_h"] / SCALE_WREL,
-            *rel["v_hand_h"] / SCALE_VREL,
-            *rel["w_hand_h"] / SCALE_WREL,
         ],
         np.float32,
     )

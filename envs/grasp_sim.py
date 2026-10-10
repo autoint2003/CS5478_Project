@@ -283,26 +283,3 @@ class GraspSim:
     def bad_state(self) -> bool:
         return unrecoverable(self.data, self.ids, self.cfg)
 
-
-def run_to_lift_or_deterioration(
-    sim: GraspSim,
-    max_time: float | None = None,
-) -> str:
-    """Advance nominal control until lift trigger, drop, success, or timeout."""
-    timeout = float(sim.cfg["fsm"]["episode_timeout"] if max_time is None else max_time)
-    n_steps = int(round(timeout / sim.model.opt.timestep))
-    for i in range(n_steps):
-        sim.physics_step(None, in_recovery=False)
-        sim.maybe_capture_reference()
-        if sim.fsm.phase == "lift" and sim.captured and (i + 1) % sim.n_sub == 0:
-            snap = sim.meter.compute(sim.model, sim.data, sim.ids, sim.dt_policy)
-            sim.meter.update_mode(snap.D)
-            z = float(sim.data.xpos[sim.ids.object_body][2])
-            z_min = float(sim.cfg.get("recovery", {}).get("z_recovery_min", 0.0))
-            if snap.D > sim.meter.D_enter and z >= z_min:
-                return "deteriorate"
-        if sim.dropped():
-            return "drop"
-        if sim.fsm.success:
-            return "success"
-    return "timeout"
