@@ -1,8 +1,10 @@
 # CS5478 unified recovery
 
-A MuJoCo Panda recovers a cylinder after a genuine ball impact. The nominal grasp controller runs until the cylinder leaves the grasp basin. A causal Transformer then commands a legal 7-D recovery action until the cylinder is back inside that basin, at which point control returns to the nominal controller. Success is a real handoff followed by the cylinder still being held through the nominal continuation. An intermediate contact is not success.
+A MuJoCo Panda recovers a cylinder after a genuine ball impact. The nominal grasp controller runs until the cylinder leaves the grasp. A causal Transformer then commands a legal 7-D recovery action for at most 2.4 s (120 control steps of 20 ms). The 7-D action has no handoff channel. The persistent bilateral basin remains only an optional early exit. If that exit does not occur, nominal handoff is forced at the recovery limit unless the object has already dropped or escaped. A missed 3 mm basin is not a failure and does not block the nominal controller.
 
-The earlier K=32 write-up is in `docs/HISTORICAL_K32_README.md`.
+After handoff the unchanged nominal lift runs for 12 s of nominal time, `sim.data.time - handoff_time`. The simulation clock is not reset. Success means the lift target is reached while both fingers still hold the cylinder, and that grasp lasts through the 12 s window. Diagnostic pose errors are recorded and are not success gates.
+
+The earlier K=32 write-up is in `docs/HISTORICAL_K32_README.md`. The basin-gated 288-demonstration set remains in `results/diagnostics/raw/legal_recovery_v2/` and is not overwritten. The migrated labels are in `results/diagnostics/raw/horizon_migration/`.
 
 ## Architecture
 
@@ -20,20 +22,20 @@ The action is `recovery7d_airborne_v3`: hand-frame velocity, wrist rate, and gri
 | VALIDATION | sealed v1 validation episodes | no |
 | FINAL_TEST | sealed v1 final-test episodes | no |
 
-A TRAIN initial condition is a restored MuJoCo snapshot at recovery entry (hand-frame position error above 6 mm for 40 ms). It is not itself a demonstration. Privileged search produced 359 successful continuous recoveries. The K=47 decoder represents 296 of them, and 288 of those still succeed when the decoded action is replayed. Those 288 trajectories, on 151 initial conditions, are the supervised demonstrations. Five mechanism groups are balanced by `sample_weight`, not by copying rows. `ball_train_v2_0021 / release_long` is one 46-step episode with three complete-loss intervals.
+A TRAIN initial condition is a restored MuJoCo snapshot at recovery entry (hand-frame position error above 6 mm for 40 ms). It is not itself a demonstration. Privileged search produced 359 continuous recoveries. Under the old basin gate, 288 decoded K=47 replays were called successes. Those files are unchanged. The migrated supervised set is rebuilt from decoded replays that still succeed after the independent 12 s nominal window. Counts are in `results/diagnostics/K47_INDEPENDENT_HORIZON_DATASET_MIGRATION.md`. `ball_train_v2_0021 / release_long` remains one 46-step episode.
 
-The other 161 TRAIN snapshots, including the 114 v2 cases with no successful search, are GRPO starting states. Eight decoded trajectories that stay inside the residual cap but fail physically are listed in `fragile_trajectories.jsonl` and are not supervised targets.
+All 312 TRAIN snapshots stay in the GRPO set, including initial conditions with no demonstration. The return is `1{physical success} - 0.05 * recovery_seconds`. The 12 s nominal window is not penalized. A recovery timeout is a forced handoff, not a zero-success label by itself.
 
 ## Training pipeline
 
-Training has not been run.
+The epoch-40 checkpoint in `results/diagnostics/raw/unified_k47/supervised/` was trained on the old 288-row basin-gated set. It has been re-evaluated under the new definition and has not been trained again. Counts, the 56-IC comparison, and the reward are in `results/diagnostics/K47_INDEPENDENT_HORIZON_DATASET_MIGRATION.md`.
 
-1. Supervised initialization on the 288 verified demonstrations.
-2. Closed-loop evaluation of that checkpoint on held-out TRAIN snapshots (`ball_train_v2` ids whose number ends in 0 or 5). The policy acts by itself. This is not a teacher replay and it does not touch FINAL_TEST.
-3. A 20-update GRPO pilot from the supervised checkpoint, sampling all 312 TRAIN snapshots.
-4. A 120-update GRPO run only after that pilot has been inspected.
+1. Supervised initialization on the 296 migrated demonstrations (`config/unified_k47_horizon.yaml`).
+2. Closed-loop evaluation on the same held-out TRAIN snapshots (`ball_train_v2` ids whose number ends in 0 or 5). The policy acts by itself. Recovery lasts at most 2.4 s, then nominal verification lasts 12 s. This does not touch FINAL_TEST. Write the result under `results/diagnostics/raw/unified_k47_horizon/eval/`, not into the historical eval file.
+3. A 20-update GRPO pilot from that new supervised checkpoint, sampling all 312 TRAIN snapshots. The return uses physical success minus `0.05` per recovery second.
+4. A 312-update GRPO run only after that pilot has been inspected. One update samples one TRAIN initial condition, so 312 updates visit each of the 312 snapshots once.
 
-GRPO advantages are group-relative. A group whose non-truncated returns are identical gets zero advantage and skips the policy surrogate. A rollout stopped by the step cap, without a drop and without a handoff, is omitted from the advantage group; it is not scored as a drop. The KL term compares the two 47-way categorical distributions. The K=36 launcher's one-logit pad is unchanged and is not used here.
+GRPO advantages are group-relative. Identical non-invalid returns get zero advantage and skip the surrogate. An invalid simulation is omitted. A forced handoff is scored by the nominal outcome. The KL term compares the two 47-way categorical distributions.
 
 ## Setup
 
@@ -62,56 +64,80 @@ python -u training/unified_k47.py --check
 Supervised initialization (40 epochs, batch 8, seed 1, learning rate 3e-4, checkpoint every epoch):
 
 ```powershell
-python -u training/unified_k47.py --supervised --config config/unified_k47.yaml
+python -u training/unified_k47.py --supervised --config config/unified_k47_horizon.yaml
 ```
 
 ```bash
-python -u training/unified_k47.py --supervised --config config/unified_k47.yaml
+python -u training/unified_k47.py --supervised --config config/unified_k47_horizon.yaml
 ```
 
-Closed-loop evaluation of the last supervised checkpoint:
+Closed-loop evaluation. Use the horizon config so the historical `heldout_train.json` is not overwritten. After a new supervised run, pass that run's checkpoint instead of the epoch-40 file:
 
 ```powershell
-python -u training/unified_k47.py --eval --config config/unified_k47.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k47.py --eval --config config/unified_k47_horizon.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
 ```
 
 ```bash
-python -u training/unified_k47.py --eval --config config/unified_k47.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k47.py --eval --config config/unified_k47_horizon.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
 ```
 
-GRPO pilot (20 updates, group 4, learning rate 3e-5, KL coefficient 0.05, clip 0.2, seed 1):
+GRPO pilot (20 updates, group 4, learning rate 3e-5, KL coefficient 0.05, clip 0.2, seed 1). Start it from the supervised checkpoint produced by the horizon config:
 
 ```powershell
-python -u training/unified_k47.py --grpo --config config/unified_k47.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k47.py --grpo --config config/unified_k47_horizon.yaml --checkpoint results/diagnostics/raw/unified_k47_horizon/supervised/checkpoint_epoch_0040.pt
 ```
 
 ```bash
-python -u training/unified_k47.py --grpo --config config/unified_k47.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k47.py --grpo --config config/unified_k47_horizon.yaml --checkpoint results/diagnostics/raw/unified_k47_horizon/supervised/checkpoint_epoch_0040.pt
 ```
 
-Longer GRPO run, only after the pilot is inspected. Pass the supervised checkpoint again so the KL reference stays at that policy:
+Longer GRPO run, only after the pilot is inspected. 312 updates visit every TRAIN initial condition once. Pass the same supervised checkpoint so the KL reference stays at that policy:
 
 ```powershell
-python -u training/unified_k47.py --grpo --config config/unified_k47_long.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k47.py --grpo --config config/unified_k47_horizon_long.yaml --checkpoint results/diagnostics/raw/unified_k47_horizon/supervised/checkpoint_epoch_0040.pt
 ```
 
 ```bash
-python -u training/unified_k47.py --grpo --config config/unified_k47_long.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k47.py --grpo --config config/unified_k47_horizon_long.yaml --checkpoint results/diagnostics/raw/unified_k47_horizon/supervised/checkpoint_epoch_0040.pt
 ```
 
 ## Paths
 
 - Codebook: `results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy`
-- Supervised rows: `results/diagnostics/raw/legal_recovery_v2/supervised_targets.jsonl`
-- GRPO starts: `results/diagnostics/raw/legal_recovery_v2/grpo_initial_conditions.jsonl`
-- Pilot config: `config/unified_k47.yaml`
-- Longer-run config: `config/unified_k47_long.yaml`
-- Supervised checkpoints: `results/diagnostics/raw/unified_k47/supervised/`
-- Pilot checkpoints: `results/diagnostics/raw/unified_k47/grpo_pilot/`
-- Longer-run checkpoints: `results/diagnostics/raw/unified_k47/grpo_long/`
+- Historical supervised rows: `results/diagnostics/raw/legal_recovery_v2/supervised_targets.jsonl` (288)
+- Migrated supervised rows: `results/diagnostics/raw/horizon_migration/supervised_targets.jsonl` (296)
+- Migrated GRPO starts: `results/diagnostics/raw/horizon_migration/grpo_initial_conditions.jsonl` (312)
+- Horizon pilot config: `config/unified_k47_horizon.yaml`
+- Horizon longer-run config: `config/unified_k47_horizon_long.yaml`
+- Historical checkpoints: `results/diagnostics/raw/unified_k47/supervised/`
+- Horizon outputs: `results/diagnostics/raw/unified_k47_horizon/`
+
+## K=48 handoff expansion
+
+The motion codebook stays 47 tokens. Token 47 is HANDOFF and has no residual. The recovery limit used for that set is 4 s, chosen because it is the shortest tested limit that contains the 122-step demonstration and a 0.20 s pause. Nominal verification is still 12 s from the handoff. Counts and the pause command are in `results/diagnostics/K48_HANDOFF_DATASET_EXPANSION.md`. No K=48 policy has been trained.
+
+```powershell
+python -u training/unified_k48.py --check
+python -u training/unified_k48.py --supervised --config config/unified_k48.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k48.py --eval --config config/unified_k48.yaml --checkpoint results/diagnostics/raw/unified_k48/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k48.py --grpo --config config/unified_k48_long.yaml --checkpoint results/diagnostics/raw/unified_k48/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k48.py --grpo --config config/unified_k48_reward_v2.yaml --checkpoint results/diagnostics/raw/unified_k48/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k48.py --grpo --config config/unified_k48_long_reward_v1.yaml --checkpoint results/diagnostics/raw/unified_k48/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k48.py --grpo --config config/unified_k48_long_reward_v2.yaml --checkpoint results/diagnostics/raw/unified_k48/supervised/checkpoint_epoch_0040.pt
+```
+
+```bash
+python -u training/unified_k48.py --check
+python -u training/unified_k48.py --supervised --config config/unified_k48.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k48.py --eval --config config/unified_k48.yaml --checkpoint results/diagnostics/raw/unified_k48/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k48.py --grpo --config config/unified_k48_long.yaml --checkpoint results/diagnostics/raw/unified_k48/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k48.py --grpo --config config/unified_k48_reward_v2.yaml --checkpoint results/diagnostics/raw/unified_k48/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k48.py --grpo --config config/unified_k48_long_reward_v1.yaml --checkpoint results/diagnostics/raw/unified_k48/supervised/checkpoint_epoch_0040.pt
+python -u training/unified_k48.py --grpo --config config/unified_k48_long_reward_v2.yaml --checkpoint results/diagnostics/raw/unified_k48/supervised/checkpoint_epoch_0040.pt
+```
 
 ## Current status and limitations
 
-The 312 TRAIN snapshots, the 288 executable demonstrations, and the K=47 table are ready. The loader accepts that table, rejects a mismatched token head, and the non-training checks passed. No K=47 policy has been trained.
+The migrated supervised set has 296 demonstrations on 153 TRAIN initial conditions. All 312 TRAIN snapshots remain in GRPO. The K=47 table is unchanged. `python -u training/unified_k47.py --check` still checks the frozen 288-row manifest and also the migrated 296-row manifest. It does not take an optimizer step.
 
-Sixty-three continuous successes are outside the ±0.25 residual and are not demonstrations. Eight in-range decoded replays fail because the contact solver reacts to a float32 reconstruction of a few billionths of a command. Recovery claims have to come from a nominal handoff and the physical continuation, not from a token being legal or from contact during the recovery phase.
+The epoch-40 checkpoint was trained under the old basin gate. On the same 56 TRAIN initial conditions its old score is 6/56 and its new physical score is 26/56. Those definitions differ. Sixty-three continuous recoveries stay outside the ±0.25 residual and are not demonstrations. No training run has been started on the migrated set.

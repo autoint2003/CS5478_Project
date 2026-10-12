@@ -65,6 +65,8 @@ def build_model(book, device):
 
 def decode_action(proto, token, pre):
     """Same map used by the supervised target, the GRPO sample, and evaluation."""
+    if int(token) < 0 or int(token) >= len(proto):
+        raise RuntimeError(f"token {int(token)} is outside the motion codebook")
     residual = np.clip(np.asarray(pre, np.float32), -CAP, CAP)
     action = np.clip(np.asarray(proto[int(token)], np.float32) + residual, -1.0, 1.0)
     return residual, action
@@ -238,6 +240,58 @@ def assert_datasets(book):
     return supervised, grpo, weights
 
 
+def assert_horizon_manifest(book):
+    """The migrated supervised and GRPO views. Does not replace the frozen 288-row check."""
+    from training.horizon_outcome import LAMBDA_TIME, NOMINAL_S, T_RECOVERY_MAX
+
+    folder = ROOT / "results/diagnostics/raw/horizon_migration"
+    supervised = read_jsonl(folder / "supervised_targets.jsonl")
+    grpo = read_jsonl(folder / "grpo_initial_conditions.jsonl")
+    if len(supervised) != 296:
+        raise RuntimeError(f"migrated supervised count {len(supervised)}")
+    if len({row["id"] for row in supervised}) != 153:
+        raise RuntimeError("migrated supervised IC count")
+    if len(grpo) != 312 or any(row.get("horizon") != "recovery_limit_then_nominal_12s" for row in grpo):
+        raise RuntimeError("migrated GRPO manifest")
+    banned = ("validation", "final_test", "ball_validation", "ball_final")
+    for row in grpo + supervised:
+        text = row["id"] + " " + row.get("snapshot", "")
+        if any(word in text for word in banned):
+            raise RuntimeError(f"sealed split leaked into the migrated training data: {row['id']}")
+    weights = {}
+    for row in supervised:
+        weights.setdefault(row["mechanism"], 0.0)
+        weights[row["mechanism"]] += float(row["sample_weight"])
+    for name, total in weights.items():
+        if abs(total - 1.0) > 1e-3:
+            raise RuntimeError(f"migrated mechanism {name} weight sum {total}")
+    case = next(row for row in supervised if row["id"] == "ball_train_v2_0021" and row["strategy"] == "release_long")
+    _obs, prev, actions, _tokens, residuals = episode_arrays(case, book)
+    if len(actions) != 46 or float(np.max(np.abs(residuals))) > CAP + 1e-5:
+        raise RuntimeError("migrated 0021 is not an intact in-bound episode")
+    if not np.array_equal(prev[0], np.zeros(7, np.float32)):
+        raise RuntimeError("migrated episode history was reset with a nonzero previous action")
+    return {
+        "supervised": len(supervised),
+        "lambda_time": LAMBDA_TIME,
+        "nominal_seconds": NOMINAL_S,
+        "recovery_limit_s": T_RECOVERY_MAX,
+    }
+
+
+def reject_mismatched_horizon(cfg):
+    from training.horizon_outcome import LAMBDA_TIME, NOMINAL_S, T_RECOVERY_MAX
+
+    expected = {
+        "lambda_time": LAMBDA_TIME,
+        "nominal_seconds": NOMINAL_S,
+        "recovery_limit_s": T_RECOVERY_MAX,
+    }
+    for key, value in expected.items():
+        if key in cfg and abs(float(cfg[key]) - float(value)) > 1e-9:
+            raise RuntimeError(f"{key} is {cfg[key]} in the config and {value} in horizon_outcome")
+
+
 def one_mujoco_step(book):
     from training.autonomous_episode import make_training_env
     from training.history_aware_critic_ablation import restore_capture
@@ -362,7 +416,15 @@ def run_check():
     step_lp.backward()
     model.zero_grad(set_to_none=True)
     physical = one_mujoco_step(book)
-    print("CHECK_OK", "supervised", len(supervised), "weights", {key: round(value, 4) for key, value in weights.items()}, "physical", physical, flush=True)
+    horizon = assert_horizon_manifest(book)
+    from envs.config_util import load_yaml
+    long_cfg = load_yaml(ROOT / "config/unified_k47_horizon_long.yaml")
+    long_ics = read_jsonl(ROOT / long_cfg["grpo_initial_conditions"])
+    long_updates = int(long_cfg["grpo_updates"])
+    covered = {long_ics[(update - 1) % len(long_ics)]["id"] for update in range(1, long_updates + 1)}
+    if len(long_ics) != 312 or len(covered) != 312:
+        raise RuntimeError(f"long GRPO covers {len(covered)} of {len(long_ics)}")
+    print("CHECK_OK", "supervised", len(supervised), "weights", {key: round(value, 4) for key, value in weights.items()}, "physical", physical, "horizon", horizon, "grpo_cover", len(covered), flush=True)
 
 
 def train_supervised(cfg):
@@ -373,6 +435,9 @@ def train_supervised(cfg):
     model = build_model(book, device)
     opt = torch.optim.Adam(model.parameters(), lr=float(cfg["lr"]))
     out = ROOT / cfg["supervised_output"]
+    historical = ROOT / "results/diagnostics/raw/unified_k47/supervised"
+    if out.resolve() == historical.resolve():
+        raise RuntimeError("refusing to write into the historical epoch-40 checkpoint directory")
     out.mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(int(cfg["seed"]))
     batch = int(cfg["batch_size"])
@@ -400,10 +465,7 @@ def train_supervised(cfg):
 
 def evaluate(cfg, checkpoint):
     from training.autonomous_episode import make_training_env
-    from training.history_aware_critic_ablation import restore_capture
-    from training.privileged_ball_impact_search import step_legal
-    from training.recovery_success import PERSIST_STEPS, apply_handoff, basin_ok, label_of, nominal_validate
-    from training.nominal_pose_audit import errors
+    from training.horizon_outcome import T_RECOVERY_MAX, roll_policy
 
     book = load_codebook(ROOT / cfg["codebook"])
     device = torch.device(cfg.get("device") or ("cuda" if torch.cuda.is_available() else "cpu"))
@@ -423,49 +485,43 @@ def evaluate(cfg, checkpoint):
             blob = pickle.load(handle)
         if blob["spec"].get("split") not in (None, "train"):
             raise RuntimeError(f"evaluation refused non-train snapshot {row['id']}")
-        restore_capture(env, blob["capture"])
-        env._obs_seq = list(env._obs_seq)
-        basin_run = 0
-        fell = False
-        hold = None
-        for _step in range(int(cfg.get("eval_cap_steps") or 120)):
-            obs = np.asarray(env.observation(), np.float32)
-            env._obs_seq.append(obs)
-            env._prev_seq.append(env._prev.copy())
-            with torch.no_grad():
-                logits, mean, _act = model(
-                    torch.tensor(np.stack(env._obs_seq[-160:]), device=device),
-                    torch.tensor(np.stack(env._prev_seq[-160:]), device=device),
-                )
-            token = int(torch.argmax(logits[-1]).item())
-            _residual, action = decode_action(book, token, mean[-1].float().cpu().numpy())
-            executed = step_legal(env.sim, action)
-            env._prev = np.asarray(executed, np.float32)
-            measured = errors(env.sim, blob["ref"])
-            if measured["z"] < 0.30:
-                fell = True
-                break
-            inside = basin_ok(measured, float(executed[6]) > 0.5)
-            basin_run = basin_run + 1 if inside else 0
-            if basin_run >= PERSIST_STEPS:
-                apply_handoff(env.sim, blob["ref"])
-                hold = nominal_validate(env, blob["ref"])
-                break
-        label = label_of(fell, hold is not None, hold is not None, hold)
-        rows.append({"id": row["id"], "label": label, "truncated": hold is None and not fell})
-        print("EVAL", row["id"], label, flush=True)
+        out = roll_policy(env, model, book, blob, device, cap_steps=int(cfg.get("eval_cap_steps") or 120))
+        rows.append({
+            "id": row["id"],
+            "label": out["reason"],
+            "success": bool(out.get("success")),
+            "handoff": out.get("handoff"),
+            "recovery_elapsed": out.get("recovery_elapsed"),
+            "nominal_elapsed": out.get("nominal_elapsed"),
+            "lift_completed": out.get("lift_completed"),
+            "recovery_limit_s": T_RECOVERY_MAX,
+            "truncated": out["reason"] == "INVALID",
+        })
+        print("EVAL", row["id"], out["reason"], out.get("handoff"), flush=True)
     out = ROOT / cfg["eval_output"]
     out.mkdir(parents=True, exist_ok=True)
     (out / "heldout_train.json").write_text(json.dumps(rows, indent=2), encoding="utf-8")
-    print("EVAL_DONE", len(rows), flush=True)
+    print("EVAL_DONE", len(rows), sum(1 for row in rows if row["success"]), flush=True)
+    baseline_path = cfg.get("baseline_eval")
+    if baseline_path:
+        baseline = json.loads((ROOT / baseline_path).read_text(encoding="utf-8"))
+        base_success = sum(1 for row in baseline if row.get("success") or row.get("reason") == "SUCCESS_12S")
+        new_success = sum(1 for row in rows if row["success"])
+        print("BASELINE", f"{base_success}/{len(baseline)}", "NEW", f"{new_success}/{len(rows)}", baseline_path, flush=True)
 
 
 def train_grpo(cfg, checkpoint):
     from training.autonomous_episode import make_training_env
     from training.history_aware_critic_ablation import restore_capture
+    from training.horizon_outcome import (
+        finish_recovery,
+        physical_reward,
+        recovery_failed,
+        recovery_steps,
+    )
     from training.nominal_pose_audit import errors
     from training.privileged_ball_impact_search import step_legal
-    from training.recovery_success import PERSIST_STEPS, apply_handoff, basin_ok, is_success, label_of, nominal_validate
+    from training.recovery_success import PERSIST_STEPS, basin_ok
 
     book = load_codebook(ROOT / cfg["codebook"])
     device = torch.device(cfg.get("device") or ("cuda" if torch.cuda.is_available() else "cpu"))
@@ -482,7 +538,10 @@ def train_grpo(cfg, checkpoint):
     out.mkdir(parents=True, exist_ok=True)
     group = int(cfg["group"])
     updates = int(cfg["grpo_updates"])
-    cap_steps = int(cfg.get("rollout_cap_steps") or 80)
+    covered = {ics[(update - 1) % len(ics)]["id"] for update in range(1, updates + 1)}
+    if cfg.get("cover_all_ics") and len(covered) != len(ics):
+        raise RuntimeError(f"GRPO updates {updates} cover {len(covered)} of {len(ics)} initial conditions")
+    cap_steps = int(cfg.get("rollout_cap_steps") or recovery_steps())
     for update in range(1, updates + 1):
         row = ics[(update - 1) % len(ics)]
         with (ROOT / row["snapshot"]).open("rb") as handle:
@@ -494,10 +553,11 @@ def train_grpo(cfg, checkpoint):
         for _member in range(group):
             restore_capture(env, blob["capture"])
             records = []
-            fell = False
-            hold = None
             basin_run = 0
-            truncated = True
+            lost_low = 0
+            how = None
+            invalid = False
+            t0 = float(env.sim.data.time)
             for _step in range(cap_steps):
                 obs = np.asarray(env.observation(), np.float32)
                 env._obs_seq.append(obs)
@@ -529,26 +589,31 @@ def train_grpo(cfg, checkpoint):
                 })
                 executed = step_legal(env.sim, action)
                 env._prev = np.asarray(executed, np.float32)
-                measured = errors(env.sim, blob["ref"])
-                if measured["z"] < 0.30:
-                    fell = True
-                    truncated = False
+                failed, lost_low = recovery_failed(env.sim, blob["ref"], lost_low)
+                if failed:
+                    how = "drop"
                     break
-                inside = basin_ok(measured, float(executed[6]) > 0.5)
+                inside = basin_ok(errors(env.sim, blob["ref"]), float(executed[6]) > 0.5)
                 basin_run = basin_run + 1 if inside else 0
                 if basin_run >= PERSIST_STEPS:
-                    apply_handoff(env.sim, blob["ref"])
-                    hold = nominal_validate(env, blob["ref"])
-                    truncated = False
+                    how = "early"
                     break
-            label = label_of(fell, hold is not None, hold is not None, hold)
+            if how == "drop":
+                elapsed = float(env.sim.data.time) - t0
+                outcome = {"reason": "DROP_DURING_RECOVERY", "reward": physical_reward("DROP_DURING_RECOVERY", elapsed)}
+            else:
+                outcome = finish_recovery(env, blob["ref"], t0, "forced" if how is None else how)
+                invalid = outcome["reason"] == "INVALID"
             members.append({
                 "records": records,
-                "return": 1.0 if is_success(label) else 0.0,
-                "truncated": truncated,
-                "label": label,
+                "return": None if invalid else float(outcome["reward"]),
+                "truncated": invalid,
+                "label": outcome["reason"],
             })
-        adv, skipped = group_advantage([member["return"] for member in members], [member["truncated"] for member in members])
+        adv, skipped = group_advantage(
+            [member["return"] for member in members],
+            [member["truncated"] for member in members],
+        )
         opt.zero_grad(set_to_none=True)
         if not skipped:
             terms = []
@@ -601,6 +666,7 @@ def main():
         return
     from envs.config_util import load_yaml
     cfg = load_yaml(args.config)
+    reject_mismatched_horizon(cfg)
     if args.supervised:
         train_supervised(cfg)
         return

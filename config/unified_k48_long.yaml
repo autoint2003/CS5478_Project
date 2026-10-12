@@ -1,0 +1,30 @@
+# Longer K=48 GRPO run. 312 updates visit every TRAIN initial condition once.
+# Execute only after the 20-update pilot.
+
+codebook: results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy
+supervised_targets: results/diagnostics/raw/k48_handoff/supervised_targets.jsonl
+grpo_initial_conditions: results/diagnostics/raw/k48_handoff/grpo_initial_conditions.jsonl
+supervised_output: results/diagnostics/raw/unified_k48/supervised
+eval_output: results/diagnostics/raw/unified_k48/eval_long
+grpo_output: results/diagnostics/raw/unified_k48/grpo_long
+baseline_eval: results/diagnostics/raw/horizon_migration/checkpoint_eval.json
+seed: 1
+device: cuda
+eval_device: cpu
+epochs: 40
+batch_size: 8
+lr: 0.0003
+grpo_updates: 312
+cover_all_ics: true
+grpo_lr: 0.00003
+kl_coef: 0.05
+clip: 0.2
+group: 4
+grpo_save_every: 12
+rollout_cap_steps: 200
+eval_cap_steps: 200
+lambda_time: 0.05
+nominal_seconds: 12.0
+recovery_limit_s: 4.0
+reward_version: v1
+expand_handoff: true

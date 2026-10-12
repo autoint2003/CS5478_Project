@@ -109,11 +109,14 @@ def zp6_steps(act, phase, proto, cap):
     return rows
 
 
-def build_policy(proto, device, res_cap):
+def build_policy(proto, device, res_cap, handoff=False):
     class Policy(torch.nn.Module):
         def __init__(self):
             super().__init__()
-            self.register_buffer("proto", torch.tensor(np.asarray(proto, np.float32)))
+            motion = np.asarray(proto, np.float32)
+            self.register_buffer("proto", torch.tensor(motion))
+            self.n_motion = int(motion.shape[0])
+            self.handoff_index = self.n_motion if handoff else None
             d = 64
             self.in_proj = torch.nn.Linear(39 + 7, d)
             self.pos = torch.nn.Embedding(160, d)
@@ -122,7 +125,7 @@ def build_policy(proto, device, res_cap):
                 batch_first=True, activation="relu",
             )
             self.enc = torch.nn.TransformerEncoder(layer, num_layers=2)
-            self.logits = torch.nn.Linear(d, len(proto))
+            self.logits = torch.nn.Linear(d, self.n_motion + (1 if handoff else 0))
             self.res = torch.nn.Linear(d, 7)
             torch.nn.init.zeros_(self.res.weight)
             torch.nn.init.zeros_(self.res.bias)
@@ -140,7 +143,12 @@ def build_policy(proto, device, res_cap):
             logits = self.logits(ctx)
             res = self.res_cap * torch.tanh(self.res(ctx))
             tok = torch.argmax(logits, dim=-1)
-            act = torch.clamp(self.proto[tok] + res, -1.0, 1.0)
+            if self.handoff_index is None:
+                act = torch.clamp(self.proto[tok] + res, -1.0, 1.0)
+            else:
+                motion = torch.clamp(tok, 0, self.n_motion - 1)
+                act = torch.clamp(self.proto[motion] + res, -1.0, 1.0)
+                act = torch.where((tok == self.handoff_index).unsqueeze(-1), torch.zeros_like(act), act)
             return logits, res, act
 
     return Policy().to(device)

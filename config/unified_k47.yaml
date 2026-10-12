@@ -18,5 +18,5 @@ kl_coef: 0.05
 clip: 0.2
 group: 4
 grpo_save_every: 5
-rollout_cap_steps: 80
+rollout_cap_steps: 120
 eval_cap_steps: 120
