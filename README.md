@@ -1,85 +1,117 @@
-# CS5478 recovery
+# CS5478 unified recovery
 
-MuJoCo Panda grasp recovery. Physical success is nominal continuation that still holds the cylinder at absolute t = 12. `physical_of` returns drop, escape, or else bilateral contact with object height above 0.51 m. The published success string is `RETAINED_TO_12`.
+A MuJoCo Panda recovers a cylinder after a genuine ball impact. The nominal grasp controller runs until the cylinder leaves the grasp basin. A causal Transformer then commands a legal 7-D recovery action until the cylinder is back inside that basin, at which point control returns to the nominal controller. Success is a real handoff followed by the cylinder still being held through the nominal continuation. An intermediate contact is not success.
 
-Online control is nominal until the geometry switch in `config/geometry_switch.yaml`, then the policy, then a stable-grasp exit, then nominal again through absolute t = 12. Entry is a hand-frame position error above 6 mm for 40 ms. Exit is bilateral contact, position error below 14.7 mm, orientation error below 0.35 rad, and relative speed below 0.08 m/s, held for 100 ms. The handoff is one-way. The deterioration score is not the trigger. `training/autonomous_episode.py` is the episode constructor. `training/autonomous_smoke.py` checks one impact, one slide, and an undisturbed grasp.
+The earlier K=32 write-up is in `docs/HISTORICAL_K32_README.md`.
 
-The policy is a causal Transformer. It reads the 39-D `observe_airborne` state and commands `recovery7d_airborne_v3` in `controllers/recovery_actions.py`. The 39 channels are the 27-D tactile and proprioceptive prefix plus 12 object-relative pose and twist channels. The duplicate wide-scale hand twist that used to occupy indices 39–44 is not in the vector. The previous 7-D command is a separate controller-state input. Tokens are K = 32 prototypes, shape `(32, 7)`. Training uses `torch.manual_seed(1)` inside `train_equal`, 120 epochs, 80 steps per epoch, batch 16, and equal weight across the families that are present. There is no viability classifier. The handoff head is not this policy.
+## Architecture
 
-Object position, orientation, and twist in that vector are exact MuJoCo body state, used as a noise-free proxy for an RGB-D tracker. The project does not run a camera or a learned tracker. On the tested moderate sensing profile (2 mm position noise, 1 deg orientation noise, 0.03 m/s linear velocity, 0.3 rad/s angular velocity, 40 ms object-channel delay, 50 ms smoothing, 0.5 mm center-of-pressure noise, and 1 N force noise) the 39-D policy scores 15, 16, and 16 out of 24, so that profile does not reduce the clean 15/24. Center-of-pressure and lateral-estimate noise remain the more sensitive part of the observation: on the 45-D sweep, 0.5–1 mm perturbations there moved impact and one open-finger case. Those tactile channels are unchanged in the 39-D vector.
+The policy is the causal Transformer in `training/action_representation_expansion.py` (`build_policy`): width 64, 2 layers, 4 heads, feed-forward 128, 160 position embeddings. Each step reads the 39-D `observe_airborne` vector and the previous executed 7-D action. History is not cleared at release, recontact, a repeated recatch, or the handoff.
 
-## Evaluate the saved policy
+The action is `recovery7d_airborne_v3`: hand-frame velocity, wrist rate, and gripper command. It is a discrete prototype plus a continuous residual. The selected table has 47 prototypes, shape `(47, 7)`. Tokens 0–35 are the original K=36 table. Tokens 36–46 are eleven appended recovery centers. The residual is `0.25 * tanh(residual_head)`, so it stays inside ±0.25, and the executed command is clipped to ±1. The same decode is used for supervised targets, GRPO rollouts, evaluation, and the one-step physics check.
 
-From the repository root:
+`training/formal_grpo.py` is the historical K=36 launcher. It still loads the K=36 `FuturePolicy` checkpoint and rejects a 36-wide token head on a 47-token model. K=47 training goes through `training/unified_k47.py` and `step_legal`, which does not park the ball.
 
-1. Load `results/diagnostics/raw/balanced_unified_recovery/ckpt_39d.pt` with `training.natural_loss_recatch_transformer_v3.load_airborne_policy`. That loader refuses a checkpoint whose first layer was built for a different observation width, including the archived 45-D weights.
-2. Build the 24 cases the same way as `build_cases` in `training/observation_study_common.py`: seated grasp, impact snapshots, schedule suffixes, airborne carries, and the held-out natural-loss windows.
-3. Score each case through `continue_long` to absolute t = 12.
+## Dataset
 
-`python training/final_39d_balanced_policy.py` retrains the 39-D policy and writes `results/diagnostics/raw/balanced_39d/summary.json`. `python training/balanced_unified_recovery.py` does not train. It stays closed so it cannot overwrite `ckpt.pt` or `results/diagnostics/BALANCED_UNIFIED_RECOVERY_EVALUATION.md`.
+| Split | What it contains | Used for gradients |
+| --- | --- | --- |
+| TRAIN | 312 ball-impact initial conditions: 28 v1 and 284 v2 | yes |
+| VALIDATION | sealed v1 validation episodes | no |
+| FINAL_TEST | sealed v1 final-test episodes | no |
 
-| role | path |
-| --- | --- |
-| Active 39-D policy | `results/diagnostics/raw/balanced_unified_recovery/ckpt_39d.pt` |
-| 39-D benchmark and robustness log | `results/diagnostics/raw/balanced_39d/summary.json` |
-| Archived 45-D balanced weights | `results/diagnostics/raw/balanced_unified_recovery/ckpt.pt` |
-| Archived 45-D 24-case log | `results/diagnostics/raw/balanced_unified_recovery/summary.json` |
-| Geometry entry and exit | `config/geometry_switch.yaml` |
-| Online episode | `training/autonomous_episode.py` |
+A TRAIN initial condition is a restored MuJoCo snapshot at recovery entry (hand-frame position error above 6 mm for 40 ms). It is not itself a demonstration. Privileged search produced 359 successful continuous recoveries. The K=47 decoder represents 296 of them, and 288 of those still succeed when the decoded action is replayed. Those 288 trajectories, on 151 initial conditions, are the supervised demonstrations. Five mechanism groups are balanced by `sample_weight`, not by copying rows. `ball_train_v2_0021 / release_long` is one 46-step episode with three complete-loss intervals.
 
-The 39-D checkpoint stores the same K = 32 prototypes as the archived 45-D run. Its weights are not a resized copy of those weights.
+The other 161 TRAIN snapshots, including the 114 v2 cases with no successful search, are GRPO starting states. Eight decoded trajectories that stay inside the residual cap but fail physically are listed in `fragile_trajectories.jsonl` and are not supervised targets.
 
-## Training trajectories
+## Training pipeline
 
-`training/final_39d_balanced_policy.py` regenerates the demonstrations. It does not read a trajectory pickle. `train_equal` in `training/balanced_unified_recovery.py` is the trainer.
+Training has not been run.
 
-- Wrist, sliding, and open-finger recatch come from `schedules()` in `training/recovery_policy_pretraining_preparation.py`: `wrist_reseat`, `gravity_inward`, and `recatch_open20`. They are recorded with `record_local` on the canonical impact, 6.5 m/s with axial offset −6 mm. Recorded lengths are 18, 52, and 32.
-- Natural-loss training uses the six core offsets in `TRAIN_NATURAL`: `dz` −13.2, −13.5, −14.2, −14.6, and `dvz` −0.01 / +0.005 on −13.5. The published run stored 18 windows. Collection is `training.natural_loss_recatch_data_scaling.collect`.
-- The seated vertical release and the sideways carry did not yield a verified v3 recatch, so airborne carry demonstrations are not in the training set.
+1. Supervised initialization on the 288 verified demonstrations.
+2. Closed-loop evaluation of that checkpoint on held-out TRAIN snapshots (`ball_train_v2` ids whose number ends in 0 or 5). The policy acts by itself. This is not a teacher replay and it does not touch FINAL_TEST.
+3. A 20-update GRPO pilot from the supervised checkpoint, sampling all 312 TRAIN snapshots.
+4. A 120-update GRPO run only after that pilot has been inspected.
 
-Held-out natural-loss evaluation windows, not training targets, are `EVAL_NATURAL`: `h_dz14.00`, `h_dz14.25`, `h_dy` (`dz` −14.10, `dy` 0.12), and `h_dx` (`dz` −14.70, `dx` 0.10).
+GRPO advantages are group-relative. A group whose non-truncated returns are identical gets zero advantage and skips the policy surrogate. A rollout stopped by the step cap, without a drop and without a handoff, is omitted from the advantage group; it is not scored as a drop. The KL term compares the two 47-way categorical distributions. The K=36 launcher's one-logit pad is unchanged and is not used here.
 
-## 24-case benchmark
+## Setup
 
-The suite is built by `build_cases`, not saved as its own pickle. The active 39-D outcomes are in `results/diagnostics/raw/balanced_39d/summary.json` and `results/diagnostics/FINAL_39D_BALANCED_POLICY.md`. The 45-D comparison remains in `results/diagnostics/raw/balanced_unified_recovery/summary.json` and `results/diagnostics/BALANCED_UNIFIED_RECOVERY_EVALUATION.md`.
+```powershell
+python -m pip install -r requirements.txt
+```
 
-Four cases each: impact, sliding, wrist, open-finger recatch, airborne carry, and held-out natural-loss.
+```bash
+python -m pip install -r requirements.txt
+```
 
-## Three demonstration schedules
+The validation environment used MuJoCo 3.12.0. Commands below are run from the repository root. Use `python -u` so the logs flush.
 
-The recipes live in `schedules()` and are the demonstrations the balanced policy replays. The canonical impact above is the snapshot on which reseat, recatch, and inward slide were recorded through to t = 12.
+## Commands
 
-| mechanism | recipe |
-| --- | --- |
-| wrist micro-reseating | embedded `[0.8, 0.6, 0, 1]` for 12 steps, then a secure hold |
-| open-finger recatch | 19 secure wrist steps, one 20 ms open, 12-step reclose |
-| gravity-assisted sliding | `wx=0.28`, `wy=+0.50` for 20 steps, grip −0.48 for 24, retighten 8 |
+Check data, the codebook, one forward pass, one supervised loss, and the GRPO log-probability. This does not update any parameter:
 
-Grip in these recipes uses −1 for +2 N·m (open) and +1 for −18 N·m (secure). `python training/test_current_mainline.py` checks nominal impact capture, snapshot restore, one 7D step, the preparation history, the three mechanism replays, and nominal continuation of the wrist reseat to t = 12.
+```powershell
+python -u training/unified_k47.py --check
+```
 
-## Where the pieces live
+```bash
+python -u training/unified_k47.py --check
+```
 
-| piece | where |
-| --- | --- |
-| nominal grasp / lift | `envs/grasp_sim.py`, `controllers/nominal.py`, `training/demo_ballistic_impact.py` |
-| 39-D airborne observation | `envs/airborne_obs.py` |
-| v3 action map | `controllers/recovery_actions.py` |
-| geometry entry and stable exit | `config/geometry_switch.yaml`, `controllers/geometry_switch.py` |
-| online episode | `training/autonomous_episode.py` |
-| t = 12 continuation | `continue_long` and `physical_of` in `training/recovery_runtime.py` |
-| snapshot restore | `restore_dyn` |
-| balanced training and the 24-case definitions | `training/balanced_unified_recovery.py` |
-| 39-D train, benchmark, and sensor check | `training/final_39d_balanced_policy.py` |
-| scene and gains | `config/nominal.yaml`, `config/sim.yaml`, `config/rule_based_recovery.yaml` |
+Supervised initialization (40 epochs, batch 8, seed 1, learning rate 3e-4, checkpoint every epoch):
 
-`map_recovery4d` remains in `controllers/residual.py` so the wrist embedding can be checked against the older 4D map. Training rollouts do not call it.
+```powershell
+python -u training/unified_k47.py --supervised --config config/unified_k47.yaml
+```
 
-## Diagnostics worth keeping
+```bash
+python -u training/unified_k47.py --supervised --config config/unified_k47.yaml
+```
 
-- `results/diagnostics/FINAL_39D_BALANCED_POLICY.md`
-- `results/diagnostics/BALANCED_UNIFIED_RECOVERY_EVALUATION.md` (the archived 45-D comparison)
-- `results/diagnostics/OBSERVATION_REALIZABILITY_AUDIT.md`, `results/diagnostics/OBSERVATION_ROBUSTNESS_CHECK.md`, and `results/diagnostics/OBSERVATION_ABLATION_CHECK.md`
-- `results/diagnostics/GEOMETRY_BASED_RECOVERY_SWITCH.md` (pre-training autonomous baseline, not a trained score)
-- `results/diagnostics/AUTONOMOUS_RECOVERY_INTEGRATION.md` (the deterioration-score switch this path replaced)
-- `results/diagnostics/RECOVERY_ENTRY_EXIT_HANDOFF_AUDIT.md`
-- `results/diagnostics/RECOVERY_POLICY_PRETRAINING_PREPARATION.md` with `results/diagnostics/raw/recovery_policy_pretraining_preparation/`
+Closed-loop evaluation of the last supervised checkpoint:
+
+```powershell
+python -u training/unified_k47.py --eval --config config/unified_k47.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+```
+
+```bash
+python -u training/unified_k47.py --eval --config config/unified_k47.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+```
+
+GRPO pilot (20 updates, group 4, learning rate 3e-5, KL coefficient 0.05, clip 0.2, seed 1):
+
+```powershell
+python -u training/unified_k47.py --grpo --config config/unified_k47.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+```
+
+```bash
+python -u training/unified_k47.py --grpo --config config/unified_k47.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+```
+
+Longer GRPO run, only after the pilot is inspected. Pass the supervised checkpoint again so the KL reference stays at that policy:
+
+```powershell
+python -u training/unified_k47.py --grpo --config config/unified_k47_long.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+```
+
+```bash
+python -u training/unified_k47.py --grpo --config config/unified_k47_long.yaml --checkpoint results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+```
+
+## Paths
+
+- Codebook: `results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy`
+- Supervised rows: `results/diagnostics/raw/legal_recovery_v2/supervised_targets.jsonl`
+- GRPO starts: `results/diagnostics/raw/legal_recovery_v2/grpo_initial_conditions.jsonl`
+- Pilot config: `config/unified_k47.yaml`
+- Longer-run config: `config/unified_k47_long.yaml`
+- Supervised checkpoints: `results/diagnostics/raw/unified_k47/supervised/`
+- Pilot checkpoints: `results/diagnostics/raw/unified_k47/grpo_pilot/`
+- Longer-run checkpoints: `results/diagnostics/raw/unified_k47/grpo_long/`
+
+## Current status and limitations
+
+The 312 TRAIN snapshots, the 288 executable demonstrations, and the K=47 table are ready. The loader accepts that table, rejects a mismatched token head, and the non-training checks passed. No K=47 policy has been trained.
+
+Sixty-three continuous successes are outside the ±0.25 residual and are not demonstrations. Eight in-range decoded replays fail because the contact solver reacts to a float32 reconstruction of a few billionths of a command. Recovery claims have to come from a nominal handoff and the physical continuation, not from a token being legal or from contact during the recovery phase.

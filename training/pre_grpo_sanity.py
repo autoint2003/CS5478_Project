@@ -293,12 +293,21 @@ def actor_surrogate(model, members, adv, reduction="mean"):
     return torch.stack(terms).mean(), len(terms), lengths
 
 
-def one_update(env, model, ref_model, opt, episode_id, kl_coef, rng, update_index, also_sum_grad=False):
-    family = family_of(episode_id)
-    train_ids = {spec["id"] for spec in CATALOG if spec["split"] == "train"}
-    if episode_id not in train_ids:
-        raise RuntimeError(f"{episode_id} is outside the train split")
-    blob = load_ic(episode_id)
+def one_update(env, model, ref_model, opt, episode_id, kl_coef, rng, update_index, also_sum_grad=False, blob=None, family=None):
+    if blob is None:
+        family = family_of(episode_id)
+        train_ids = {spec["id"] for spec in CATALOG if spec["split"] == "train"}
+        if episode_id not in train_ids:
+            raise RuntimeError(f"{episode_id} is outside the train split")
+        blob = load_ic(episode_id)
+    else:
+        split = str(blob.get("spec", {}).get("split", ""))
+        if split == "final_test":
+            raise RuntimeError(f"FINAL_TEST is not used: {episode_id}")
+        if split != "train":
+            raise RuntimeError(f"{episode_id} is outside the train split")
+        if family is None:
+            family = "impact"
     members = []
     for _g in range(GROUP):
         restore_capture(env, blob["capture"])

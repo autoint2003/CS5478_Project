@@ -18,7 +18,13 @@ from controllers.residual import RECOVERY4D_W_HY_MAX
 from envs.config_util import load_yaml, merge_sim_config
 from envs.physical_recovery import TABLE_DROP
 from envs.deterioration import body_twist
-from training.demo_ballistic_impact import dump_json, make_sim, z_tgt_of
+from training.demo_ballistic_impact import make_sim, z_tgt_of
+
+
+def dump_json(path, obj) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(obj, indent=2, default=str), encoding="utf-8")
 from training.demo_ballistic_recovery import (
     HOLD_S,
     OUT,
@@ -31,13 +37,10 @@ from training.demo_ballistic_recovery import (
     restore_audit,
     restore_ballistic,
     run_center6_until,
-    run_episode,
     slim_m,
     tick_4d,
 )
-from training.demo_teleport_recovery_state import signed_rot_about_y_deg
-from training.grav_reposition_v2_viz import apply_camera_preset
-from training.map_ballistic_disturbance import CAM, _viewer_overlay
+from training.demo_ballistic_recovery import signed_rot_about_y_deg
 from training.replay_core import freeze
 
 

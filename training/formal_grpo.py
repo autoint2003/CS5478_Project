@@ -36,6 +36,7 @@ from training.supervised_coverage_warmstart import roll_ic
 
 IC_DIR = ROOT / "results" / "diagnostics" / "raw" / "final_rl_readiness" / "ics"
 SANITY_DIR = ROOT / "results" / "diagnostics" / "raw" / "pre_grpo_sanity"
+PILOT_DIR = ROOT / "results" / "diagnostics" / "raw" / "formal_grpo_pilot"
 # Frozen readiness result: this validation impact never entered.
 INVALID_NO_ENTRY = frozenset({"imp_f"})
 
@@ -60,19 +61,25 @@ def assert_config(cfg):
     every = int(cfg["eval_every"])
     if updates < 1 or every < 1:
         raise RuntimeError("updates and eval_every must be positive")
-    if set(TRAIN_ORDER) != set(split_ids("train")):
-        raise RuntimeError("TRAIN_ORDER does not match the catalog train split")
-    final_ids = set(split_ids("final_test"))
-    if final_ids & set(TRAIN_ORDER) or final_ids & set(split_ids("validation")):
-        raise RuntimeError("FINAL_TEST overlaps the train or validation split")
+    dataset = str(cfg.get("dataset", "pilot_catalog"))
+    if dataset == "pilot_catalog":
+        if set(TRAIN_ORDER) != set(split_ids("train")):
+            raise RuntimeError("TRAIN_ORDER does not match the catalog train split")
+        final_ids = set(split_ids("final_test"))
+        if final_ids & set(TRAIN_ORDER) or final_ids & set(split_ids("validation")):
+            raise RuntimeError("FINAL_TEST overlaps the train or validation split")
+    elif dataset != "ball_impact":
+        raise RuntimeError(f"unknown dataset {dataset}")
     init = ROOT / str(cfg["initialization"])
     ref = ROOT / str(cfg["reference"])
     out = ROOT / str(cfg["output_dir"])
     if out.resolve() == SANITY_DIR.resolve():
         raise RuntimeError("output_dir would overwrite the pre-GRPO sanity files")
+    if out.resolve() == PILOT_DIR.resolve() or (out / "PILOT_SEALED").is_file():
+        raise RuntimeError("output_dir is the sealed 120-update GRPO pilot")
     if not init.is_file() or not ref.is_file():
         raise RuntimeError("initialization or reference checkpoint is missing")
-    return updates, every, init, ref, out
+    return updates, every, init, ref, out, dataset
 
 
 def refuse_final(episode_id):
@@ -80,23 +87,56 @@ def refuse_final(episode_id):
         raise RuntimeError(f"FINAL_TEST is not used: {episode_id}")
 
 
+def _reject_head_mismatch(model, state):
+    """Raise unless every checkpoint tensor matches a parameter of this head.
+
+    A K=36 logit matrix is not copied into a wider head, and unknown keys are
+    not dropped.
+    """
+    own = model.state_dict()
+    problems = []
+    for key, value in state.items():
+        if key not in own:
+            problems.append(f"unexpected {key}")
+        elif tuple(own[key].shape) != tuple(value.shape):
+            problems.append(f"{key} checkpoint {tuple(value.shape)} model {tuple(own[key].shape)}")
+    missing = [key for key in own if key not in state]
+    if missing:
+        problems.append("missing " + ", ".join(missing[:6]))
+    if problems:
+        raise RuntimeError("incompatible token head: " + "; ".join(problems[:8]))
+
+
 def load_models(init_path, ref_path, device):
     saved_ref = torch.load(ref_path, map_location="cpu", weights_only=False)
-    ref_model = build_policy(np.asarray(saved_ref["proto"], np.float32), device, float(saved_ref["res_cap"]))
+    ref_proto = np.asarray(saved_ref["proto"], np.float32)
+    ref_model = build_policy(ref_proto, device, float(saved_ref["res_cap"]))
     ref_model.load_state_dict(saved_ref["model"])
     ref_model.eval()
     for parameter in ref_model.parameters():
         parameter.requires_grad_(False)
     saved_init = torch.load(init_path, map_location="cpu", weights_only=False)
     proto = np.asarray(saved_init["proto"], np.float32)
-    if proto.shape != (36, 7):
-        raise RuntimeError(f"expected K=36 initialization, got {proto.shape}")
+    if proto.ndim != 2 or proto.shape[1] != 7:
+        raise RuntimeError(f"codebook must be (K, 7), got {proto.shape}")
     if abs(float(saved_ref["res_cap"]) - 0.25) > 1e-9 or abs(float(saved_init["res_cap"]) - 0.25) > 1e-9:
         raise RuntimeError("residual cap is not 0.25")
-    model = FuturePolicy(proto).to(device)
-    model.load_state_dict(saved_init["model"])
-    for parameter in model.fut.parameters():
-        parameter.requires_grad_(False)
+    state = saved_init["model"]
+    legacy = "logit35_w" in state or "logits_old.weight" in state
+    if legacy:
+        if proto.shape != (36, 7):
+            raise RuntimeError(
+                f"FuturePolicy checkpoint is a 36-token head and cannot be remapped onto K={proto.shape[0]}"
+            )
+        model = FuturePolicy(proto).to(device)
+        _reject_head_mismatch(model, state)
+        model.load_state_dict(state)
+        for parameter in model.fut.parameters():
+            parameter.requires_grad_(False)
+        return model, ref_model
+    model = build_policy(proto, device, 0.25)
+    _reject_head_mismatch(model, state)
+    model.load_state_dict(state)
     return model, ref_model
 
 
@@ -139,23 +179,72 @@ def save_model(path, model, update_index, score):
     )
 
 
+def ball_splits():
+    from training.ball_impact_dataset import ids_for
+
+    train_ids = list(ids_for("train"))
+    val_ids = list(ids_for("validation"))
+    final_ids = set(ids_for("final_test"))
+    if final_ids & set(train_ids) or final_ids & set(val_ids):
+        raise RuntimeError("FINAL_TEST overlaps the ball-impact train or validation split")
+    if not train_ids or not val_ids:
+        raise RuntimeError("ball-impact train or validation split is empty")
+    return train_ids, val_ids
+
+
+def validation_eval_ball(env, model, episode_ids):
+    from training.ball_impact_dataset import load_episode
+    from training.history_aware_critic_ablation import restore_capture
+    from training.supervised_coverage_warmstart import det_roll
+
+    model.eval()
+    env.model = model
+    rows = []
+    for episode_id in episode_ids:
+        blob = load_episode(episode_id)
+        if blob["spec"]["split"] != "validation":
+            raise RuntimeError(f"{episode_id} is not a validation episode")
+        restore_capture(env, blob["capture"])
+        out = det_roll(env, blob["ref"])
+        rows.append({
+            "id": episode_id,
+            "rolled": True,
+            "label": out.get("label"),
+            "success": bool(out.get("success")),
+            "held_10": out.get("held_10"),
+            "held_12": out.get("held_12"),
+        })
+    score = int(sum(row["success"] for row in rows))
+    return score, rows
+
+
 def main():
     parser = argparse.ArgumentParser(description="Formal critic-free GRPO")
     parser.add_argument("--config", default="config/formal_grpo.yaml")
     args = parser.parse_args()
     cfg = load_yaml(args.config)
-    updates, every, init_path, ref_path, out = assert_config(cfg)
+    updates, every, init_path, ref_path, out, dataset = assert_config(cfg)
     out.mkdir(parents=True, exist_ok=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model, ref_model = load_models(init_path, ref_path, device)
     env = make_training_env(device, model=model)
+    if dataset == "ball_impact":
+        train_ids, val_ids = ball_splits()
+        final_ids = []
+        invalid = []
+    else:
+        train_ids = list(TRAIN_ORDER)
+        val_ids = list(split_ids("validation"))
+        final_ids = list(split_ids("final_test"))
+        invalid = sorted(INVALID_NO_ENTRY)
     log = {
+        "dataset": dataset,
         "initialization": {"path": str(init_path.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(init_path)},
         "reference": {"path": str(ref_path.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(ref_path)},
-        "train_ids": list(TRAIN_ORDER),
-        "validation_ids": list(split_ids("validation")),
-        "validation_not_rolled": sorted(INVALID_NO_ENTRY),
-        "final_test_not_rolled": list(split_ids("final_test")),
+        "train_ids": train_ids,
+        "validation_ids": val_ids,
+        "validation_not_rolled": invalid,
+        "final_test_not_rolled": final_ids,
         "updates": updates,
         "eval_every": every,
         "kl_coef": KL_WEAK,
@@ -168,7 +257,10 @@ def main():
     best = {"score": -1, "update": None}
 
     def consider(update_index):
-        score, rows = validation_eval(env, model)
+        if dataset == "ball_impact":
+            score, rows = validation_eval_ball(env, model, val_ids)
+        else:
+            score, rows = validation_eval(env, model)
         model.train()
         log["evals"].append({"update": update_index, "validation_success": score, "rows": rows})
         save_model(out / f"checkpoint_u{update_index:04d}.pt", model, update_index, score)
@@ -184,10 +276,20 @@ def main():
     consider(0)
     opt = torch.optim.Adam([p for p in model.parameters() if p.requires_grad], lr=LR)
     for index in range(1, updates + 1):
-        episode_id = TRAIN_ORDER[(index - 1) % len(TRAIN_ORDER)]
-        refuse_final(episode_id)
+        episode_id = train_ids[(index - 1) % len(train_ids)]
+        if dataset != "ball_impact":
+            refuse_final(episode_id)
         rng = np.random.default_rng(int(cfg["seed_base"]) + 19 * index + sum(ord(char) for char in episode_id))
-        row, _audits = one_update(env, model, ref_model, opt, episode_id, KL_WEAK, rng, index)
+        if dataset == "ball_impact":
+            from training.ball_impact_dataset import load_episode
+
+            blob = load_episode(episode_id)
+            row, _audits = one_update(
+                env, model, ref_model, opt, episode_id, KL_WEAK, rng, index,
+                blob=blob, family="impact",
+            )
+        else:
+            row, _audits = one_update(env, model, ref_model, opt, episode_id, KL_WEAK, rng, index)
         log["rows"].append(row)
         path.write_text(json.dumps(log), encoding="utf-8")
         if index % every == 0:

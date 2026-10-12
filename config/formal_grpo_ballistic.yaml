@@ -1,0 +1,17 @@
+# Future GRPO on genuine ball-impact initial conditions.
+# Does not write into the sealed 120-update pilot.
+# Executing training/formal_grpo.py with this config starts training.
+
+dataset: ball_impact
+initialization: results/diagnostics/raw/pre_grpo_sanity/policy_B_init.pt
+reference: results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt
+output_dir: results/diagnostics/raw/formal_grpo_ballistic
+updates: 120
+eval_every: 12
+kl_coef: 0.05
+lr: 3.0e-5
+clip: 0.2
+group: 4
+sigma: 0.05
+grad_clip: 1.0
+seed_base: 3000

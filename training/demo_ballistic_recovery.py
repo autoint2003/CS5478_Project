@@ -32,16 +32,41 @@ from controllers.residual import (
 from envs.config_util import load_yaml, merge_sim_config
 from envs.physical_recovery import TABLE_DROP, physical_pack
 from training.demo_ballistic_impact import TAU_SEC, dump_json, live_opt, make_sim, z_tgt_of
-from training.demo_teleport_recovery_state import signed_rot_about_y_deg
-from training.grav_reposition_v2_viz import apply_camera_preset
-from training.map_ballistic_disturbance import (
-    CAM,
-    _viewer_overlay,
-    run_episode,
-)
 from training.replay_core import tick_vw
-from training.vertical_slip_contact_mechanics_audit import extract_contacts
 from training.write_ballistic_impact_scene import BALL_M
+
+
+def signed_rot_about_y_deg(R0, R1) -> float:
+    delta = np.asarray(R0, float).reshape(3, 3).T @ np.asarray(R1, float).reshape(3, 3)
+    return float(np.degrees(np.arctan2(delta[0, 2], delta[0, 0])))
+
+
+def extract_contacts(sim):
+    """Cylinder-finger contacts. frame rows are normal, tangent1, tangent2."""
+    model, data, ids = sim.model, sim.data, sim.ids
+    obj_b = int(ids.object_body)
+    wrench = np.zeros(6)
+    rows = []
+    for index in range(int(data.ncon)):
+        contact = data.contact[index]
+        geom1, geom2 = int(contact.geom1), int(contact.geom2)
+        body1 = int(model.geom_bodyid[geom1])
+        body2 = int(model.geom_bodyid[geom2])
+        if obj_b not in (body1, body2):
+            continue
+        if ids.left_body not in (body1, body2) and ids.right_body not in (body1, body2):
+            continue
+        mujoco.mj_contactForce(model, data, index, wrench)
+        normal_force = float(wrench[0])
+        tangent = float(np.hypot(wrench[1], wrench[2]))
+        friction = float(np.array(contact.friction, float)[0])
+        rho = tangent / (friction * abs(normal_force)) if friction * abs(normal_force) > 1e-9 else float("nan")
+        rows.append({
+            "side": "L" if ids.left_body in (body1, body2) else "R",
+            "Fn": normal_force,
+            "rho": rho,
+        })
+    return rows, {}
 
 OUT = ROOT / "results" / "diagnostics" / "ballistic_recovery_transfer"
 RAW = OUT / "raw"

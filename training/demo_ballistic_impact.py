@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import mujoco
@@ -19,6 +20,36 @@ ROOT = Path(__file__).resolve().parents[1]
 PAIR_MU = 1.0
 HAND_RISE_M = 0.05
 TAU_SEC = -18.0
+
+
+def _jsonable(value):
+    if isinstance(value, dict):
+        return {str(key): _jsonable(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_jsonable(item) for item in value]
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, (np.floating, np.integer)):
+        return value.item()
+    if isinstance(value, float) and (np.isnan(value) or np.isinf(value)):
+        return None
+    return value
+
+
+def dump_json(path: Path, obj) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(_jsonable(obj), indent=2), encoding="utf-8")
+
+
+def live_opt(sim) -> dict:
+    model = sim.model
+    return {
+        "mujoco": mujoco.__version__,
+        "noslip_iterations": int(model.opt.noslip_iterations),
+        "noslip_tolerance": float(model.opt.noslip_tolerance),
+        "timestep": float(model.opt.timestep),
+        "gravity": np.array(model.opt.gravity, float).tolist(),
+    }
 
 
 def assert_noslip(sim) -> None:
