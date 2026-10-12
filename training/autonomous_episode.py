@@ -194,10 +194,14 @@ class AutonomousRecoveryEnv:
         obs = self.observation()
         self._obs_seq.append(np.asarray(obs, np.float32))
         self._prev_seq.append(self._prev.copy())
+        # The frozen position table has 160 entries. Longer recoveries keep
+        # the latest 160 actions in view; earlier steps are unchanged.
+        obs_in = self._obs_seq[-160:]
+        prev_in = self._prev_seq[-160:]
         with torch.no_grad():
             pred = self.model(
-                torch.tensor(np.stack(self._obs_seq), device=self.device),
-                torch.tensor(np.stack(self._prev_seq), device=self.device),
+                torch.tensor(np.stack(obs_in), device=self.device),
+                torch.tensor(np.stack(prev_in), device=self.device),
             )[2][-1].float().cpu().numpy()
         act = np.clip(pred, -1.0, 1.0).astype(np.float32)
         v3.step_v3(self.sim, act)

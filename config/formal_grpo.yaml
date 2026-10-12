@@ -1,0 +1,16 @@
+# Formal critic-free GRPO. Executing training/formal_grpo.py starts training.
+# Objective values are checked against the code and refused if they differ.
+# imp_f has no geometry entry and is not rolled. FINAL_TEST is not rolled.
+
+initialization: results/diagnostics/raw/pre_grpo_sanity/policy_B_init.pt
+reference: results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt
+output_dir: results/diagnostics/raw/formal_grpo
+updates: 120
+eval_every: 12
+kl_coef: 0.05
+lr: 3.0e-5
+clip: 0.2
+group: 4
+sigma: 0.05
+grad_clip: 1.0
+seed_base: 3000

@@ -1,0 +1,12 @@
+# Canonical recovery success. Measured on an undisturbed nominal hold in
+# NOMINAL_POSE_RETURN_LONG_HORIZON_AUDIT. These numbers are frozen.
+# Geometry entry remains config/geometry_switch.yaml. The looser exit in that
+# file is legacy and is not this success label.
+
+orientation_rad: 0.117
+pinch_position_m: 0.00303
+relative_speed_mps: 0.020
+persistence_s: 0.100
+control_period_s: 0.020
+primary_horizon_s: 10.0
+extended_horizon_s: 12.0
