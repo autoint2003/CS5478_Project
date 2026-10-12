@@ -145,11 +145,18 @@ def seat_base(sim, nominal, pads, pad_mu):
 class AutonomousRecoveryEnv:
     """Nominal world, 39-D observation, geometry switch, and the frozen policy."""
 
-    def __init__(self, device=None):
+    def __init__(self, device=None, model=None):
         torch.set_num_threads(1)
         self.sim, self.gains, self.nominal, self.pads, self.pad_mu, self.pads_l, self.pads_r = world()
         assert_noslip(self.sim)
-        self.model, self.proto, self.saved, self.device = load_balanced(device)
+        if model is None:
+            self.model, self.proto, self.saved, self.device = load_balanced(device)
+        else:
+            self.device = device or next(model.parameters()).device
+            self.model = model.to(self.device)
+            proto = getattr(model, "proto", None)
+            self.proto = None if proto is None else proto.detach().float().cpu().numpy()
+            self.saved = None
         self.model.eval()
         self.switch = GeometrySwitch()
         self._hist = None
@@ -215,9 +222,12 @@ class AutonomousRecoveryEnv:
         return t12, float(self.sim.data.time)
 
 
-def make_training_env(device=None):
-    """Construct the autonomous training environment. Does not step or train."""
-    return AutonomousRecoveryEnv(device)
+def make_training_env(device=None, model=None):
+    """Construct the autonomous training environment. Does not step or train.
+
+    model replaces the retired 39-D checkpoint. Formal GRPO passes the K=36 policy.
+    """
+    return AutonomousRecoveryEnv(device, model=model)
 
 
 def run_ball_episode(env, v_hit, z_off, phi, delta=None):

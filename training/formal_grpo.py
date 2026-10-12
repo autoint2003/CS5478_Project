@@ -148,8 +148,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model, ref_model = load_models(init_path, ref_path, device)
-    env = make_training_env()
-    env.device = device
+    env = make_training_env(device, model=model)
     log = {
         "initialization": {"path": str(init_path.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(init_path)},
         "reference": {"path": str(ref_path.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(ref_path)},
