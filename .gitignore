@@ -31,25 +31,12 @@ Thumbs.db
 # Third-party robot models (clone locally; see README)
 mujoco_menagerie/
 
-# Raw trajectory, snapshot, and video data
-data/**/*.npz
-data/**/*.pkl
-data/**/*.mp4
-demo_results/**/*.npz
-demo_results/**/*.pkl
-demo_results/**/*.mp4
-demo_results/diagnostics/**/raw/
-demo_results/diagnostics/**/figures/
-demo_results/diagnostics/**/videos/
+# Datasets, historical artifacts, and training outputs
+data/
+demo_results/
+results/
 
 # Training / evaluation runtime artifacts (local only)
-results/checkpoints/
-results/logs/
-results/videos/
-results/figures/
-results/buffers/
-results/tb/
-results/debug_qacc_dof19/
 tb_logs/
 tensorboard/
 **/tb/
@@ -61,29 +48,6 @@ wandb/
 # Presentation / render outputs (keep on disk; do not version)
 *.mp4
 **/_frames_*/
-results/comparison/**/cam_stills/
-
-# Intermediate diagnostic dumps (regenerable). Canonical exceptions below.
-results/diagnostics/**/raw/
-results/diagnostics/**/figures/
-results/diagnostics/**/videos/
-results/diagnostics/**/*.npz
-results/diagnostics/**/*.pkl
-results/diagnostics/**/*.csv
-
-# Canonical snapshots / eval ICs that the pipeline actually reads
-!results/diagnostics/ballistic_recovery_transfer/raw/
-!results/diagnostics/ballistic_recovery_transfer/raw/snap_early.pkl
-!results/diagnostics/ballistic_recovery_transfer/raw/stages.json
-!results/diagnostics/dynamic_airborne_recatch/raw/
-!results/diagnostics/dynamic_airborne_recatch/raw/release_map_recatch.json
-!results/eval_sets/airborne_offset_eval.npz
-!demo_results/diagnostics/ballistic_recovery_transfer/raw/
-!demo_results/diagnostics/ballistic_recovery_transfer/raw/snap_early.pkl
-!demo_results/diagnostics/ballistic_recovery_transfer/raw/stages.json
-!demo_results/diagnostics/dynamic_airborne_recatch/raw/
-!demo_results/diagnostics/dynamic_airborne_recatch/raw/release_map_recatch.json
-!demo_results/eval_sets/airborne_offset_eval.npz
 
 # MuJoCo
 *.mjb

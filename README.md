@@ -2,7 +2,7 @@
 
 A MuJoCo Panda recovers a cylinder after a ball impact. Recovery is a legal 47-token motion codebook plus a bounded residual. Token 47 is HANDOFF: it ends recovery, consumes no physics step, and does not decode a residual. The recovery clock stops at 4 seconds. After handoff, the unchanged nominal controller lifts and must hold the grasp for 12 seconds. That `SUCCESS_12S` outcome is the only recovery success. A 3 mm geometric improvement is not a success gate.
 
-The audited training set is ready for supervised training and GRPO. No training run has been started on this set.
+The audited training set is the supervised and GRPO entry. Commands below are the ones implemented by `training/unified_k48.py`.
 
 ## Directory layout
 
@@ -16,7 +16,7 @@ The audited training set is ready for supervised training and GRPO. No training 
 | `config/` | YAML configs. The active recovery configs are `unified_k48_recovery_v3.yaml` and `unified_k48_recovery_v3_reward_v2.yaml` |
 | `docs/HISTORICAL_K32_README.md` | Earlier K=32 write-up |
 
-`results/` starts empty of run artifacts. Training writes only under `results/sft/`, `results/grpo/`, and `results/evaluations/`. Historical files stay in `demo_results/`, so a new run does not overwrite them.
+Training writes under `results/sft/`, `results/grpo/`, and `results/evaluations/`. Historical files stay in `demo_results/`. `data/`, `demo_results/`, and `results/` are gitignored.
 
 ## Dataset
 
@@ -68,41 +68,67 @@ python -u training/audit_pretrain_data.py static
 
 ## Training and evaluation
 
+Run these from the repository root. Evaluation is deterministic argmax on CPU. Training uses the `device` in the config.
+
 Check the codebook, the HANDOFF head, one supervised loss, and the reward order. This does not update parameters or write a checkpoint:
 
 ```powershell
 python -u training/unified_k48.py --check
 ```
 
-Supervised training, 40 epochs, batch 8, seed 1, learning rate 3e-4. The initialization checkpoint is the historical K=47 epoch-40 model:
+### Supervised training
+
+40 epochs, batch 8, seed 1, learning rate 3e-4. The initialization checkpoint is the historical K=47 epoch-40 model. Checkpoints go to `results/sft/`. The last file is `results/sft/checkpoint_epoch_0040.pt`.
 
 ```powershell
 python -u training/unified_k48.py --supervised --config config/unified_k48_recovery_v3.yaml --checkpoint demo_results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
 ```
 
-Checkpoints go to `results/sft/`.
+### GRPO reward v1
 
-Closed-loop evaluation uses the same config. Pass the supervised checkpoint just written, not the historical K=47 file:
-
-```powershell
-python -u training/unified_k48.py --eval --config config/unified_k48_recovery_v3.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
-```
-
-Evaluation rows go to `results/evaluations/`.
-
-GRPO with reward v1, 261 updates, three passes over the 87 recovery initial conditions:
+Three passes over the 87 training recovery initial conditions, 261 updates. Writes `results/grpo/v1/`. The last file is `results/grpo/v1/checkpoint_u0261.pt`. The success terminal is only `SUCCESS_12S`.
 
 ```powershell
 python -u training/unified_k48.py --grpo --config config/unified_k48_recovery_v3.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
 ```
 
-Reward v2 uses the same schedule and a different return:
+### GRPO reward v2
+
+`config/unified_k48_recovery_v3_reward_v2.yaml` runs nine passes, 783 updates, and writes `results/grpo/v2/`. A checkpoint saved after update 261 is the end of the first three passes. This command continues that file from update 262 through 783 and appends `training_log.jsonl` and `rollouts.jsonl`. It does not overwrite `checkpoint_u0261.pt`. The frozen KL reference stays `results/sft/checkpoint_epoch_0040.pt`. The last new file is `results/grpo/v2/checkpoint_u0783.pt`.
 
 ```powershell
-python -u training/unified_k48.py --grpo --config config/unified_k48_recovery_v3_reward_v2.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
+python -u training/unified_k48.py --grpo --config config/unified_k48_recovery_v3_reward_v2.yaml --checkpoint results/grpo/v2/checkpoint_u0261.pt
 ```
 
-GRPO writes to `results/grpo/v1/` or `results/grpo/v2/`. Both rewards give the success terminal only for `SUCCESS_12S` after handoff.
+### Evaluation
+
+The default IC list is `data/valid_recovery.jsonl` (8 validation recovery initial conditions). The summary is `results/evaluations/heldout_train.json`.
+
+SFT epoch 40:
+
+```powershell
+python -u training/unified_k48.py --eval --config config/unified_k48_recovery_v3.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
+```
+
+GRPO v1, same 8 validation initial conditions:
+
+```powershell
+python -u training/unified_k48.py --eval --config config/unified_k48_recovery_v3.yaml --checkpoint results/grpo/v1/checkpoint_u0261.pt
+```
+
+GRPO v2, same 8 validation initial conditions:
+
+```powershell
+python -u training/unified_k48.py --eval --config config/unified_k48_recovery_v3_reward_v2.yaml --checkpoint results/grpo/v2/checkpoint_u0261.pt
+```
+
+`--eval-data` selects another recovery list. The 87 training recovery initial conditions are `data/grpo_initial_conditions.jsonl`. Pass `--eval-output` so this does not overwrite `results/evaluations/heldout_train.json`. The rows are written to `closed_loop.json` in that directory.
+
+```powershell
+python -u training/unified_k48.py --eval --config config/unified_k48_recovery_v3.yaml --checkpoint results/grpo/v1/checkpoint_u0261.pt --eval-data data/grpo_initial_conditions.jsonl --eval-output results/evaluations/raw/grpo_v1_train_eval
+```
+
+Replace the checkpoint path to evaluate another run on the same 87 initial conditions. Reward v1 and reward v2 use the same rollout. The config selects the codebook and the 4 s / 12 s limits.
 
 ## Model
 

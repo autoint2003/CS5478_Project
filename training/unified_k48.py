@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import pickle
+import re
 import sys
 import time
 from collections import Counter, deque
@@ -429,12 +430,13 @@ def progress_postfix(timing, success, group):
     )
 
 
-def open_grpo_progress(total, file=None):
+def open_grpo_progress(total, file=None, initial=0):
     from tqdm import tqdm
 
     stream = sys.stdout if file is None else file
     return tqdm(
         total=int(total),
+        initial=int(initial),
         file=stream,
         ascii=True,
         dynamic_ncols=bool(getattr(stream, "isatty", lambda: False)()),
@@ -514,6 +516,24 @@ def assert_selected_reward(version, limit_s):
         raise RuntimeError("v2 drop return is not the outcome-aware return")
 
 
+def _completed_grpo_update(out, checkpoint):
+    """Return the finished update when ``checkpoint`` is an existing file in ``out``."""
+    path = Path(checkpoint).resolve()
+    if path.parent != out.resolve():
+        return 0
+    match = re.fullmatch(r"checkpoint_u(\d+)\.pt", path.name)
+    if match is None:
+        return 0
+    done = int(match.group(1))
+    log = out / "training_log.jsonl"
+    if not log.exists():
+        raise RuntimeError(f"{path.name} is in {out} but training_log.jsonl is missing")
+    last = json.loads(log.read_text(encoding="utf-8").splitlines()[-1])
+    if int(last["update"]) != done:
+        raise RuntimeError(f"training log ends at update {last['update']}, not {done}")
+    return done
+
+
 def train_grpo(cfg, checkpoint):
     from training.autonomous_episode import make_training_env
     from training.history_aware_critic_ablation import restore_capture
@@ -550,22 +570,30 @@ def train_grpo(cfg, checkpoint):
         if save_updates != expected_saves:
             raise RuntimeError(f"checkpoints at {save_updates} are not once per epoch {expected_saves}")
     out = ROOT / cfg["grpo_output"]
+    completed = _completed_grpo_update(out, checkpoint)
+    if completed >= updates:
+        raise RuntimeError(f"{checkpoint} already reached update {completed}; configured total is {updates}")
     protected = {
         (ROOT / "demo_results/diagnostics/raw/unified_k47/supervised").resolve(),
         (ROOT / "demo_results/diagnostics/raw/unified_k48/supervised").resolve(),
-        Path(checkpoint).resolve().parent,
     }
+    if completed == 0:
+        protected.add(Path(checkpoint).resolve().parent)
     if out.resolve() in protected:
         raise RuntimeError(f"refusing to write GRPO checkpoints into {out}")
-    if any(out.glob("checkpoint_u*.pt")) or (out / "rollouts.jsonl").exists() or (out / "training_log.jsonl").exists():
+    if completed == 0 and (any(out.glob("checkpoint_u*.pt")) or (out / "rollouts.jsonl").exists() or (out / "training_log.jsonl").exists()):
         raise RuntimeError(f"refusing to overwrite existing GRPO outputs in {out}")
     out.mkdir(parents=True, exist_ok=True)
+    schedule = schedule[completed:]
 
     book = load_codebook(ROOT / cfg["codebook"])
     device = torch.device(cfg.get("device") or "cpu")
     model, saved_book = load_trained_k48(Path(checkpoint), device)
     model.train()
-    ref_model, _ref_book = load_trained_k48(Path(checkpoint), device)
+    reference = cfg.get("grpo_reference") if completed else checkpoint
+    if completed and not reference:
+        raise RuntimeError("appending GRPO requires grpo_reference, the frozen policy from the first update")
+    ref_model, _ref_book = load_trained_k48(Path(reference), device)
     if not np.array_equal(saved_book, book):
         raise RuntimeError("checkpoint motion codebook differs from the configured codebook")
     ref_model.eval()
@@ -579,11 +607,11 @@ def train_grpo(cfg, checkpoint):
     recent_updates = deque(maxlen=20)
     wall_start = time.perf_counter()
     last_checkpoint = None
-    progress = open_grpo_progress(updates)
+    progress = open_grpo_progress(updates, initial=completed)
     progress_log = (out / "training_log.jsonl").open("a", encoding="utf-8")
     from tqdm import tqdm
     try:
-        for update, episode_id in enumerate(schedule, start=1):
+        for update, episode_id in enumerate(schedule, start=completed + 1):
             compute_started = time.perf_counter()
             row = by_id[episode_id]
             with (ROOT / row["snapshot"]).open("rb") as handle:
@@ -694,6 +722,8 @@ def train_grpo(cfg, checkpoint):
             if update in save_updates:
                 save_started = time.perf_counter()
                 last_checkpoint = out / f"checkpoint_u{update:04d}.pt"
+                if last_checkpoint.exists():
+                    raise RuntimeError(f"refusing to overwrite {last_checkpoint}")
                 torch.save(
                     {
                         "proto": book,
@@ -764,7 +794,7 @@ def load_trained_k48(path, device):
     return model, book
 
 
-def evaluate(cfg, checkpoint):
+def evaluate(cfg, checkpoint, eval_data=""):
     from training.autonomous_episode import make_training_env
     from training.horizon_outcome import roll_policy
     from training.unified_k47 import read_jsonl
@@ -783,14 +813,24 @@ def evaluate(cfg, checkpoint):
     env = make_training_env(device, model=model)
     rebuilt = assert_recovery_v3_paths(cfg)
     if rebuilt:
-        baseline_path = ROOT / cfg["eval_manifest"]
+        default_manifest = str(cfg["eval_manifest"]).replace("\\", "/")
+        requested = str(eval_data).replace("\\", "/") if eval_data else default_manifest
+        explicit = requested != default_manifest
+        baseline_path = ROOT / requested
         baseline = read_jsonl(baseline_path)
         if not baseline:
-            raise RuntimeError("rebuilt validation manifest is empty")
-        if any(row.get("split") != "valid" or row.get("nominal_class") != "RECOVERY_CANDIDATE" for row in baseline):
-            raise RuntimeError("evaluation manifest is not the valid recovery pool")
+            raise RuntimeError("evaluation manifest is empty")
         if any("final" in str(row.get("snapshot", "")) for row in baseline):
             raise RuntimeError("evaluation manifest points at FINAL")
+        if explicit:
+            bad = [
+                row["id"] for row in baseline
+                if row.get("nominal_class") != "RECOVERY_CANDIDATE" or row.get("split") not in ("train", "valid")
+            ]
+            if bad:
+                raise RuntimeError(f"evaluation list is not a recovery pool: {bad[:5]}")
+        elif any(row.get("split") != "valid" or row.get("nominal_class") != "RECOVERY_CANDIDATE" for row in baseline):
+            raise RuntimeError("evaluation manifest is not the valid recovery pool")
         baseline_ids = [row["id"] for row in baseline]
         by_id = {row["id"]: row for row in baseline}
         allowed_split = {"valid"}
@@ -813,7 +853,8 @@ def evaluate(cfg, checkpoint):
         row = by_id[episode_id]
         with (ROOT / row["snapshot"]).open("rb") as handle:
             blob = pickle.load(handle)
-        if blob["spec"].get("split") not in allowed_split:
+        allowed = {row.get("split")} if rebuilt and explicit else allowed_split
+        if blob["spec"].get("split") not in allowed:
             raise RuntimeError(f"evaluation refused snapshot {episode_id}")
         out = roll_policy(
             env, model, book, blob, device,
@@ -864,7 +905,8 @@ def evaluate(cfg, checkpoint):
         raise RuntimeError(f"refusing to write evaluation into {out_dir}")
     out_dir.mkdir(parents=True, exist_ok=True)
     payload = {"summary": summary, "rows": rows}
-    (out_dir / "heldout_train.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    result_name = "closed_loop.json" if rebuilt and explicit else "heldout_train.json"
+    (out_dir / result_name).write_text(json.dumps(payload, indent=2), encoding="utf-8")
     if checkpoint_path.stat().st_mtime != before or checkpoint_path.stat().st_size != size_before:
         raise RuntimeError("evaluation changed the checkpoint")
     print("EVAL_DONE", json.dumps(summary), flush=True)
@@ -876,6 +918,7 @@ def main():
     parser.add_argument("--supervised", action="store_true")
     parser.add_argument("--eval", action="store_true")
     parser.add_argument("--eval-output", default="")
+    parser.add_argument("--eval-data", default="data/valid_recovery.jsonl")
     parser.add_argument("--grpo", action="store_true")
     parser.add_argument("--config", default="config/unified_k48.yaml")
     parser.add_argument("--checkpoint", default="")
@@ -894,7 +937,7 @@ def main():
             raise SystemExit("--eval requires a trained K=48 checkpoint")
         if args.eval_output:
             cfg["eval_output"] = args.eval_output
-        evaluate(cfg, args.checkpoint)
+        evaluate(cfg, args.checkpoint, args.eval_data)
         return
     if not args.checkpoint:
         raise SystemExit("pass the epoch-40 K=47 checkpoint; it is expanded and not overwritten")

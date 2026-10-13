@@ -14,8 +14,9 @@ eval_device: cpu
 epochs: 40
 batch_size: 8
 lr: 0.0003
-grpo_updates: 261
-ic_epochs: 3
+grpo_updates: 783
+ic_epochs: 9
+grpo_reference: results/sft/checkpoint_epoch_0040.pt
 cover_all_ics: true
 grpo_lr: 0.00003
 kl_coef: 0.05
