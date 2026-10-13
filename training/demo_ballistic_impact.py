@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 import mujoco
@@ -20,6 +21,10 @@ ROOT = Path(__file__).resolve().parents[1]
 PAIR_MU = 1.0
 HAND_RISE_M = 0.05
 TAU_SEC = -18.0
+VIDEO_FPS = 25
+HOLD_S = 12.0
+AFTER_DROP_S = 2.0
+LOG_DT = 0.010
 
 
 def _jsonable(value):
@@ -39,6 +44,47 @@ def _jsonable(value):
 def dump_json(path: Path, obj) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(_jsonable(obj), indent=2), encoding="utf-8")
+
+
+def encode_mp4(frame_dir: Path, dest: Path) -> str | None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    pattern = str(frame_dir / "frame_%06d.png")
+    cmd_tail = ["-y", "-framerate", str(VIDEO_FPS), "-i", pattern, "-c:v", "libx264", "-pix_fmt", "yuv420p", str(dest)]
+    candidates = []
+    try:
+        import imageio_ffmpeg
+
+        candidates.append(imageio_ffmpeg.get_ffmpeg_exe())
+    except Exception:
+        pass
+    candidates.append("ffmpeg")
+    for exe in candidates:
+        try:
+            subprocess.run([exe, *cmd_tail], check=True, capture_output=True)
+            if dest.is_file() and dest.stat().st_size > 1000:
+                return str(dest)
+        except Exception:
+            continue
+    return None
+
+
+def write_frames(frames, dest: Path) -> str | None:
+    tmp = dest.parent / f"_frames_{dest.stem}"
+    if tmp.exists():
+        for path in tmp.glob("*.png"):
+            path.unlink()
+    tmp.mkdir(parents=True, exist_ok=True)
+    try:
+        import imageio.v2 as imageio
+
+        for index, frame in enumerate(frames):
+            imageio.imwrite(str(tmp / f"frame_{index:06d}.png"), frame)
+    except Exception:
+        import matplotlib.image as mpimg
+
+        for index, frame in enumerate(frames):
+            mpimg.imsave(str(tmp / f"frame_{index:06d}.png"), frame)
+    return encode_mp4(tmp, dest)
 
 
 def live_opt(sim) -> dict:
@@ -169,3 +215,60 @@ def ball_force_on_ball(sim) -> tuple[np.ndarray, list]:
         kind = "ball-cylinder" if other == og else "ball-other"
         rows.append({"kind": kind, "pos": np.array(c.pos, float).copy(), "fn": fn})
     return F, rows
+
+
+def pack_row(sim, tau: float) -> dict:
+    from envs.deterioration import body_twist
+    from envs.physical_recovery import physical_pack
+    from training.vertical_slip_contact_mechanics_audit import extract_contacts
+
+    o = physical_pack(sim)
+    Rh = np.array(sim.data.xmat[sim.ids.hand_body].reshape(3, 3), float)
+    Ro = np.array(sim.data.xmat[sim.ids.object_body].reshape(3, 3), float)
+    vh, wh = body_twist(sim.model, sim.data, sim.ids.hand_body)
+    vo, wo = body_twist(sim.model, sim.data, sim.ids.object_body)
+    q = sim.ball_qadr
+    d = sim.ball_dadr
+    pb = np.array(sim.data.qpos[q : q + 3], float)
+    vb = np.array(sim.data.qvel[d : d + 3], float)
+    wb = np.array(sim.data.qvel[d + 3 : d + 6], float)
+    Fb, bc = ball_force_on_ball(sim)
+    fc, _ = extract_contacts(sim)
+    return {
+        "t": float(sim.data.time),
+        "fsm": str(sim.fsm.phase),
+        "p_ball": pb,
+        "v_ball": vb,
+        "w_ball": wb,
+        "p_obj": np.array(sim.data.xpos[sim.ids.object_body], float).copy(),
+        "R_obj": Ro.copy(),
+        "v_obj": vo,
+        "w_obj": wo,
+        "p_hand": np.array(sim.data.xpos[sim.ids.hand_body], float).copy(),
+        "R_hand": Rh.copy(),
+        "v_hand": vh,
+        "w_hand": wh,
+        "rh": np.asarray(o["rh"], float).copy(),
+        "R_rel": np.asarray(o["R_rel"], float).copy(),
+        "v_rel_h": np.asarray(o["v_rel_h"], float).copy(),
+        "w_rel_h": np.asarray(o["w_rel_h"], float).copy(),
+        "cyl_h": (Rh.T @ Ro[:, 2]).copy(),
+        "nL": int(o["nL"]),
+        "nR": int(o["nR"]),
+        "Fn_L": float(sum(abs(r["Fn"]) for r in fc if r["side"] == "L")),
+        "Fn_R": float(sum(abs(r["Fn"]) for r in fc if r["side"] == "R")),
+        "rho_max": float(np.nanmax([r["rho"] for r in fc])) if fc else float("nan"),
+        "ball_n": len(bc),
+        "ball_cyl": int(any(r["kind"] == "ball-cylinder" for r in bc)),
+        "ball_other": int(any(r["kind"] != "ball-cylinder" for r in bc)),
+        "F_ball_w": Fb,
+        "p_des": np.asarray(sim.fsm.p_des, float).copy(),
+        "v_cmd": np.asarray(sim.fsm.v_cmd, float).copy(),
+        "tau": float(tau),
+        "ctrl7": float(sim.data.ctrl[7]) if sim.data.ctrl.size > 7 else float(tau),
+        "obj_z": float(o["obj_z"]),
+        "clear": float(o.get("clear", np.nan)),
+        "eq_active": sim.eq_active(),
+        "bc": bc,
+        "fc": fc,
+    }

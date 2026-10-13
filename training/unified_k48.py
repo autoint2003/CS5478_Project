@@ -34,8 +34,8 @@ MOTION_K = 47
 HANDOFF = 47
 LOGIT_K = 48
 SELECTED_LIMIT_S = 4.0
-CKPT = ROOT / "results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt"
-DATA = ROOT / "results/diagnostics/raw/k48_handoff"
+CKPT = ROOT / "demo_results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt"
+DATA = ROOT / "demo_results/diagnostics/raw/k48_handoff"
 
 
 def build_k48(book, device):
@@ -199,15 +199,25 @@ def check():
     }, flush=True)
 
 
-def episode_tensors(row, book):
-    from training.unified_k47 import episode_arrays
+def recorded_end_includes_handoff(n_actions):
+    """A recorded_end tape is supervised with token 47 only if another decision fits.
 
-    obs, prev, actions, tokens, residuals = episode_arrays(row, book)
-    if row.get("handoff_label") != "early_handoff":
-        return obs, prev, tokens, residuals
+    Each stored action is one 20 ms step. After 200 steps the recovery clock is
+    exactly 4 s, and the rollout forces handoff before it reads another
+    observation. That forced transition is not a model target. A shorter tape
+    leaves the clock inside the limit, so the next observation is the state
+    after the last action and the target there is HANDOFF.
+    """
+    steps = int(n_actions)
+    if steps < 1:
+        return False
+    return steps * 0.02 < SELECTED_LIMIT_S - 1e-9
+
+
+def _append_handoff_target(row, obs, prev, actions, tokens, residuals):
     packed = np.load(ROOT / row["continuous_npz"])
     if "handoff_obs" not in packed.files:
-        raise RuntimeError(f"{row['id']} early HANDOFF has no handoff observation")
+        raise RuntimeError(f"{row['id']} HANDOFF target has no handoff observation")
     extra = np.asarray(packed["handoff_obs"], np.float32).reshape(1, 39)
     obs = np.concatenate([obs, extra], axis=0)
     tokens = np.concatenate([tokens, np.array([HANDOFF], np.int64)])
@@ -216,6 +226,27 @@ def episode_tensors(row, book):
     prev_h[:-1] = prev
     prev_h[-1] = actions[-1]
     return obs, prev_h, tokens, residuals
+
+
+def episode_tensors(row, book):
+    from training.unified_k47 import episode_arrays
+
+    if row.get("handoff_label") == "immediate_handoff":
+        packed = np.load(ROOT / row["continuous_npz"])
+        if "handoff_obs" not in packed.files:
+            raise RuntimeError(f"{row['id']} immediate HANDOFF has no observation")
+        obs = np.asarray(packed["handoff_obs"], np.float32).reshape(1, 39)
+        prev = np.zeros((1, 7), np.float32)
+        tokens = np.array([HANDOFF], np.int64)
+        residuals = np.zeros((1, 7), np.float32)
+        return obs, prev, tokens, residuals
+    obs, prev, actions, tokens, residuals = episode_arrays(row, book)
+    label = row.get("handoff_label")
+    if label == "early_handoff":
+        return _append_handoff_target(row, obs, prev, actions, tokens, residuals)
+    if label == "recorded_end" and recorded_end_includes_handoff(len(actions)):
+        return _append_handoff_target(row, obs, prev, actions, tokens, residuals)
+    return obs, prev, tokens, residuals
 
 
 def collate(rows, book, device):
@@ -239,9 +270,34 @@ def collate(rows, book, device):
         weights.append(float(rows[index]["sample_weight"]))
         handoff_steps += int(np.sum(tok_i == HANDOFF))
         motion_steps += int(np.sum(tok_i != HANDOFF))
-    if handoff_steps > motion_steps:
+    immediate = any(row.get("handoff_label") == "immediate_handoff" for row in rows)
+    if handoff_steps > motion_steps and not immediate:
         raise RuntimeError("HANDOFF labels outnumber motion labels in this batch")
     return obs, prev, tokens, residuals, mask, torch.tensor(weights, device=device, dtype=torch.float32)
+
+
+RECOVERY_V3 = "k48_recovery_v3"
+RECOVERY_V3_ROOT = ROOT / "demo_results/diagnostics/raw/k48_recovery_v3"
+DATA_ROOT = ROOT / "data"
+
+
+def assert_recovery_v3_paths(cfg):
+    """Training reads data/. The diagnostic copy under k48_recovery_v3 remains readable."""
+    if str(cfg.get("dataset_version") or "") != RECOVERY_V3:
+        return False
+    supervised = ROOT / cfg["supervised_targets"]
+    grpo = ROOT / cfg["grpo_initial_conditions"]
+    allowed = (DATA_ROOT.resolve(), RECOVERY_V3_ROOT.resolve())
+    for path in (supervised, grpo):
+        resolved = path.resolve()
+        if not any(resolved == root or root in resolved.parents for root in allowed):
+            raise RuntimeError(f"{path} is not inside the rebuilt recovery dataset")
+        text = str(path).replace("\\", "/")
+        if "k48_handoff/supervised_targets" in text or "k48_handoff/grpo_initial_conditions" in text:
+            raise RuntimeError(f"refusing the collapsed dataset manifest {path}")
+        if "final" in text:
+            raise RuntimeError(f"refusing a final path {path}")
+    return True
 
 
 def train_supervised(cfg, checkpoint):
@@ -251,16 +307,29 @@ def train_supervised(cfg, checkpoint):
     del load_yaml
     book = load_codebook(ROOT / cfg["codebook"])
     rows = read_jsonl(ROOT / cfg["supervised_targets"])
-    if len(rows) < 296:
+    rebuilt = assert_recovery_v3_paths(cfg)
+    if rebuilt:
+        if not rows:
+            raise RuntimeError("rebuilt supervised manifest is empty")
+        for row in rows:
+            label = row.get("nominal_class")
+            if label == "RECOVERY_CANDIDATE" and row.get("verified_success") is not True:
+                raise RuntimeError(f"{row.get('id')} recovery row is not a verified trajectory")
+            if label == "NOMINAL_SOLVABLE" and row.get("handoff_label") != "immediate_handoff":
+                raise RuntimeError(f"{row.get('id')} control row is not an immediate HANDOFF label")
+            if label not in ("RECOVERY_CANDIDATE", "NOMINAL_SOLVABLE"):
+                raise RuntimeError(f"{row.get('id')} has nominal class {label}")
+    elif len(rows) < 296:
         raise RuntimeError(f"K=48 supervised file has {len(rows)} rows")
     device = torch.device(cfg.get("device") or "cpu")
     torch.manual_seed(int(cfg["seed"]))
     model, _book = load_expanded(Path(checkpoint), device)
     opt = torch.optim.Adam(model.parameters(), lr=float(cfg["lr"]))
     out = ROOT / cfg["supervised_output"]
-    historical = ROOT / "results/diagnostics/raw/unified_k47/supervised"
-    if out.resolve() == historical.resolve():
-        raise RuntimeError("refusing to write into the historical epoch-40 directory")
+    historical = ROOT / "demo_results/diagnostics/raw/unified_k47/supervised"
+    collapsed = ROOT / "demo_results/diagnostics/raw/unified_k48/supervised"
+    if out.resolve() == historical.resolve() or (rebuilt and out.resolve() == collapsed.resolve()):
+        raise RuntimeError("refusing to write into a historical supervised directory")
     out.mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(int(cfg["seed"]))
     batch = int(cfg["batch_size"])
@@ -453,8 +522,18 @@ def train_grpo(cfg, checkpoint):
     from training.unified_k47 import categorical_kl, read_jsonl
 
     ics = read_jsonl(ROOT / cfg["grpo_initial_conditions"])
-    if any("final_test" in row["snapshot"] or "validation" in row["snapshot"] for row in ics):
+    rebuilt = assert_recovery_v3_paths(cfg)
+    if any("final_test" in row["snapshot"] or "validation" in row["snapshot"] or "final" in row["snapshot"] for row in ics):
         raise RuntimeError("GRPO manifest contains a sealed split")
+    if rebuilt:
+        pools = {row.get("pool") for row in ics}
+        if pools != {"recovery"}:
+            raise RuntimeError(f"GRPO pool must be recovery only, found {pools}")
+        nominal = [row["id"] for row in ics if row.get("nominal_class") != "RECOVERY_CANDIDATE"]
+        if nominal:
+            raise RuntimeError(f"nominal-solvable controls are not in the GRPO recovery pool: {nominal}")
+        if any(row.get("split") == "valid" for row in ics):
+            raise RuntimeError("GRPO recovery pool contains a validation initial condition")
     updates = int(cfg["grpo_updates"])
     limit_s = float(cfg.get("recovery_limit_s") or SELECTED_LIMIT_S)
     reward_version = str(cfg.get("reward_version") or "v1")
@@ -472,8 +551,8 @@ def train_grpo(cfg, checkpoint):
             raise RuntimeError(f"checkpoints at {save_updates} are not once per epoch {expected_saves}")
     out = ROOT / cfg["grpo_output"]
     protected = {
-        (ROOT / "results/diagnostics/raw/unified_k47/supervised").resolve(),
-        (ROOT / "results/diagnostics/raw/unified_k48/supervised").resolve(),
+        (ROOT / "demo_results/diagnostics/raw/unified_k47/supervised").resolve(),
+        (ROOT / "demo_results/diagnostics/raw/unified_k48/supervised").resolve(),
         Path(checkpoint).resolve().parent,
     }
     if out.resolve() in protected:
@@ -702,25 +781,40 @@ def evaluate(cfg, checkpoint):
     if abs(limit_s - SELECTED_LIMIT_S) > 1e-9 or abs(float(cfg.get("nominal_seconds") or NOMINAL_S) - NOMINAL_S) > 1e-9:
         raise RuntimeError("evaluation must use a 4 s recovery limit and a 12 s nominal window")
     env = make_training_env(device, model=model)
-    baseline_path = ROOT / cfg["baseline_eval"]
-    baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
-    baseline_ids = [row["id"] for row in baseline]
-    if len(baseline_ids) != 56 or len(set(baseline_ids)) != 56:
-        raise RuntimeError("K=47 baseline is not the 56-IC evaluation")
-    by_id = {
-        row["id"]: row
-        for row in read_jsonl(ROOT / cfg["grpo_initial_conditions"])
-        if row.get("source") == "ball_impact_v2" and int(row["id"].rsplit("_", 1)[-1]) % 5 == 0
-    }
-    if set(by_id) != set(baseline_ids):
-        raise RuntimeError("K=48 evaluation ICs differ from the 56 K=47 baseline ICs")
+    rebuilt = assert_recovery_v3_paths(cfg)
+    if rebuilt:
+        baseline_path = ROOT / cfg["eval_manifest"]
+        baseline = read_jsonl(baseline_path)
+        if not baseline:
+            raise RuntimeError("rebuilt validation manifest is empty")
+        if any(row.get("split") != "valid" or row.get("nominal_class") != "RECOVERY_CANDIDATE" for row in baseline):
+            raise RuntimeError("evaluation manifest is not the valid recovery pool")
+        if any("final" in str(row.get("snapshot", "")) for row in baseline):
+            raise RuntimeError("evaluation manifest points at FINAL")
+        baseline_ids = [row["id"] for row in baseline]
+        by_id = {row["id"]: row for row in baseline}
+        allowed_split = {"valid"}
+    else:
+        baseline_path = ROOT / cfg["baseline_eval"]
+        baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+        baseline_ids = [row["id"] for row in baseline]
+        if len(baseline_ids) != 56 or len(set(baseline_ids)) != 56:
+            raise RuntimeError("K=47 baseline is not the 56-IC evaluation")
+        by_id = {
+            row["id"]: row
+            for row in read_jsonl(ROOT / cfg["grpo_initial_conditions"])
+            if row.get("source") == "ball_impact_v2" and int(row["id"].rsplit("_", 1)[-1]) % 5 == 0
+        }
+        if set(by_id) != set(baseline_ids):
+            raise RuntimeError("K=48 evaluation ICs differ from the 56 K=47 baseline ICs")
+        allowed_split = {None, "train"}
     rows = []
     for episode_id in baseline_ids:
         row = by_id[episode_id]
         with (ROOT / row["snapshot"]).open("rb") as handle:
             blob = pickle.load(handle)
-        if blob["spec"].get("split") not in (None, "train"):
-            raise RuntimeError(f"evaluation refused non-train snapshot {episode_id}")
+        if blob["spec"].get("split") not in allowed_split:
+            raise RuntimeError(f"evaluation refused snapshot {episode_id}")
         out = roll_policy(
             env, model, book, blob, device,
             cap_steps=int(cfg.get("eval_cap_steps") or 200),
@@ -762,9 +856,9 @@ def evaluate(cfg, checkpoint):
     }
     out_dir = ROOT / cfg["eval_output"]
     historical = {
-        (ROOT / "results/diagnostics/raw/unified_k47/eval").resolve(),
-        (ROOT / "results/diagnostics/raw/horizon_migration").resolve(),
-        (ROOT / "results/diagnostics/raw/unified_k47/supervised").resolve(),
+        (ROOT / "demo_results/diagnostics/raw/unified_k47/eval").resolve(),
+        (ROOT / "demo_results/diagnostics/raw/horizon_migration").resolve(),
+        (ROOT / "demo_results/diagnostics/raw/unified_k47/supervised").resolve(),
     }
     if out_dir.resolve() in historical:
         raise RuntimeError(f"refusing to write evaluation into {out_dir}")
@@ -781,6 +875,7 @@ def main():
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--supervised", action="store_true")
     parser.add_argument("--eval", action="store_true")
+    parser.add_argument("--eval-output", default="")
     parser.add_argument("--grpo", action="store_true")
     parser.add_argument("--config", default="config/unified_k48.yaml")
     parser.add_argument("--checkpoint", default="")
@@ -797,6 +892,8 @@ def main():
     if args.eval:
         if not args.checkpoint:
             raise SystemExit("--eval requires a trained K=48 checkpoint")
+        if args.eval_output:
+            cfg["eval_output"] = args.eval_output
         evaluate(cfg, args.checkpoint)
         return
     if not args.checkpoint:

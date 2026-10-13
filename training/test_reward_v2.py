@@ -135,8 +135,8 @@ def test_advantages():
 
 def compare_saved_traces():
     """Score stored outcome rows. Do not write back into those files."""
-    baseline_path = ROOT / "results/diagnostics/raw/horizon_migration/checkpoint_eval.json"
-    pilot_dir = ROOT / "results/diagnostics/raw/unified_k48/grpo_pilot"
+    baseline_path = ROOT / "demo_results/diagnostics/raw/horizon_migration/checkpoint_eval.json"
+    pilot_dir = ROOT / "demo_results/diagnostics/raw/unified_k48/grpo_pilot"
     rows = json.loads(baseline_path.read_text(encoding="utf-8"))
     scored = []
     for row in rows:
@@ -178,7 +178,7 @@ def compare_saved_traces():
         saved = torch.load(pilot_files[-1], map_location="cpu", weights_only=False)
         pilot_keys = sorted(saved.keys())
     summary = {
-        "source": "results/diagnostics/raw/horizon_migration/checkpoint_eval.json",
+        "source": "demo_results/diagnostics/raw/horizon_migration/checkpoint_eval.json",
         "episodes": len(scored),
         "reasons": dict(Counter(row["reason"] for row in scored)),
         "historical_reward": _stats([row["historical_reward"] for row in scored]),
@@ -193,7 +193,7 @@ def compare_saved_traces():
         ),
         "saved_eval_fields": sorted(rows[0]),
     }
-    out = ROOT / "results/diagnostics/raw/unified_k48/reward_v2/saved_trace_comparison.json"
+    out = ROOT / "demo_results/diagnostics/raw/unified_k48/reward_v2/saved_trace_comparison.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     payload = {"summary": summary, "rows": scored}
     out.write_text(json.dumps(payload, indent=2), encoding="utf-8")

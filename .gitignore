@@ -31,6 +31,17 @@ Thumbs.db
 # Third-party robot models (clone locally; see README)
 mujoco_menagerie/
 
+# Raw trajectory, snapshot, and video data
+data/**/*.npz
+data/**/*.pkl
+data/**/*.mp4
+demo_results/**/*.npz
+demo_results/**/*.pkl
+demo_results/**/*.mp4
+demo_results/diagnostics/**/raw/
+demo_results/diagnostics/**/figures/
+demo_results/diagnostics/**/videos/
+
 # Training / evaluation runtime artifacts (local only)
 results/checkpoints/
 results/logs/
@@ -67,6 +78,12 @@ results/diagnostics/**/*.csv
 !results/diagnostics/dynamic_airborne_recatch/raw/
 !results/diagnostics/dynamic_airborne_recatch/raw/release_map_recatch.json
 !results/eval_sets/airborne_offset_eval.npz
+!demo_results/diagnostics/ballistic_recovery_transfer/raw/
+!demo_results/diagnostics/ballistic_recovery_transfer/raw/snap_early.pkl
+!demo_results/diagnostics/ballistic_recovery_transfer/raw/stages.json
+!demo_results/diagnostics/dynamic_airborne_recatch/raw/
+!demo_results/diagnostics/dynamic_airborne_recatch/raw/release_map_recatch.json
+!demo_results/eval_sets/airborne_offset_eval.npz
 
 # MuJoCo
 *.mjb

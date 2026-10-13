@@ -687,7 +687,7 @@ def main():
         eval_offset(name, dz, dx, dy, dvz)
 
     payload = {
-        "checkpoint": "results/diagnostics/raw/action_representation/ckpt_lateral_token.pt",
+        "checkpoint": "demo_results/diagnostics/raw/action_representation/ckpt_lateral_token.pt",
         "residual_cap": cap,
         "nominal": nom,
         "tolerance": tol,

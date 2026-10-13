@@ -84,7 +84,7 @@ def test_log_and_bar():
             "update": 936,
             "episode_id": "ball_train_v2_0001",
             "reward_version": version,
-            "checkpoint": "results/diagnostics/raw/unified_k48/grpo_long_reward_%s/checkpoint_u0936.pt" % version,
+            "checkpoint": "demo_results/diagnostics/raw/unified_k48/grpo_long_reward_%s/checkpoint_u0936.pt" % version,
             **summary,
             **timing,
         })

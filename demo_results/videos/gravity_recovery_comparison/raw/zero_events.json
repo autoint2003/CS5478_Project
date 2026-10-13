@@ -1,0 +1,121 @@
+[
+  {
+    "event": "task_start",
+    "t": 0.0,
+    "phase": "APPROACH",
+    "tau": -18.0,
+    "nL": 0,
+    "nR": 0,
+    "obj_z": 0.43,
+    "fsm": "approach"
+  },
+  {
+    "event": "phase",
+    "t": 1.9380000000000015,
+    "phase": "DESCEND",
+    "tau": -18.0,
+    "nL": 0,
+    "nR": 0,
+    "obj_z": 0.4299663841184366,
+    "fsm": "descend"
+  },
+  {
+    "event": "phase",
+    "t": 2.673999999999927,
+    "phase": "CLOSE",
+    "tau": -18.0,
+    "nL": 0,
+    "nR": 0,
+    "obj_z": 0.4299664062868253,
+    "fsm": "close"
+  },
+  {
+    "event": "lift_start",
+    "t": 3.0979999999998804,
+    "phase": "CLOSE",
+    "tau": -18.0,
+    "nL": 8,
+    "nR": 8,
+    "obj_z": 0.4307934345746261,
+    "hand_z": 0.5274608539490675,
+    "p_des": [
+      0.5000011018736582,
+      3.6504990787422684e-08,
+      0.5329664062868253
+    ]
+  },
+  {
+    "event": "phase",
+    "t": 3.0979999999998804,
+    "phase": "LIFT",
+    "tau": -18.0,
+    "nL": 8,
+    "nR": 8,
+    "obj_z": 0.4307934345746261,
+    "fsm": "lift"
+  },
+  {
+    "event": "disturbance",
+    "t": 3.9239999999997894,
+    "phase": "DISTURBANCE",
+    "tau": -18.0,
+    "nL": 10,
+    "nR": 0,
+    "obj_z": 0.4788256688543298,
+    "hand_rise": 0.050064140635850185,
+    "controller_untouched": true,
+    "v_cmd": [
+      0.0,
+      0.0,
+      0.08
+    ]
+  },
+  {
+    "event": "zero_resume",
+    "t": 3.9239999999997894,
+    "phase": "LIFT",
+    "tau": -18.0,
+    "nL": 10,
+    "nR": 0,
+    "obj_z": 0.4788256688543298,
+    "sha": "9830db40cfa9ee69926bc86d848ecd42dd7c4526947ed05d97dcedb1f5af5f59",
+    "v_cmd": [
+      0.0,
+      0.0,
+      0.08
+    ]
+  },
+  {
+    "event": "drop",
+    "t": 15.84000000000196,
+    "phase": "DROP",
+    "tau": -18.0,
+    "nL": 0,
+    "nR": 0,
+    "obj_z": 0.5970910310937311
+  },
+  {
+    "event": "continuation_end",
+    "t": 17.84200000000099,
+    "phase": "DROP",
+    "tau": -18.0,
+    "nL": 0,
+    "nR": 0,
+    "obj_z": 0.01791868449380277,
+    "t0": 3.9239999999997894,
+    "t_lift_done": 5.417999999999625,
+    "t_drop": 11.91600000000217,
+    "t_both_loss": 11.91600000000217,
+    "lift_completed": true,
+    "drop": true,
+    "hold_s": 12.0,
+    "hold_survived": false,
+    "end_nL": 0,
+    "end_nR": 0,
+    "end_obj_z": 0.01791868449380277,
+    "end_p_des_z": 0.7130316394873875,
+    "z_tgt": 0.7129664062868253,
+    "dt": 0.002,
+    "v_lift": 0.08
+  }
+]

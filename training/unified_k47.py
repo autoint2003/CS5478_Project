@@ -28,9 +28,9 @@ from training.action_representation_expansion import build_policy
 from training.formal_grpo import _reject_head_mismatch, load_models
 from training.pre_grpo_sanity import SIGMA, advantages, gaussian_logprob
 
-RAW = ROOT / "results/diagnostics/raw/legal_recovery_v2"
+RAW = ROOT / "demo_results/diagnostics/raw/legal_recovery_v2"
 CODEBOOK = RAW / "codebook_selected_k47.npy"
-K36_PATH = ROOT / "results/diagnostics/raw/pre_grpo_sanity/policy_B_init.pt"
+K36_PATH = ROOT / "demo_results/diagnostics/raw/pre_grpo_sanity/policy_B_init.pt"
 EXTRA_PATH = RAW / "candidate_extra.npy"
 SUPERVISED = RAW / "supervised_targets.jsonl"
 GRPO_ICS = RAW / "grpo_initial_conditions.jsonl"
@@ -244,7 +244,7 @@ def assert_horizon_manifest(book):
     """The migrated supervised and GRPO views. Does not replace the frozen 288-row check."""
     from training.horizon_outcome import LAMBDA_TIME, NOMINAL_S, T_RECOVERY_MAX
 
-    folder = ROOT / "results/diagnostics/raw/horizon_migration"
+    folder = ROOT / "demo_results/diagnostics/raw/horizon_migration"
     supervised = read_jsonl(folder / "supervised_targets.jsonl")
     grpo = read_jsonl(folder / "grpo_initial_conditions.jsonl")
     if len(supervised) != 296:
@@ -301,7 +301,7 @@ def one_mujoco_step(book):
     device = torch.device("cpu")
     model = build_model(book, device)
     env = make_training_env(device, model=model)
-    path = ROOT / "results/diagnostics/raw/ball_impact_dataset_v2/accepted/train/ball_train_v2_0021.pkl"
+    path = ROOT / "demo_results/diagnostics/raw/ball_impact_dataset_v2/accepted/train/ball_train_v2_0021.pkl"
     with path.open("rb") as handle:
         blob = pickle.load(handle)
     restore_capture(env, blob["capture"])
@@ -340,7 +340,7 @@ def check_loader(book, device):
     folder.mkdir(parents=True, exist_ok=True)
     good = folder / "roundtrip.pt"
     torch.save({"proto": book, "res_cap": CAP, "model": {key: value.detach().cpu() for key, value in model.state_dict().items()}}, good)
-    loaded, _ref = load_models(good, ROOT / "results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt", device)
+    loaded, _ref = load_models(good, ROOT / "demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt", device)
     if loaded.logits.out_features != REQUIRED_K:
         raise RuntimeError("reloaded head width")
     bad_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
@@ -371,7 +371,7 @@ def run_check():
     # Historical K=36 checkpoint still loads, and is not remapped.
     legacy, _ref = load_models(
         K36_PATH,
-        ROOT / "results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt",
+        ROOT / "demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt",
         device,
     )
     if legacy.logits_old.out_features != 35:
@@ -435,7 +435,7 @@ def train_supervised(cfg):
     model = build_model(book, device)
     opt = torch.optim.Adam(model.parameters(), lr=float(cfg["lr"]))
     out = ROOT / cfg["supervised_output"]
-    historical = ROOT / "results/diagnostics/raw/unified_k47/supervised"
+    historical = ROOT / "demo_results/diagnostics/raw/unified_k47/supervised"
     if out.resolve() == historical.resolve():
         raise RuntimeError("refusing to write into the historical epoch-40 checkpoint directory")
     out.mkdir(parents=True, exist_ok=True)
@@ -469,7 +469,7 @@ def evaluate(cfg, checkpoint):
 
     book = load_codebook(ROOT / cfg["codebook"])
     device = torch.device(cfg.get("device") or ("cuda" if torch.cuda.is_available() else "cpu"))
-    model, _ref = load_models(Path(checkpoint), ROOT / "results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt", device)
+    model, _ref = load_models(Path(checkpoint), ROOT / "demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt", device)
     if model.logits.out_features != REQUIRED_K:
         raise RuntimeError("evaluation checkpoint is not K=47")
     model.eval()

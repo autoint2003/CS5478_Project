@@ -1,0 +1,167 @@
+{
+  "case": "B",
+  "case_reason": "canonical parent is a frozen airborne hold (v_cmd\u22480 after freeze), not a live in-lift state; do not splice it into a continuing LIFT",
+  "embed": {
+    "verdict": "B",
+    "reason": "canonical parent is a frozen airborne hold (v_cmd\u22480 after freeze), not a live in-lift state; do not splice it into a continuing LIFT",
+    "parent_v_cmd": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "parent_phase": "lift",
+    "parent_time": 4.111999999999769,
+    "parent_obj_z": 0.4961196938563631,
+    "frozen_parent": true,
+    "best_replay_qpos_diff": 0.0,
+    "first_airborne_live": {
+      "t": 3.9139999999997905,
+      "obj_z": 0.4800382065574465,
+      "v_cmd": [
+        0.0,
+        0.0,
+        0.08
+      ],
+      "qpos_vs_parent": 0.040709116003618595,
+      "p_des_vs_parent": 0.004569404615981654,
+      "v_cmd_vs_parent": 0.08
+    },
+    "old_apply_sfail_vs_sfail_pkl": {
+      "diffs": {
+        "qpos": 0.0,
+        "qvel": 0.0,
+        "p_des": 0.0,
+        "r_des": 0.0,
+        "v_cmd": 0.0,
+        "ctrl": 0.0,
+        "time": 0.0,
+        "phase_same": true
+      },
+      "match": true
+    },
+    "sfail_pkl_untouched": true
+  },
+  "best_replay": {
+    "qpos": 0.0,
+    "t": 4.111999999999769,
+    "phase": "lift",
+    "v_cmd": [
+      0.0,
+      0.0,
+      0.08
+    ],
+    "p_des": [
+      0.5000106997680214,
+      1.3998822536386855e-05,
+      0.6085516394873555
+    ],
+    "obj_z": 0.4961196938563631,
+    "lift_started": true,
+    "hand": [
+      0.4954412951520397,
+      3.7564285940587134e-05,
+      0.5927680920787367
+    ]
+  },
+  "trigger": {
+    "definition": "fsm.phase==lift AND captured AND obj_z>=Z_AIR (0.48 m) AND (hand_z - hand_z_at_lift_start) >= 0.05 m",
+    "Z_AIR": 0.48,
+    "HAND_RISE_M": 0.05,
+    "obj_z_pre": 0.48087303782406465,
+    "hand_rise": 0.050064140635850185
+  },
+  "t_disturb": 3.9239999999997894,
+  "t_lift0": 3.0979999999998804,
+  "controller_audit": {
+    "untouched": true,
+    "diffs": {
+      "p_des": 0.0,
+      "r_des": 0.0,
+      "v_cmd": 0.0,
+      "w_cmd": 0.0,
+      "phase_same": true,
+      "t_phase": 0.0,
+      "lift_started_same": true,
+      "t_held": 0.0
+    },
+    "v_cmd_pre": [
+      0.0,
+      0.0,
+      0.08
+    ]
+  },
+  "sfail_lift_sha": "9830db40cfa9ee69926bc86d848ecd42dd7c4526947ed05d97dcedb1f5af5f59",
+  "hash_equal": true,
+  "vs_old_sfail": {
+    "diffs": {
+      "qpos": 0.038696928580087775,
+      "qvel": 0.018261642456313905,
+      "p_des": 0.004577857476512126,
+      "r_des": 0.021430216156933662,
+      "v_cmd": 0.08,
+      "ctrl": 0.12623523136419834,
+      "time": 0.18799999999997974,
+      "phase_same": true
+    },
+    "match": false
+  },
+  "vs_old_sfail_match": false,
+  "live": {
+    "mujoco": "3.12.0",
+    "noslip_iterations": 1,
+    "noslip_tolerance": 1e-06,
+    "timestep": 0.002,
+    "gravity": [
+      0.0,
+      0.0,
+      -9.81
+    ]
+  },
+  "zero": {
+    "t0": 3.9239999999997894,
+    "t_lift_done": 5.417999999999625,
+    "t_drop": 11.91600000000217,
+    "t_both_loss": 11.91600000000217,
+    "lift_completed": true,
+    "drop": true,
+    "hold_s": 12.0,
+    "hold_survived": false,
+    "end_nL": 0,
+    "end_nR": 0,
+    "end_obj_z": 0.01791868449380277,
+    "end_p_des_z": 0.7130316394873875,
+    "z_tgt": 0.7129664062868253,
+    "dt": 0.002,
+    "v_lift": 0.08,
+    "tau": -18.0
+  },
+  "heuristic": {
+    "t0": 6.563999999999499,
+    "t_lift_done": 8.381999999999469,
+    "t_drop": null,
+    "t_both_loss": null,
+    "lift_completed": true,
+    "drop": false,
+    "hold_s": 12.0,
+    "hold_survived": true,
+    "end_nL": 6,
+    "end_nR": 6,
+    "end_obj_z": 0.5992018247093056,
+    "end_p_des_z": 0.7130219881109461,
+    "z_tgt": 0.7129664062868253,
+    "dt": 0.002,
+    "v_lift": 0.08,
+    "tau": -18.0
+  },
+  "zero_drop": true,
+  "heu_survived": true,
+  "outcome_note": null,
+  "zero_sha": "9830db40cfa9ee69926bc86d848ecd42dd7c4526947ed05d97dcedb1f5af5f59",
+  "heu_sha": "9830db40cfa9ee69926bc86d848ecd42dd7c4526947ed05d97dcedb1f5af5f59",
+  "packed_meta": {
+    "hand_rise": 0.050064140635850185,
+    "obj_z_pre": 0.48087303782406465,
+    "obj_z_post": 0.4788256688543298,
+    "z_tgt": 0.7129664062868253
+  }
+}

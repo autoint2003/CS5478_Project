@@ -1,0 +1,266 @@
+{"id": "ball_train_v2_0002", "phase": "replay", "success": true, "schedule": "center6_pos"}
+{"id": "ball_train_v2_0012", "phase": "replay", "success": true, "schedule": "short_neg"}
+{"id": "ball_train_v2_0031", "phase": "replay", "success": true, "schedule": "short_pos"}
+{"id": "ball_train_v2_0036", "phase": "replay", "success": true, "schedule": "no_return_pos"}
+{"id": "ball_train_v2_0038", "phase": "replay", "success": true, "schedule": "center6_pos_transfer"}
+{"id": "ball_train_v2_0053", "phase": "replay", "success": true, "schedule": "center6_pos_transfer"}
+{"id": "k48r_valid_00004", "phase": "replay", "success": true, "schedule": "deterministic_baseline"}
+{"id": "k48r_valid_00009", "phase": "replay", "success": true, "schedule": "center6_pos"}
+{"id": "ball_train_v2_0087", "phase": "replay", "success": true, "schedule": "center6_pos_transfer"}
+{"id": "k48r_valid_00078", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.014138079176364561}
+{"id": "k48r_valid_00168", "phase": "candidate", "success": true, "schedule": "short_neg", "bilateral": true, "rhx": -0.00954615837953791}
+{"id": "k48r_train_00034", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.030137635310326816}
+{"id": "k48r_train_00070", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.02924267495496859}
+{"id": "ball_train_v2_0223", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.027845887017194332}
+{"id": "ball_train_v2_0248", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.027075607335784378}
+{"id": "ball_train_v2_0088", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.026716897556746534}
+{"id": "ball_train_v2_0051", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.025371514577395192}
+{"id": "k48r_train_00057", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.023855769410698748}
+{"id": "ball_train_v2_0182", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.022372591510474004}
+{"id": "ball_train_v2_0121", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.022111526031460577}
+{"id": "ball_train_v2_0162", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.02207811529053264}
+{"id": "ball_train_v2_0193", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.02177484887117532}
+{"id": "ball_train_0021", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.021145409870207306}
+{"id": "ball_train_v2_0188", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.020705372533227125}
+{"id": "ball_train_v2_0035", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.02058842066914816}
+{"id": "ball_train_v2_0224", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.0199614686669982}
+{"id": "k48r_train_00053", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.019390886677059575}
+{"id": "ball_train_v2_0101", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.019384241887717427}
+{"id": "ball_train_v2_0082", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.019341568518706734}
+{"id": "k48r_train_00040", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.019228245245600777}
+{"id": "ball_train_v2_0105", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.019201143188663446}
+{"id": "k48r_train_00115", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.018724487193099323}
+{"id": "ball_train_v2_0226", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.0186647214759342}
+{"id": "k48r_train_00046", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.018379026298773242}
+{"id": "ball_train_v2_0060", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.018289228776983572}
+{"id": "ball_train_v2_0269", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.018064907637157228}
+{"id": "k48r_train_00148", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.01801476767797273}
+{"id": "ball_train_v2_0279", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.017948751546967016}
+{"id": "k48r_train_00136", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.017922080764151836}
+{"id": "k48r_train_00029", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.017782296308483714}
+{"id": "ball_train_v2_0240", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.017615263415089816}
+{"id": "ball_train_v2_0059", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.017600128837265843}
+{"id": "ball_train_v2_0149", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.01745314644776381}
+{"id": "ball_train_v2_0050", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.017134121414419005}
+{"id": "ball_train_v2_0161", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.016937808728258442}
+{"id": "ball_train_v2_0186", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.01691697451393482}
+{"id": "k48r_train_00176", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.01690908217083083}
+{"id": "ball_train_v2_0268", "phase": "candidate", "success": true, "schedule": "short_neg", "bilateral": true, "rhx": -0.01685598269410226}
+{"id": "ball_train_v2_0093", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.016121961783802676}
+{"id": "ball_train_v2_0208", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.01586377193968224}
+{"id": "ball_train_v2_0116", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.015842013249063317}
+{"id": "ball_train_v2_0277", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.015490161226059703}
+{"id": "ball_train_v2_0280", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.01531662987294085}
+{"id": "ball_train_v2_0086", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.015312186201348723}
+{"id": "ball_train_v2_0138", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.015228831347918697}
+{"id": "ball_train_v2_0194", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.015168300792705243}
+{"id": "k48r_train_00135", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.015126430716965135}
+{"id": "ball_train_v2_0183", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.014700213496755356}
+{"id": "ball_train_v2_0164", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.01461529343508992}
+{"id": "ball_train_v2_0272", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.014553500167636693}
+{"id": "ball_train_v2_0137", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.014478119134710025}
+{"id": "ball_train_v2_0083", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.014471675431667901}
+{"id": "ball_train_v2_0200", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.014464722092998894}
+{"id": "ball_train_v2_0113", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.014214409077568754}
+{"id": "ball_train_v2_0259", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.01412686311113788}
+{"id": "ball_train_v2_0131", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.014069103066491217}
+{"id": "k48r_train_00162", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.013933825789972144}
+{"id": "ball_train_v2_0157", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.013895389570082139}
+{"id": "k48r_train_00006", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.013734544514052484}
+{"id": "ball_train_v2_0044", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.01362609112101869}
+{"id": "ball_train_v2_0274", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.013549251321111835}
+{"id": "ball_train_v2_0214", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.013490264313286152}
+{"id": "ball_train_v2_0180", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.013429004191985193}
+{"id": "k48r_train_00128", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.013353009940524652}
+{"id": "ball_train_v2_0189", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.013347589421417992}
+{"id": "ball_train_v2_0211", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.01329124683856672}
+{"id": "ball_train_v2_0068", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.012659546445198419}
+{"id": "ball_train_v2_0127", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.012087920143917916}
+{"id": "ball_train_v2_0273", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.011995939497151229}
+{"id": "k48r_train_00094", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.011920776658165298}
+{"id": "ball_train_v2_0199", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.011865716827923624}
+{"id": "k48r_train_00132", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.011844294594124114}
+{"id": "k48r_train_00118", "phase": "candidate", "success": true, "schedule": "short_pos", "bilateral": true, "rhx": 0.011715400330741796}
+{"id": "ball_train_v2_0251", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.011637174938088971}
+{"id": "ball_train_v2_0120", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": 0.011514828456880108}
+{"id": "ball_train_v2_0196", "phase": "candidate", "success": true, "schedule": "short_pos", "bilateral": true, "rhx": 0.011424234268982873}
+{"id": "ball_train_v2_0077", "phase": "candidate", "success": true, "schedule": "short_pos", "bilateral": true, "rhx": 0.01101662408124936}
+{"id": "k48r_train_00152", "phase": "candidate", "success": true, "schedule": "short_neg", "bilateral": true, "rhx": -0.010879879432788838}
+{"id": "ball_train_v2_0171", "phase": "candidate", "success": true, "schedule": "center6_pos", "bilateral": true, "rhx": 0.010645320824798543}
+{"id": "ball_train_v2_0225", "phase": "candidate", "success": false, "schedule": null, "bilateral": true, "rhx": -0.010496579945926794}
+{"id": "ball_train_v2_0255", "phase": "candidate", "success": true, "schedule": "center6_pos", "bilateral": true, "rhx": 0.010385829810055201}
+{"id": "ball_train_v2_0085", "phase": "candidate", "success": true, "schedule": "center6_neg", "bilateral": true, "rhx": -0.01037074491069719}
+{"id": "ball_train_v2_0216", "phase": "candidate", "success": true, "schedule": "center6_pos", "bilateral": true, "rhx": 0.01025955922132323}
+{"id": "ball_train_v2_0239", "phase": "candidate", "success": true, "schedule": "center6_pos", "bilateral": true, "rhx": 0.010099473029640845}
+{"id": "k48r_train_00150", "phase": "candidate", "success": true, "schedule": "short_neg", "bilateral": true, "rhx": -0.01009654106883543}
+{"id": "k48r_train_00005", "phase": "candidate", "success": true, "schedule": "center6_pos", "bilateral": true, "rhx": 0.009727269002897285}
+{"id": "ball_train_v2_0261", "phase": "candidate", "success": true, "schedule": "short_neg", "bilateral": true, "rhx": -0.009723414723833975}
+{"id": "k48r_train_00125", "phase": "candidate", "success": true, "schedule": "short_neg", "bilateral": true, "rhx": -0.009677099531421861}
+{"id": "k48r_train_00042", "phase": "candidate", "success": true, "schedule": "short_neg", "bilateral": true, "rhx": -0.009638184540573061}
+{"id": "ball_train_v2_0236", "phase": "candidate", "success": true, "schedule": "center6_pos", "bilateral": true, "rhx": 0.00955335004279813}
+{"id": "k48r_train_00007", "phase": "candidate", "success": true, "schedule": "short_neg", "bilateral": true, "rhx": -0.009295513534078198}
+{"id": "ball_train_v2_0103", "phase": "candidate", "success": true, "schedule": "short_neg", "bilateral": true, "rhx": -0.009272715391227064}
+{"id": "ball_train_v2_0041", "phase": "candidate", "success": true, "schedule": "short_neg", "bilateral": true, "rhx": -0.009028926749055264}
+{"id": "ball_train_v2_0190", "phase": "candidate", "success": true, "schedule": "short_neg", "bilateral": true, "rhx": -0.008836665576173528}
+{"id": "k48r_train_00092", "phase": "candidate", "success": true, "schedule": "center6_pos", "bilateral": true, "rhx": 0.008822402624131495}
+{"id": "k48r_train_00033", "phase": "candidate", "success": true, "schedule": "short_neg", "bilateral": true, "rhx": -0.008756079151520785}
+{"id": "k48r_train_00081", "phase": "candidate", "success": true, "schedule": "short_neg", "bilateral": true, "rhx": -0.008670743806727842}
+{"id": "k48r_valid_00127", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.053689078505471236}
+{"id": "k48r_valid_00019", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.051528221443986166}
+{"id": "k48r_valid_00101", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.04782296756804674}
+{"id": "k48r_valid_00113", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04413709322454224}
+{"id": "k48r_valid_00050", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.04306672353353466}
+{"id": "k48r_valid_00108", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04281173406009113}
+{"id": "k48r_valid_00158", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.04263055907886711}
+{"id": "k48r_valid_00030", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04021245939766324}
+{"id": "k48r_valid_00023", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.03997898201432519}
+{"id": "k48r_valid_00027", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.038651364006579876}
+{"id": "k48r_valid_00068", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.03768387514269926}
+{"id": "k48r_valid_00149", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.03368633483716636}
+{"id": "k48r_valid_00154", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.02644928932474955}
+{"id": "ball_train_v2_0281", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.052489267314685235}
+{"id": "ball_train_v2_0260", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.0523581974039517}
+{"id": "ball_train_v2_0198", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.051923098885075104}
+{"id": "ball_train_v2_0217", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.05182155202935835}
+{"id": "k48r_train_00104", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.05067801928410977}
+{"id": "ball_train_v2_0100", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.05066324262549739}
+{"id": "k48r_train_00061", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.05042087731616109}
+{"id": "ball_train_v2_0124", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.05029889077149663}
+{"id": "ball_train_v2_0160", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.050249458404389026}
+{"id": "k48r_train_00012", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04966621141813442}
+{"id": "ball_train_v2_0010", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04901250140991412}
+{"id": "k48r_train_00025", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04810376001951453}
+{"id": "ball_train_v2_0112", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04803934055997693}
+{"id": "k48r_train_00041", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.0480361470988763}
+{"id": "ball_train_0023", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.047955326603777944}
+{"id": "k48r_train_00088", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.047785374818737514}
+{"id": "ball_train_v2_0230", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.047692387502536224}
+{"id": "ball_train_v2_0229", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.04760054429684604}
+{"id": "k48r_train_00112", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.047561487193729365}
+{"id": "k48r_train_00096", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.047175493217895194}
+{"id": "k48r_train_00167", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.04647203393856063}
+{"id": "k48r_train_00062", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.0464166049089757}
+{"id": "k48r_train_00044", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.04635317387082624}
+{"id": "ball_train_v2_0243", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04593680582344652}
+{"id": "k48r_train_00106", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04577559592809047}
+{"id": "k48r_train_00018", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04358877728269515}
+{"id": "ball_train_v2_0246", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.043384409372773027}
+{"id": "k48r_train_00155", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.04264935170107863}
+{"id": "k48r_train_00047", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.042429008349548346}
+{"id": "k48r_train_00172", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04240075217634625}
+{"id": "k48r_train_00045", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.04110820271052294}
+{"id": "ball_train_v2_0187", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.04107538981920947}
+{"id": "k48r_train_00072", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.040887805718014696}
+{"id": "ball_train_v2_0148", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04063267788502752}
+{"id": "k48r_train_00169", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04060570822468358}
+{"id": "k48r_train_00090", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04029849488383416}
+{"id": "ball_train_v2_0195", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.04004524261506092}
+{"id": "k48r_train_00137", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.04003463366577221}
+{"id": "k48r_train_00021", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.0399182484255114}
+{"id": "ball_train_v2_0242", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.039806383735760634}
+{"id": "k48r_train_00160", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.03965995688854226}
+{"id": "k48r_train_00069", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.03961378066235979}
+{"id": "k48r_train_00156", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.039463894173961345}
+{"id": "ball_train_v2_0175", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.038663485343325275}
+{"id": "k48r_train_00095", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.03782607311175372}
+{"id": "ball_train_v2_0064", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.037554586104461524}
+{"id": "ball_train_v2_0056", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.03729147763470664}
+{"id": "ball_train_v2_0067", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.037192062123884394}
+{"id": "k48r_train_00142", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.03717241457227516}
+{"id": "k48r_train_00139", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.03600528925753797}
+{"id": "ball_train_v2_0218", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.03589495188770522}
+{"id": "k48r_train_00129", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.03558600610967324}
+{"id": "k48r_train_00051", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.035503840524780936}
+{"id": "k48r_train_00022", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.034937669580947114}
+{"id": "ball_train_v2_0170", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.03486993891137261}
+{"id": "ball_train_v2_0027", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.034314849688609386}
+{"id": "k48r_train_00171", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.0339107087671668}
+{"id": "ball_train_v2_0076", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.03342465294450826}
+{"id": "ball_train_v2_0089", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.03311743053249488}
+{"id": "ball_train_v2_0202", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.033066761142951075}
+{"id": "ball_train_v2_0205", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.03244350215170435}
+{"id": "k48r_train_00049", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.031835779834375334}
+{"id": "ball_train_v2_0096", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.03168964107653886}
+{"id": "k48r_train_00133", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.031498993679498495}
+{"id": "k48r_train_00065", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.0313684888373504}
+{"id": "ball_train_v2_0232", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.03128465923196185}
+{"id": "ball_train_v2_0158", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.031221147085345208}
+{"id": "ball_train_v2_0049", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.03060323827254693}
+{"id": "ball_train_v2_0109", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.03033663684290963}
+{"id": "ball_train_v2_0141", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.030192677673499677}
+{"id": "ball_train_v2_0107", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.028827084414956853}
+{"id": "k48r_train_00089", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.028131110407882284}
+{"id": "ball_train_v2_0032", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.027582785415382803}
+{"id": "k48r_train_00085", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.02685019003082653}
+{"id": "ball_train_v2_0185", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.026635750119919574}
+{"id": "ball_train_v2_0201", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.025665870522733572}
+{"id": "k48r_train_00048", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.02544981851696535}
+{"id": "k48r_train_00105", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.023914514392019266}
+{"id": "ball_train_v2_0136", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.02260535625508982}
+{"id": "ball_train_v2_0244", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.02249722325659219}
+{"id": "ball_train_v2_0011", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": 0.022075410492288616}
+{"id": "ball_train_v2_0052", "phase": "candidate", "success": false, "schedule": null, "bilateral": false, "rhx": -0.021351439075191766}
+{"id": "slide_extra_260001", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260002", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260003", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260004", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260005", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260006", "phase": "launch", "success": true, "schedule": "center6_pos"}
+{"id": "slide_extra_260007", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260008", "phase": "launch", "success": false, "reason": "nominal_solvable"}
+{"id": "slide_extra_260009", "phase": "launch", "success": false, "reason": "nominal_solvable"}
+{"id": "slide_extra_260010", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260011", "phase": "launch", "success": false, "reason": "nominal_solvable"}
+{"id": "slide_extra_260012", "phase": "launch", "success": false, "reason": "nominal_solvable"}
+{"id": "slide_extra_260013", "phase": "launch", "success": true, "schedule": "deterministic_baseline"}
+{"id": "slide_extra_260014", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260015", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260016", "phase": "launch", "success": false, "reason": "nominal_solvable"}
+{"id": "slide_extra_260017", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260018", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260019", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260020", "phase": "launch", "success": false, "reason": "nominal_solvable"}
+{"id": "slide_extra_260021", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260022", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260023", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260024", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260025", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260026", "phase": "launch", "success": false, "reason": "nominal_solvable"}
+{"id": "slide_extra_260027", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260028", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260029", "phase": "launch", "success": false, "reason": "nominal_solvable"}
+{"id": "slide_extra_260030", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260031", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260032", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260033", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260034", "phase": "launch", "success": true, "schedule": "deterministic_baseline"}
+{"id": "slide_extra_260035", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260036", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260037", "phase": "launch", "success": false, "reason": "nominal_solvable"}
+{"id": "slide_extra_260038", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260039", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260040", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260041", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260042", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260043", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260044", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260045", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260046", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260047", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260048", "phase": "launch", "success": false, "reason": "nominal_solvable"}
+{"id": "slide_extra_260049", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260050", "phase": "launch", "success": false, "reason": "nominal_solvable"}
+{"id": "slide_extra_260051", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260052", "phase": "launch", "success": false, "reason": "nominal_solvable"}
+{"id": "slide_extra_260053", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260054", "phase": "launch", "success": false, "reason": "impact_without_recovery_entry"}
+{"id": "slide_extra_260055", "phase": "launch", "success": false, "reason": "nominal_solvable"}
+{"id": "slide_extra_260056", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260057", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260058", "phase": "launch", "success": true, "schedule": "center6_pos"}
+{"id": "slide_extra_260059", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260060", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260061", "phase": "launch", "success": false, "reason": "nominal_solvable"}
+{"id": "slide_extra_260062", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260063", "phase": "launch", "success": false, "reason": "miss"}
+{"id": "slide_extra_260064", "phase": "launch", "success": true, "schedule": "center6_pos"}

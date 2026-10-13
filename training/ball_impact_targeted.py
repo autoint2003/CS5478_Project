@@ -1,7 +1,7 @@
 """Versioned TRAIN ball-impact generator.
 
 v1 snapshots, the v1 manifest, and BALL_IMPACT_DATASET_REBUILD.md stay where
-they are. New launches go to results/diagnostics/raw/ball_impact_dataset_v2.
+they are. New launches go to demo_results/diagnostics/raw/ball_impact_dataset_v2.
 VALIDATION and FINAL_TEST are not written. This module does not train.
 """
 

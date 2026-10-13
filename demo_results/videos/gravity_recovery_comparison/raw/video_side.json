@@ -1,0 +1,41 @@
+{
+  "zero": {
+    "t0": 3.9239999999997894,
+    "t_lift_done": 5.417999999999625,
+    "t_drop": 11.91600000000217,
+    "t_both_loss": 11.91600000000217,
+    "lift_completed": true,
+    "drop": true,
+    "hold_s": 12.0,
+    "hold_survived": false,
+    "end_nL": 0,
+    "end_nR": 0,
+    "end_obj_z": 0.01791868449380277,
+    "end_p_des_z": 0.7130316394873875,
+    "z_tgt": 0.7129664062868253,
+    "dt": 0.002,
+    "v_lift": 0.08,
+    "tau": -18.0
+  },
+  "heuristic": {
+    "t0": 6.563999999999499,
+    "t_lift_done": 8.381999999999469,
+    "t_drop": null,
+    "t_both_loss": null,
+    "lift_completed": true,
+    "drop": false,
+    "hold_s": 12.0,
+    "hold_survived": true,
+    "end_nL": 6,
+    "end_nR": 6,
+    "end_obj_z": 0.5992018247093056,
+    "end_p_des_z": 0.7130219881109461,
+    "z_tgt": 0.7129664062868253,
+    "dt": 0.002,
+    "v_lift": 0.08,
+    "tau": -18.0
+  },
+  "zero_mp4": "D:\\NUS\\CS5478 Intelligent Robots\\CS5478_Project\\results\\videos\\gravity_recovery_comparison\\zero.mp4",
+  "heuristic_mp4": "D:\\NUS\\CS5478 Intelligent Robots\\CS5478_Project\\results\\videos\\gravity_recovery_comparison\\heuristic.mp4",
+  "side_mp4": "D:\\NUS\\CS5478 Intelligent Robots\\CS5478_Project\\results\\videos\\gravity_recovery_comparison\\zero_vs_heuristic.mp4"
+}

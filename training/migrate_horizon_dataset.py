@@ -30,10 +30,10 @@ from training.pre_grpo_sanity import advantages
 from training.unified_k47 import CAP, episode_arrays, group_advantage, load_codebook, read_jsonl, supervised_loss
 import torch
 
-RAW = ROOT / "results/diagnostics/raw/legal_recovery_v2"
-OUT = ROOT / "results/diagnostics/raw/horizon_migration"
-OLD_EVAL = ROOT / "results/diagnostics/raw/unified_k47/eval/heldout_train.json"
-CKPT = ROOT / "results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt"
+RAW = ROOT / "demo_results/diagnostics/raw/legal_recovery_v2"
+OUT = ROOT / "demo_results/diagnostics/raw/horizon_migration"
+OLD_EVAL = ROOT / "demo_results/diagnostics/raw/unified_k47/eval/heldout_train.json"
+CKPT = ROOT / "demo_results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt"
 
 
 def mechanism(row):
@@ -103,7 +103,7 @@ def migrate(env, book):
     for row in replay_rows:
         key = (row["id"], row["strategy"])
         info = meta.get(key, {})
-        snapshot = info.get("snapshot") or f"results/diagnostics/raw/ball_impact_dataset_v2/accepted/train/{row['id']}.pkl"
+        snapshot = info.get("snapshot") or f"demo_results/diagnostics/raw/ball_impact_dataset_v2/accepted/train/{row['id']}.pkl"
         path = ROOT / snapshot
         if not path.is_file():
             record = {**row, "source": "continuous", "reason": "INVALID", "error": f"missing snapshot {snapshot}"}
@@ -114,7 +114,7 @@ def migrate(env, book):
             with path.open("rb") as handle:
                 cache[path] = pickle.load(handle)
         blob = cache[path]
-        npz = ROOT / (info.get("continuous_npz") or f"results/diagnostics/raw/legal_recovery_v2/trajectories/{row['id']}__{row['strategy']}.npz")
+        npz = ROOT / (info.get("continuous_npz") or f"demo_results/diagnostics/raw/legal_recovery_v2/trajectories/{row['id']}__{row['strategy']}.npz")
         if (row["id"], row["strategy"], "continuous") not in done_c:
             if not npz.is_file():
                 append(continuous_path, {**row, "source": "continuous", "reason": "INVALID", "error": "missing action file"})
@@ -133,7 +133,7 @@ def migrate(env, book):
                 append(continuous_path, record)
                 done_c[(row["id"], row["strategy"], "continuous")] = record
                 print("CONT", row["id"], row["strategy"], out["reason"], flush=True)
-        token_path = ROOT / (info.get("token_residual_npz") or f"results/diagnostics/raw/legal_recovery_v2/trajectories/{row['id']}__{row['strategy']}__candidate_k47.npz")
+        token_path = ROOT / (info.get("token_residual_npz") or f"demo_results/diagnostics/raw/legal_recovery_v2/trajectories/{row['id']}__{row['strategy']}__candidate_k47.npz")
         if (row["id"], row["strategy"], "decoded") in done_d:
             continue
         if row.get("status") == "NOT_REPRESENTABLE":
@@ -258,7 +258,7 @@ def write_views():
 
 def timing(env, book, model):
     book = load_codebook()
-    path = ROOT / "results/diagnostics/raw/ball_impact_dataset_v2/accepted/train/ball_train_v2_0021.pkl"
+    path = ROOT / "demo_results/diagnostics/raw/ball_impact_dataset_v2/accepted/train/ball_train_v2_0021.pkl"
     with path.open("rb") as handle:
         blob = pickle.load(handle)
     from training.history_aware_critic_ablation import restore_capture
@@ -332,7 +332,7 @@ def eval_checkpoint(env, book, model):
     from training.horizon_outcome import roll_policy
     del model
     device = torch.device("cpu")
-    loaded, _ref = load_models(CKPT, ROOT / "results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt", device)
+    loaded, _ref = load_models(CKPT, ROOT / "demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt", device)
     loaded.eval()
     env.model = loaded
     old = {row["id"]: row for row in json.loads(OLD_EVAL.read_text(encoding="utf-8"))}

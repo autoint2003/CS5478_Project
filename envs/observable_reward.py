@@ -17,7 +17,7 @@ from sensors.spatial_tactile import SpatialTactileReading, measure_spatial_tacti
 # had 0 false-progress events on that diagnostic set. NOT a physical constant.
 T_PROGRESS_S = 0.100
 T_PROGRESS_PROVENANCE = (
-    "results/diagnostics/tactile_ex_estimator: 100 ms false_progress=0 on RULE/all; "
+    "demo_results/diagnostics/tactile_ex_estimator: 100 ms false_progress=0 on RULE/all; "
     "50 ms false_progress~0.013. Chosen T_progress=0.100 s (option A: emit once per interval)."
 )
 
