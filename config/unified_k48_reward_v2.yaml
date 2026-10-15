@@ -1,15 +1,15 @@
 # K=48 GRPO pilot with reward v2. The original pilot config stays on reward v1.
 # Tokens 0-46 are the unchanged motion codebook. Token 47 is HANDOFF.
 # This file starts training only when passed to --grpo. It does not overwrite
-# demo_results/diagnostics/raw/unified_k48/grpo_pilot.
+# results/archive/demo_results/diagnostics/raw/unified_k48/grpo_pilot.
 
-codebook: demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy
-supervised_targets: demo_results/diagnostics/raw/k48_handoff/supervised_targets.jsonl
-grpo_initial_conditions: demo_results/diagnostics/raw/k48_handoff/grpo_initial_conditions.jsonl
-supervised_output: demo_results/diagnostics/raw/unified_k48/supervised
-eval_output: demo_results/diagnostics/raw/unified_k48/eval_reward_v2
-grpo_output: demo_results/diagnostics/raw/unified_k48/grpo_pilot_reward_v2
-baseline_eval: demo_results/diagnostics/raw/horizon_migration/checkpoint_eval.json
+codebook: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy
+supervised_targets: results/archive/demo_results/diagnostics/raw/k48_handoff/supervised_targets.jsonl
+grpo_initial_conditions: results/archive/demo_results/diagnostics/raw/k48_handoff/grpo_initial_conditions.jsonl
+supervised_output: results/archive/demo_results/diagnostics/raw/unified_k48/supervised
+eval_output: results/archive/demo_results/diagnostics/raw/unified_k48/eval_reward_v2
+grpo_output: results/archive/demo_results/diagnostics/raw/unified_k48/grpo_pilot_reward_v2
+baseline_eval: results/archive/demo_results/diagnostics/raw/horizon_migration/checkpoint_eval.json
 seed: 1
 device: cuda
 eval_device: cpu

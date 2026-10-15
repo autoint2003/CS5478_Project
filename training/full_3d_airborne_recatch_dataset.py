@@ -34,12 +34,12 @@ from envs.airborne_obs import OBS_DIM_AIR, OBS_NAMES_AIR, OBS_VERSION, observe_a
 from envs.deterioration import body_twist
 from envs.observable_obs import ObservableObsState, OBS_NAMES
 from envs.physical_recovery import physical_pack
-from training.demo_ballistic_impact import TAU_SEC, assert_noslip, make_sim
-from training.horizontal_grasp_offset_freefall_recatch import DT, begin, grasp_settled, hold_step
-from training.long_context_recovery_pilot import jsonable
-from training.recovery_policy_pretraining_preparation import schedules
+from envs.ballistic_impact import TAU_SEC, assert_noslip, make_sim
+from envs.grasp_seat import DT, begin, grasp_settled, hold_step, restore_seated
+from training.jsonable import jsonable
+from controllers.skill_schedules import schedules
 from training.recovery_runtime import capture_nominal, capture_pads, gains_from_cfg, stamp
-from training.single_step_action_token_policy import kmeans
+from models.action_kmeans import kmeans
 
 OUT = ROOT / "results" / "diagnostics" / "raw" / "full_3d_airborne_recatch"
 # Tracking gains used by the verified catch. Torques are still clipped to the actuators.
@@ -150,9 +150,7 @@ def step_mapped(sim, action, version, gains, q_home):
 
 
 def restore_to(sim, snap, nominal, pads, pad_mu):
-    from training.multi_disturbance_airborne_feasibility import restore
-
-    info = restore(sim, snap, nominal, pads, pad_mu)
+    info = restore_seated(sim, snap, nominal, pads, pad_mu)
     sim.model.opt.timestep = DT
     if hasattr(sim, "park_ball"):
         sim.park_ball()

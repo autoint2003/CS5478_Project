@@ -31,7 +31,8 @@ Thumbs.db
 # Third-party robot models (clone locally; see README)
 mujoco_menagerie/
 
-# Datasets, historical artifacts, and training outputs
+# Datasets and training outputs. Historical demo_results now live at
+# results/archive/demo_results/, which is covered by results/.
 data/
 demo_results/
 results/

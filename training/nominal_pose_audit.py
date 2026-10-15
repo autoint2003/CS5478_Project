@@ -17,18 +17,18 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import training.natural_loss_recatch_data_scaling as scale
+from envs.grasp_seat import apply_spec
 import training.natural_loss_recatch_transformer_v3 as v3
 from controllers.geometry_switch import GeometrySwitch, hand_pose, relative_speed, rot_angle
 from controllers.recovery_actions import AIRBORNE_V2, AIRBORNE_V3, normalize_action
 from envs.physical_recovery import physical_pack
 from training.autonomous_episode import T_TASK, Z_ABORT, ball_substep, empty_ball, fresh_nominal_state, make_training_env, nominal_substep, seat_base
 from training.autonomous_rl_sanity import restore_supports, supports_of
-from training.demo_ballistic_impact import TAU_SEC, z_tgt_of
-from training.film_impact_zp6_k33 import load_policy
+from envs.ballistic_impact import TAU_SEC, z_tgt_of
+from training.k33_checkpoint import load_policy
 from training.full_3d_airborne_recatch_dataset import TRACK, drop_supports, restore_to, step_mapped
 from training.history_aware_critic_ablation import restore_capture, take_capture
-from training.recovery_policy_pretraining_preparation import schedules
+from controllers.skill_schedules import schedules
 from training.recovery_runtime import TABLE_DROP, _escaped
 from training.replay_core import tick_vw
 
@@ -518,7 +518,7 @@ def main():
             raise RuntimeError("offset restore failed")
         env.switch = GeometrySwitch()
         ref_case = arm_reference(env)
-        scale.apply_spec(env.sim, spec)
+        apply_spec(env.sim, spec)
         st = fresh_nominal_state()
         while float(env.sim.data.time) < T_TASK - 1e-9 and not env.switch.entered:
             for _ in range(v3.N_SUB):
@@ -687,7 +687,7 @@ def main():
         eval_offset(name, dz, dx, dy, dvz)
 
     payload = {
-        "checkpoint": "demo_results/diagnostics/raw/action_representation/ckpt_lateral_token.pt",
+        "checkpoint": "results/archive/demo_results/diagnostics/raw/action_representation/ckpt_lateral_token.pt",
         "residual_cap": cap,
         "nominal": nom,
         "tolerance": tol,

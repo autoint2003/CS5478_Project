@@ -12,18 +12,18 @@ Object position, orientation, and twist in that vector are exact MuJoCo body sta
 
 From the repository root:
 
-1. Load `demo_results/diagnostics/raw/balanced_unified_recovery/ckpt_39d.pt` with `training.natural_loss_recatch_transformer_v3.load_airborne_policy`. That loader refuses a checkpoint whose first layer was built for a different observation width, including the archived 45-D weights.
+1. Load `results/archive/demo_results/diagnostics/raw/balanced_unified_recovery/ckpt_39d.pt` with `training.natural_loss_recatch_transformer_v3.load_airborne_policy`. That loader refuses a checkpoint whose first layer was built for a different observation width, including the archived 45-D weights.
 2. Build the 24 cases the same way as `build_cases` in `training/observation_study_common.py`: seated grasp, impact snapshots, schedule suffixes, airborne carries, and the held-out natural-loss windows.
 3. Score each case through `continue_long` to absolute t = 12.
 
-`python training/final_39d_balanced_policy.py` retrains the 39-D policy and writes `demo_results/diagnostics/raw/balanced_39d/summary.json`. `python training/balanced_unified_recovery.py` does not train. It stays closed so it cannot overwrite `ckpt.pt` or `demo_results/diagnostics/BALANCED_UNIFIED_RECOVERY_EVALUATION.md`.
+`python training/final_39d_balanced_policy.py` retrains the 39-D policy and writes `results/archive/demo_results/diagnostics/raw/balanced_39d/summary.json`. `python training/balanced_unified_recovery.py` does not train. It stays closed so it cannot overwrite `ckpt.pt` or `results/archive/demo_results/diagnostics/BALANCED_UNIFIED_RECOVERY_EVALUATION.md`.
 
 | role | path |
 | --- | --- |
-| Active 39-D policy | `demo_results/diagnostics/raw/balanced_unified_recovery/ckpt_39d.pt` |
-| 39-D benchmark and robustness log | `demo_results/diagnostics/raw/balanced_39d/summary.json` |
-| Archived 45-D balanced weights | `demo_results/diagnostics/raw/balanced_unified_recovery/ckpt.pt` |
-| Archived 45-D 24-case log | `demo_results/diagnostics/raw/balanced_unified_recovery/summary.json` |
+| Active 39-D policy | `results/archive/demo_results/diagnostics/raw/balanced_unified_recovery/ckpt_39d.pt` |
+| 39-D benchmark and robustness log | `results/archive/demo_results/diagnostics/raw/balanced_39d/summary.json` |
+| Archived 45-D balanced weights | `results/archive/demo_results/diagnostics/raw/balanced_unified_recovery/ckpt.pt` |
+| Archived 45-D 24-case log | `results/archive/demo_results/diagnostics/raw/balanced_unified_recovery/summary.json` |
 | Geometry entry and exit | `config/geometry_switch.yaml` |
 | Online episode | `training/autonomous_episode.py` |
 
@@ -41,7 +41,7 @@ Held-out natural-loss evaluation windows, not training targets, are `EVAL_NATURA
 
 ## 24-case benchmark
 
-The suite is built by `build_cases`, not saved as its own pickle. The active 39-D outcomes are in `demo_results/diagnostics/raw/balanced_39d/summary.json` and `demo_results/diagnostics/FINAL_39D_BALANCED_POLICY.md`. The 45-D comparison remains in `demo_results/diagnostics/raw/balanced_unified_recovery/summary.json` and `demo_results/diagnostics/BALANCED_UNIFIED_RECOVERY_EVALUATION.md`.
+The suite is built by `build_cases`, not saved as its own pickle. The active 39-D outcomes are in `results/archive/demo_results/diagnostics/raw/balanced_39d/summary.json` and `results/archive/demo_results/diagnostics/FINAL_39D_BALANCED_POLICY.md`. The 45-D comparison remains in `results/archive/demo_results/diagnostics/raw/balanced_unified_recovery/summary.json` and `results/archive/demo_results/diagnostics/BALANCED_UNIFIED_RECOVERY_EVALUATION.md`.
 
 Four cases each: impact, sliding, wrist, open-finger recatch, airborne carry, and held-out natural-loss.
 
@@ -76,10 +76,10 @@ Grip in these recipes uses −1 for +2 N·m (open) and +1 for −18 N·m (secure
 
 ## Diagnostics worth keeping
 
-- `demo_results/diagnostics/FINAL_39D_BALANCED_POLICY.md`
-- `demo_results/diagnostics/BALANCED_UNIFIED_RECOVERY_EVALUATION.md` (the archived 45-D comparison)
-- `demo_results/diagnostics/OBSERVATION_REALIZABILITY_AUDIT.md`, `demo_results/diagnostics/OBSERVATION_ROBUSTNESS_CHECK.md`, and `demo_results/diagnostics/OBSERVATION_ABLATION_CHECK.md`
-- `demo_results/diagnostics/GEOMETRY_BASED_RECOVERY_SWITCH.md` (pre-training autonomous baseline, not a trained score)
-- `demo_results/diagnostics/AUTONOMOUS_RECOVERY_INTEGRATION.md` (the deterioration-score switch this path replaced)
-- `demo_results/diagnostics/RECOVERY_ENTRY_EXIT_HANDOFF_AUDIT.md`
-- `demo_results/diagnostics/RECOVERY_POLICY_PRETRAINING_PREPARATION.md` with `demo_results/diagnostics/raw/recovery_policy_pretraining_preparation/`
+- `results/archive/demo_results/diagnostics/FINAL_39D_BALANCED_POLICY.md`
+- `results/archive/demo_results/diagnostics/BALANCED_UNIFIED_RECOVERY_EVALUATION.md` (the archived 45-D comparison)
+- `results/archive/demo_results/diagnostics/OBSERVATION_REALIZABILITY_AUDIT.md`, `results/archive/demo_results/diagnostics/OBSERVATION_ROBUSTNESS_CHECK.md`, and `results/archive/demo_results/diagnostics/OBSERVATION_ABLATION_CHECK.md`
+- `results/archive/demo_results/diagnostics/GEOMETRY_BASED_RECOVERY_SWITCH.md` (pre-training autonomous baseline, not a trained score)
+- `results/archive/demo_results/diagnostics/AUTONOMOUS_RECOVERY_INTEGRATION.md` (the deterioration-score switch this path replaced)
+- `results/archive/demo_results/diagnostics/RECOVERY_ENTRY_EXIT_HANDOFF_AUDIT.md`
+- `results/archive/demo_results/diagnostics/RECOVERY_POLICY_PRETRAINING_PREPARATION.md` with `results/archive/demo_results/diagnostics/raw/recovery_policy_pretraining_preparation/`

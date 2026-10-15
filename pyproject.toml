@@ -1,0 +1,19 @@
+[project]
+name = "cs5478-grasp-recovery"
+version = "0.1.0"
+description = "MuJoCo Panda grasp recovery"
+requires-python = ">=3.10"
+
+[tool.setuptools.packages.find]
+include = [
+    "controllers*",
+    "envs*",
+    "sensors*",
+    "models*",
+    "data_generation*",
+    "training*",
+    "evaluation*",
+    "visualization*",
+    "experiments*",
+    "scripts*",
+]

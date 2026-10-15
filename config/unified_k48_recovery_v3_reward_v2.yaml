@@ -1,13 +1,13 @@
 # Rebuilt K48 recovery dataset. Do not point this at the collapsed manifests.
 dataset_version: k48_recovery_v3
-codebook: demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy
+codebook: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy
 supervised_targets: data/supervised_targets.jsonl
 grpo_initial_conditions: data/grpo_initial_conditions.jsonl
 eval_manifest: data/valid_recovery.jsonl
 supervised_output: results/sft
 eval_output: results/evaluations
 grpo_output: results/grpo/v2
-baseline_eval: demo_results/diagnostics/raw/horizon_migration/checkpoint_eval.json
+baseline_eval: results/archive/demo_results/diagnostics/raw/horizon_migration/checkpoint_eval.json
 seed: 1
 device: cuda
 eval_device: cpu

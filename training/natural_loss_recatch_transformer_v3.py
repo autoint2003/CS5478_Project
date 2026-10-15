@@ -45,7 +45,7 @@ from envs.airborne_obs import (
 from envs.deterioration import body_twist
 from envs.observable_obs import ObservableObsState
 from envs.physical_recovery import physical_pack
-from training.demo_ballistic_impact import assert_noslip
+from envs.ballistic_impact import assert_noslip
 from training.full_3d_airborne_recatch_dataset import (
     TRACK,
     begin,
@@ -59,9 +59,9 @@ from training.full_3d_airborne_recatch_dataset import (
     restore_to,
     run_chase,
 )
-from training.long_context_recovery_pilot import jsonable
-from training.phase_decoupled_recovery_pilot import world
-from training.recovery_policy_pretraining_preparation import schedules
+from training.jsonable import jsonable
+from envs.ballistic_impact import world
+from controllers.skill_schedules import schedules
 from training.recovery_runtime import (
     T_TASK,
     continue_long,
@@ -71,8 +71,8 @@ from training.recovery_runtime import (
     stamp,
 )
 from training.replay_core import park_impact_ball
-from training.single_step_action_token_policy import kmeans
-from training.uncapped_cartesian_airborne_chase import target_hand
+from models.action_kmeans import kmeans
+from envs.grasp_seat import target_hand
 
 OUT = ROOT / "results" / "diagnostics" / "raw" / "natural_loss_recatch_transformer_v3"
 DT_POLICY = 0.02
@@ -402,7 +402,7 @@ def run_natural(sim, base, nominal, pads, pad_mu, pinch, spec, split):
     drop_supports(sim)
     if not info.get("pose_ok", False):
         return [], {"tag": spec["tag"], "ok": False, "why": "restore", "split": split}, []
-    from training.horizontal_grasp_offset_freefall_recatch import apply_offset
+    from envs.grasp_seat import apply_offset
 
     apply_offset(sim, {"dx": spec.get("dx", 0.0), "dy": 0.0, "dz": spec["dz"], "pitch": 0.0})
     if spec.get("dq2"):

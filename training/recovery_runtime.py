@@ -20,7 +20,7 @@ from controllers.residual import (
 from envs.deterioration import body_twist
 from envs.dynamics import finger_pad_geom_ids, set_finger_object_sliding_mu, set_object_dynamics
 from envs.physical_recovery import TABLE_DROP, Z_AIR, physical_pack
-from training.demo_ballistic_impact import (
+from envs.ballistic_impact import (
     HAND_RISE_M,
     TAU_SEC,
     assert_noslip,

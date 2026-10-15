@@ -28,8 +28,8 @@ from training.autonomous_episode import (
     empty_ball,
     make_training_env,
 )
-from training.balanced_unified_recovery import EVAL_NATURAL, TRAIN_NATURAL
-from training.recovery_policy_pretraining_preparation import schedules
+from data_generation.natural_specs import EVAL_NATURAL, TRAIN_NATURAL
+from controllers.skill_schedules import schedules
 from training.recovery_runtime import T_TASK, continue_long, physical_of
 from training.full_3d_airborne_recatch_dataset import TRACK
 
@@ -216,7 +216,7 @@ def demonstrate_natural(env, tag, base=None):
     The seated grasp is the initial nominal state. The offset is the disturbance.
     The intercept is not started by restoring a loss snapshot.
     """
-    import training.natural_loss_recatch_data_scaling as scale
+    from envs.grasp_seat import apply_spec
     from envs.airborne_obs import relative_state
     from training.autonomous_episode import fresh_nominal_state, nominal_substep, seat_base
     from training.full_3d_airborne_recatch_dataset import restore_to
@@ -236,7 +236,7 @@ def demonstrate_natural(env, tag, base=None):
     if switch.p0 is None:
         from controllers.geometry_switch import hand_pose
         switch.p0, switch.r0 = hand_pose(sim)
-    scale.apply_spec(sim, spec)
+    apply_spec(sim, spec)
     st = fresh_nominal_state()
     while float(sim.data.time) < T_TASK - 1e-9 and not switch.entered:
         for _ in range(v3.N_SUB):

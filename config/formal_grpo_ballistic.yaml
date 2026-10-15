@@ -3,9 +3,9 @@
 # Executing training/formal_grpo.py with this config starts training.
 
 dataset: ball_impact
-initialization: demo_results/diagnostics/raw/pre_grpo_sanity/policy_B_init.pt
-reference: demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt
-output_dir: demo_results/diagnostics/raw/formal_grpo_ballistic
+initialization: results/archive/demo_results/diagnostics/raw/pre_grpo_sanity/policy_B_init.pt
+reference: results/archive/demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt
+output_dir: results/archive/demo_results/diagnostics/raw/formal_grpo_ballistic
 updates: 120
 eval_every: 12
 kl_coef: 0.05

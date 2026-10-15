@@ -24,13 +24,13 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from training.action_representation_expansion import build_policy
-from training.formal_grpo import _reject_head_mismatch, load_models
-from training.pre_grpo_sanity import SIGMA, advantages, gaussian_logprob
+from models.k48_policy import build_policy
+from training.k36_checkpoint import _reject_head_mismatch, load_models
+from training.grpo_math import SIGMA, advantages, gaussian_logprob
 
-RAW = ROOT / "demo_results/diagnostics/raw/legal_recovery_v2"
+RAW = ROOT / "results/archive/demo_results/diagnostics/raw/legal_recovery_v2"
 CODEBOOK = RAW / "codebook_selected_k47.npy"
-K36_PATH = ROOT / "demo_results/diagnostics/raw/pre_grpo_sanity/policy_B_init.pt"
+K36_PATH = ROOT / "results/archive/demo_results/diagnostics/raw/pre_grpo_sanity/policy_B_init.pt"
 EXTRA_PATH = RAW / "candidate_extra.npy"
 SUPERVISED = RAW / "supervised_targets.jsonl"
 GRPO_ICS = RAW / "grpo_initial_conditions.jsonl"
@@ -242,9 +242,9 @@ def assert_datasets(book):
 
 def assert_horizon_manifest(book):
     """The migrated supervised and GRPO views. Does not replace the frozen 288-row check."""
-    from training.horizon_outcome import LAMBDA_TIME, NOMINAL_S, T_RECOVERY_MAX
+    from envs.horizon_outcome import LAMBDA_TIME, NOMINAL_S, T_RECOVERY_MAX
 
-    folder = ROOT / "demo_results/diagnostics/raw/horizon_migration"
+    folder = ROOT / "results/archive/demo_results/diagnostics/raw/horizon_migration"
     supervised = read_jsonl(folder / "supervised_targets.jsonl")
     grpo = read_jsonl(folder / "grpo_initial_conditions.jsonl")
     if len(supervised) != 296:
@@ -280,7 +280,7 @@ def assert_horizon_manifest(book):
 
 
 def reject_mismatched_horizon(cfg):
-    from training.horizon_outcome import LAMBDA_TIME, NOMINAL_S, T_RECOVERY_MAX
+    from envs.horizon_outcome import LAMBDA_TIME, NOMINAL_S, T_RECOVERY_MAX
 
     expected = {
         "lambda_time": LAMBDA_TIME,
@@ -295,13 +295,13 @@ def reject_mismatched_horizon(cfg):
 def one_mujoco_step(book):
     from training.autonomous_episode import make_training_env
     from training.history_aware_critic_ablation import restore_capture
-    from training.privileged_ball_impact_search import step_legal
-    from training.recovery_success import label_of
+    from envs.step_legal import step_legal
+    from envs.recovery_success import label_of
 
     device = torch.device("cpu")
     model = build_model(book, device)
     env = make_training_env(device, model=model)
-    path = ROOT / "demo_results/diagnostics/raw/ball_impact_dataset_v2/accepted/train/ball_train_v2_0021.pkl"
+    path = ROOT / "results/archive/demo_results/diagnostics/raw/ball_impact_dataset_v2/accepted/train/ball_train_v2_0021.pkl"
     with path.open("rb") as handle:
         blob = pickle.load(handle)
     restore_capture(env, blob["capture"])
@@ -340,7 +340,7 @@ def check_loader(book, device):
     folder.mkdir(parents=True, exist_ok=True)
     good = folder / "roundtrip.pt"
     torch.save({"proto": book, "res_cap": CAP, "model": {key: value.detach().cpu() for key, value in model.state_dict().items()}}, good)
-    loaded, _ref = load_models(good, ROOT / "demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt", device)
+    loaded, _ref = load_models(good, ROOT / "results/archive/demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt", device)
     if loaded.logits.out_features != REQUIRED_K:
         raise RuntimeError("reloaded head width")
     bad_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
@@ -371,7 +371,7 @@ def run_check():
     # Historical K=36 checkpoint still loads, and is not remapped.
     legacy, _ref = load_models(
         K36_PATH,
-        ROOT / "demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt",
+        ROOT / "results/archive/demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt",
         device,
     )
     if legacy.logits_old.out_features != 35:
@@ -435,7 +435,7 @@ def train_supervised(cfg):
     model = build_model(book, device)
     opt = torch.optim.Adam(model.parameters(), lr=float(cfg["lr"]))
     out = ROOT / cfg["supervised_output"]
-    historical = ROOT / "demo_results/diagnostics/raw/unified_k47/supervised"
+    historical = ROOT / "results/archive/demo_results/diagnostics/raw/unified_k47/supervised"
     if out.resolve() == historical.resolve():
         raise RuntimeError("refusing to write into the historical epoch-40 checkpoint directory")
     out.mkdir(parents=True, exist_ok=True)
@@ -465,11 +465,11 @@ def train_supervised(cfg):
 
 def evaluate(cfg, checkpoint):
     from training.autonomous_episode import make_training_env
-    from training.horizon_outcome import T_RECOVERY_MAX, roll_policy
+    from envs.horizon_outcome import T_RECOVERY_MAX, roll_policy
 
     book = load_codebook(ROOT / cfg["codebook"])
     device = torch.device(cfg.get("device") or ("cuda" if torch.cuda.is_available() else "cpu"))
-    model, _ref = load_models(Path(checkpoint), ROOT / "demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt", device)
+    model, _ref = load_models(Path(checkpoint), ROOT / "results/archive/demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt", device)
     if model.logits.out_features != REQUIRED_K:
         raise RuntimeError("evaluation checkpoint is not K=47")
     model.eval()
@@ -513,15 +513,15 @@ def evaluate(cfg, checkpoint):
 def train_grpo(cfg, checkpoint):
     from training.autonomous_episode import make_training_env
     from training.history_aware_critic_ablation import restore_capture
-    from training.horizon_outcome import (
+    from envs.horizon_outcome import (
         finish_recovery,
         physical_reward,
         recovery_failed,
         recovery_steps,
     )
     from training.nominal_pose_audit import errors
-    from training.privileged_ball_impact_search import step_legal
-    from training.recovery_success import PERSIST_STEPS, basin_ok
+    from envs.step_legal import step_legal
+    from envs.recovery_success import PERSIST_STEPS, basin_ok
 
     book = load_codebook(ROOT / cfg["codebook"])
     device = torch.device(cfg.get("device") or ("cuda" if torch.cuda.is_available() else "cpu"))
@@ -600,7 +600,7 @@ def train_grpo(cfg, checkpoint):
                     break
             if how == "drop":
                 elapsed = float(env.sim.data.time) - t0
-                from training.table_drop import terminal_reason
+                from envs.table_drop import terminal_reason
                 reason = terminal_reason(env.sim)
                 outcome = {"reason": reason, "reward": physical_reward(reason, elapsed)}
             else:

@@ -26,12 +26,19 @@ from controllers.geometry_switch import (
 from envs.airborne_obs import OBS_DIM_AIR, observe_airborne
 from envs.observable_obs import ObservableObsState
 from envs.physical_recovery import Z_AIR, physical_pack
-from training.demo_ballistic_impact import HAND_RISE_M, TAU_SEC, assert_noslip, ball_force_on_ball, z_tgt_of
+from envs.ballistic_impact import HAND_RISE_M, TAU_SEC, assert_noslip, ball_force_on_ball, z_tgt_of
 from training.full_3d_airborne_recatch_dataset import TRACK, drop_supports, limits_of
-from training.horizontal_grasp_offset_freefall_recatch import begin, grasp_settled, hold_step
+from envs.grasp_seat import begin, grasp_settled, hold_step
+
+def load_balanced(device=None):
+    device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    path = ROOT / "results" / "diagnostics" / "raw" / "balanced_unified_recovery" / "ckpt_39d.pt"
+    model, proto, saved = v3.load_airborne_policy(path, device)
+    return model, proto, saved, device
+
+
 from training.impact_ball import apply_ball_free_state
-from training.observation_study_common import load_balanced
-from training.phase_decoupled_recovery_pilot import world
+from envs.ballistic_impact import world
 from training.recovery_runtime import (
     T_TASK,
     apply_dyn,

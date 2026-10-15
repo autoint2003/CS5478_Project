@@ -1,12 +1,12 @@
 # K=47 unified recovery. Running the supervised or GRPO command starts training.
 # `python -u training/unified_k47.py --check` does not.
 
-codebook: demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy
-supervised_targets: demo_results/diagnostics/raw/legal_recovery_v2/supervised_targets.jsonl
-grpo_initial_conditions: demo_results/diagnostics/raw/legal_recovery_v2/grpo_initial_conditions.jsonl
-supervised_output: demo_results/diagnostics/raw/unified_k47/supervised
-eval_output: demo_results/diagnostics/raw/unified_k47/eval
-grpo_output: demo_results/diagnostics/raw/unified_k47/grpo_pilot
+codebook: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy
+supervised_targets: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/supervised_targets.jsonl
+grpo_initial_conditions: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/grpo_initial_conditions.jsonl
+supervised_output: results/archive/demo_results/diagnostics/raw/unified_k47/supervised
+eval_output: results/archive/demo_results/diagnostics/raw/unified_k47/eval
+grpo_output: results/archive/demo_results/diagnostics/raw/unified_k47/grpo_pilot
 seed: 1
 device: cuda
 epochs: 40

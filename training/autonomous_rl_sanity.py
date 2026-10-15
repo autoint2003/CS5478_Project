@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import training.natural_loss_recatch_data_scaling as scale
+from envs.grasp_seat import apply_spec
 import training.natural_loss_recatch_transformer_v3 as v3
 from controllers.geometry_switch import GeometrySwitch, hand_pose
 from controllers.recovery_actions import AIRBORNE_V2, normalize_action
@@ -278,7 +278,7 @@ def collect_offset(env, base, buf, sigma, rng, on_decision=None, spec=None):
     env.switch.capture_if_ready(sim)
     if env.switch.p0 is None:
         env.switch.p0, env.switch.r0 = hand_pose(sim)
-    scale.apply_spec(sim, spec)
+    apply_spec(sim, spec)
     st = fresh_nominal_state()
     switch = env.switch
     while float(sim.data.time) < T_TASK - 1e-9 and not switch.entered:
@@ -511,7 +511,7 @@ def eval_impact(env, v, z, phi):
 
 def eval_seated(env, base, q_ref, tag):
     """Validation and held-out carries and grasp offsets. Not used as training data."""
-    from training.balanced_unified_recovery import EVAL_NATURAL, TRAIN_NATURAL
+    from data_generation.natural_specs import EVAL_NATURAL, TRAIN_NATURAL
     rows = []
     jobs = [
         ("air_lat_pos", "validation", "air", 0.30, 1.0),
@@ -610,7 +610,7 @@ def _roll_air(env, base, q_ref, name, split, speed, sign, tag):
 
 def _roll_offset(env, base, name, split, spec, tag):
     _arm(env, base)
-    scale.apply_spec(env.sim, spec)
+    apply_spec(env.sim, spec)
     st = fresh_nominal_state()
     switch = env.switch
     while float(env.sim.data.time) < T_TASK - 1e-9 and not switch.entered:

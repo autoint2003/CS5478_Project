@@ -47,7 +47,7 @@ from training.autonomous_rl_sanity import (
     supports_of,
 )
 from training.full_3d_airborne_recatch_dataset import TRACK
-from training.recovery_policy_pretraining_preparation import schedules
+from controllers.skill_schedules import schedules
 from training.recovery_runtime import T_TASK
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "autonomous_rl"
@@ -182,7 +182,7 @@ def _switch_blob(switch):
 
 
 def take_capture(env):
-    from training.table_drop import export_state as export_table_drop
+    from envs.table_drop import export_state as export_table_drop
 
     hist = env._hist
     return {
@@ -255,7 +255,7 @@ def restore_capture(env, cap):
     env._prev = cap["prev"].copy()
     sim.captured = physics["captured"]
     mujoco.mj_forward(sim.model, sim.data)
-    from training.table_drop import restore_state
+    from envs.table_drop import restore_state
     restore_state(sim, cap.get("table_drop"))
     err = float(np.max(np.abs(np.array(sim.data.qpos, float) - physics["qpos"])))
     if err > 1e-6:
