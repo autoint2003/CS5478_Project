@@ -11,9 +11,9 @@ from __future__ import annotations
 import mujoco
 import numpy as np
 
-from controllers.jacobian_controller import apply_cartesian_ctrl
+from controllers.cartesian.jacobian import apply_cartesian_ctrl
 from controllers.nominal import _integrate_rot
-from controllers.recovery_actions import AIRBORNE_V3, map_action
+from controllers.recovery.action_map import AIRBORNE_V3, map_action
 
 # Same values the recovery step used when it lived beside the search:
 # natural_loss_recatch_transformer_v3.N_SUB and full_3d TRACK.
@@ -35,7 +35,7 @@ def step_legal(sim, action):
     sim.fsm.v_des = vel.copy()
     sim.fsm.w_des = ang.copy()
     sim.fsm.fg_cmd = float(-tau)
-    from envs.table_drop import object_vz, observe
+    from envs.outcomes.table_drop import object_vz, observe
 
     dt = float(sim.model.opt.timestep)
     for _ in range(N_SUB):

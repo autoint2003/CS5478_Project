@@ -8,6 +8,7 @@ successes are not training data and are not used to pick the checkpoint.
 
 from __future__ import annotations
 
+
 import json
 import sys
 import time
@@ -20,10 +21,12 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import training.natural_loss_recatch_transformer_v3 as v3
+from controllers.cartesian.tracking import TRACK
+from envs.simulation.support_contacts import restore_supports, supports_of
+import models.airborne_v3 as v3
 import experiments.legacy.sac_dpo_grpo_selection as sel
-from training.autonomous_dataset import _until_impact_entry
-from training.autonomous_episode import (
+from data_generation.autonomous_episodes import _until_impact_entry
+from training.recovery_episode import (
     T_TASK,
     Z_ABORT,
     fresh_nominal_state,
@@ -31,13 +34,13 @@ from training.autonomous_episode import (
     nominal_substep,
     seat_base,
 )
-from training.autonomous_rl_sanity import restore_supports, supports_of
+
 from experiments.legacy.balanced_unified_recovery import CKPT_39, EPOCHS, STEPS_PER_EPOCH
-from training.full_3d_airborne_recatch_dataset import TRACK, drop_supports, restore_to, step_mapped
-from training.natural_loss_recatch_transformer_v3 import AIRBORNE_V2, build_model, load_airborne_policy
-from controllers.geometry_switch import GeometrySwitch, hand_pose
-from controllers.recovery_actions import normalize_action
-from envs.physical_recovery import physical_pack
+from data_generation.airborne_recatch_dataset import drop_supports, restore_to, step_mapped
+from models.airborne_v3 import AIRBORNE_V2, build_model, load_airborne_policy
+from controllers.recovery.geometry_switch import GeometrySwitch, hand_pose
+from controllers.recovery.action_map import normalize_action
+from envs.outcomes.physical_recovery import physical_pack
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "new_recatch_supervised"
 SKILL = ROOT / "results" / "diagnostics" / "raw" / "autonomous_training"

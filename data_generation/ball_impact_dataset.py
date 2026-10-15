@@ -10,6 +10,7 @@ episode runs. Final-test episodes are stored and are not rolled with a policy.
 
 from __future__ import annotations
 
+
 import argparse
 import json
 import pickle
@@ -23,14 +24,16 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from envs.simulation.capture import restore_capture, take_capture
+from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
 import mujoco
 
-import training.natural_loss_recatch_transformer_v3 as v3
-import envs.recovery_success as success
-from controllers.geometry_switch import hand_pose, rot_angle
-from envs.deterioration import body_twist
-from envs.physical_recovery import Z_AIR, physical_pack
-from training.autonomous_episode import (
+import models.airborne_v3 as v3
+import envs.outcomes.recovery_success as success
+from controllers.recovery.geometry_switch import hand_pose, rot_angle
+from envs.simulation.grasp_quality import body_twist
+from envs.outcomes.physical_recovery import Z_AIR, physical_pack
+from training.recovery_episode import (
     T_TASK,
     Z_ABORT,
     fresh_nominal_state,
@@ -38,10 +41,10 @@ from training.autonomous_episode import (
     nominal_substep,
 )
 from envs.ballistic_impact import HAND_RISE_M, PAIR_MU
-from training.history_aware_critic_ablation import restore_capture, take_capture
-from training.impact_ball import apply_ball_free_state
-from training.nominal_pose_audit import capture_ref, closed_grip, errors
-from training.write_ballistic_impact_scene import BALL_M, BALL_R, CYL_M, CYL_R
+
+from envs.simulation.impact_ball import apply_ball_free_state
+
+from envs.simulation.ballistic_scene import BALL_M, BALL_R, CYL_M, CYL_R
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "ball_impact_dataset"
 ATTEMPTS = RAW / "attempts.jsonl"
@@ -980,7 +983,7 @@ def nominal_continue(env, blob, seconds=3.0):
 
 
 def policy_continue(env, blob, cap=120):
-    from training.policy_rollout import policy_step
+    from data_generation.policy_rollout import policy_step
 
     restore_capture(env, blob["capture"])
     ref = blob["ref"]
@@ -1283,7 +1286,7 @@ def write_report(rows, physics, audit, elapsed_s, ran):
         "Future training command, not executed here:",
         "",
         "```",
-        "python -u training/formal_grpo.py --config config/formal_grpo_ballistic.yaml",
+        "python -u training/formal_grpo.py --config config/training/legacy/formal_grpo_ballistic.yaml",
         "```",
         "",
         "Resume generation:",
@@ -1351,7 +1354,7 @@ def main():
     parser.add_argument("--split", default="", help="Restrict new launches to one split, for example train")
     args = parser.parse_args()
     RAW.mkdir(parents=True, exist_ok=True)
-    from training.k36_checkpoint import load_models
+    from models.historical.k36_checkpoint import load_models
     import torch
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model, _ref = load_models(

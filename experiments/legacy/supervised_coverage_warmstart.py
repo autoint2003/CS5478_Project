@@ -5,6 +5,7 @@ Does not run SAC, DPO, or GRPO updates, and does not touch final test.
 
 from __future__ import annotations
 
+
 import json
 import sys
 from pathlib import Path
@@ -16,11 +17,14 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import training.natural_loss_recatch_transformer_v3 as v3
-import envs.recovery_success as success
+from envs.simulation.capture import restore_capture, take_capture
+from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
+from envs.simulation.support_contacts import restore_supports, supports_of
+import models.airborne_v3 as v3
+import envs.outcomes.recovery_success as success
 from models.k48_policy import build_policy
-from training.autonomous_episode import Z_ABORT, make_training_env, seat_base
-from training.autonomous_rl_sanity import restore_supports, supports_of
+from training.recovery_episode import Z_ABORT, make_training_env, seat_base
+
 from experiments.legacy.balanced_unified_recovery import EPOCHS, STEPS_PER_EPOCH
 from experiments.legacy.final_rl_readiness import (
     CAP,
@@ -35,10 +39,10 @@ from experiments.legacy.final_rl_readiness import (
     reconstruct,
     rollout,
 )
-from training.history_aware_critic_ablation import restore_capture
+
 from experiments.recatch.new_recatch_supervised import _enter_air
-from training.nominal_pose_audit import capture_ref, errors, until_impact
-from training.policy_rollout import policy_step
+from experiments.legacy.nominal_pose_audit import until_impact
+from data_generation.policy_rollout import policy_step
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "supervised_coverage_warmstart"
 RECOV = ROOT / "results" / "diagnostics" / "raw" / "train_recoverability"

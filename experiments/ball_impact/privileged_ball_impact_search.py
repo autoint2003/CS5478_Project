@@ -9,6 +9,7 @@ FINAL_TEST is refused. VALIDATION is not searched.
 
 from __future__ import annotations
 
+
 import argparse
 import json
 import sys
@@ -22,20 +23,23 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import training.natural_loss_recatch_transformer_v3 as v3
-import envs.recovery_success as success
-from controllers.geometry_switch import hand_pose, rot_angle
-from controllers.jacobian_controller import apply_cartesian_ctrl
+from envs.simulation.capture import restore_capture, take_capture
+from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
+from controllers.cartesian.tracking import TRACK
+import models.airborne_v3 as v3
+import envs.outcomes.recovery_success as success
+from controllers.recovery.geometry_switch import hand_pose, rot_angle
+from controllers.cartesian.jacobian import apply_cartesian_ctrl
 from controllers.nominal import _integrate_rot
-from controllers.recovery_actions import AIRBORNE_V3, W_MAX, grip_tau, map_action, normalize_action
-from controllers.residual import RECOVERY4D_TAU_OPEN, RECOVERY4D_TAU_SECURE
-from envs.physical_recovery import physical_pack
-from training.autonomous_episode import Z_ABORT, make_training_env
+from controllers.recovery.action_map import AIRBORNE_V3, W_MAX, grip_tau, map_action, normalize_action
+from controllers.recovery.residual_limits import RECOVERY4D_TAU_OPEN, RECOVERY4D_TAU_SECURE
+from envs.outcomes.physical_recovery import physical_pack
+from training.recovery_episode import Z_ABORT, make_training_env
 from data_generation.ball_impact_dataset import grasp_sample, ids_for, label_states, load_episode
-from training.full_3d_airborne_recatch_dataset import TRACK
-from training.history_aware_critic_ablation import restore_capture
-from training.nominal_pose_audit import errors, hand_R
-from training.recovery_runtime import _escaped
+
+
+
+from training.recovery_execution import _escaped
 from data_generation.strategies.recovery_laws import STRATEGIES, command, wrist_return
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "privileged_ball_impact_recovery"
@@ -304,7 +308,7 @@ def mechanisms(actions, samples, entry, ablations):
 
 
 def representability(actions, proto):
-    from data_generation.oracle_search import representability as project
+    from data_generation.oracles.representability import representability as project
 
     return project(actions, proto)
 
@@ -572,7 +576,7 @@ def main():
     parser.add_argument("--max-ics", type=int, default=18)
     args = parser.parse_args()
     import torch
-    from training.k36_checkpoint import load_models
+    from models.historical.k36_checkpoint import load_models
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model, _reference = load_models(PROTO_PATH, PROTO_PATH.with_name("policy_A_reference.pt"), device)

@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from envs.horizon_outcome import recovery_failed
+from envs.outcomes.horizon_outcome import recovery_failed
 from data_generation.strategies.k48_inward_sliding_search import row_snapshot
 from experiments.ball_impact.privileged_ball_impact_search import step_legal
 from data_generation.rebuild_k48_recovery import (
@@ -32,7 +32,7 @@ from data_generation.rebuild_k48_recovery import (
     legal_verify,
     legalize,
 )
-from training.unified_k47 import load_codebook
+from training.k47_codebook import load_codebook
 
 OLD = ROOT / "results/archive/demo_results/diagnostics/raw/k48_recovery_v3"
 REPLAY = ROOT / "results/archive/demo_results/diagnostics/raw/k48_inward_sliding_search_v1/old_gate_replay.jsonl"
@@ -51,7 +51,7 @@ def confirmed_ids():
 
 
 def propose(env, blob):
-    from training.history_aware_critic_ablation import restore_capture
+    from envs.simulation.capture import restore_capture
 
     restore_capture(env, blob["capture"])
     spec = {"name": "inward_reseat", "ref": blob["ref"]}

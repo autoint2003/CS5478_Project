@@ -7,12 +7,12 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from models.action_kmeans import kmeans
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from data_generation.action_kmeans import kmeans
 OUT = ROOT / "results" / "diagnostics" / "raw" / "single_step_action_token_policy"
 DIMS = ["vx", "vy", "vz", "wx", "wy", "wz", "grip"]
 EPOCHS = 80
@@ -207,11 +207,11 @@ def rollout(sim, gains, snap, encoder, head, centers, nominal, pad_ids, pad_mu, 
     from training.unsupervised_trajectory_latent_recovery import encode_hist
 
     import torch
-    from envs.observable_obs import ObservableObsState
-    from envs.physical_recovery import physical_pack
+    from envs.observations.observable_obs import ObservableObsState
+    from envs.outcomes.physical_recovery import physical_pack
     from training.long_context_recovery_generalization_audit import prepare
     from experiments.legacy.recovery_policy_pretraining_preparation import legal_obs
-    from training.recovery_runtime import _dropped, _escaped, step_cmd
+    from training.recovery_execution import _dropped, _escaped, step_cmd
     from training.value_guided_recovery_bootstrap import DT_POLICY
 
     info, _o = prepare(sim, snap, nominal, pad_ids, pad_mu, mass, friction, 0.0, 0.0)
@@ -283,7 +283,7 @@ def main() -> int:
 
     OUT.mkdir(parents=True, exist_ok=True)
     from experiments.legacy.phase_decoupled_recovery_pilot import world
-    from training.recovery_runtime import run_impact
+    from training.recovery_execution import run_impact
     from training.unsupervised_trajectory_latent_recovery import initial_history
 
     sim, gains, nominal, pad_ids, pad_mu, pads_l, pads_r = world()

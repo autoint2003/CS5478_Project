@@ -9,13 +9,13 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
-from envs.config_util import load_yaml, merge_sim_config
-from envs.dynamics import set_finger_object_sliding_mu
-from envs.grasp_sim import GraspSim, apply_solver_from_cfg, reset_home
-from envs.ids import resolve_ids
-from envs.xml_build import write_panda_torque
-from training.impact_ball import apply_ball_free_state
-from training.write_ballistic_impact_scene import CYL_M, write_ballistic_scene
+from envs.simulation.yaml_config import load_yaml, merge_sim_config
+from envs.simulation.object_dynamics import set_finger_object_sliding_mu
+from envs.simulation.grasp_sim import GraspSim, apply_solver_from_cfg, reset_home
+from envs.simulation.mujoco_ids import resolve_ids
+from envs.simulation.panda_xml import write_panda_torque
+from envs.simulation.impact_ball import apply_ball_free_state
+from envs.simulation.ballistic_scene import CYL_M, write_ballistic_scene
 
 ROOT = Path(__file__).resolve().parents[1]
 PAIR_MU = 1.0
@@ -119,8 +119,8 @@ class BallisticSim(GraspSim):
         self.data = mujoco.MjData(self.model)
         self.ids = resolve_ids(self.model)
         from controllers.nominal import GraspFSM
-        from controllers.residual import ResidualLimiter
-        from envs.deterioration import DeteriorationMeter
+        from controllers.recovery.residual_limits import ResidualLimiter
+        from envs.simulation.grasp_quality import DeteriorationMeter
 
         self.fsm = GraspFSM(cfg)
         self.meter = DeteriorationMeter(cfg)
@@ -177,7 +177,7 @@ class BallisticSim(GraspSim):
 
 
 def make_sim() -> tuple[BallisticSim, dict]:
-    cfg = merge_sim_config(load_yaml(ROOT / "config" / "nominal.yaml"))
+    cfg = merge_sim_config(load_yaml(ROOT / "config" / "simulation" / "nominal.yaml"))
     sim = BallisticSim(cfg)
     sim.reset()
     assert_noslip(sim)
@@ -218,9 +218,9 @@ def ball_force_on_ball(sim) -> tuple[np.ndarray, list]:
 
 
 def pack_row(sim, tau: float) -> dict:
-    from envs.deterioration import body_twist
-    from envs.physical_recovery import physical_pack
-    from envs.contacts import extract_contacts
+    from envs.simulation.grasp_quality import body_twist
+    from envs.outcomes.physical_recovery import physical_pack
+    from envs.contacts.frames import extract_contacts
 
     o = physical_pack(sim)
     Rh = np.array(sim.data.xmat[sim.ids.hand_body].reshape(3, 3), float)
@@ -276,9 +276,9 @@ def pack_row(sim, tau: float) -> dict:
 
 def world():
     """Ballistic scene plus the nominal grasp and finger-pad records."""
-    from controllers.jacobian_controller import gains_from_cfg
-    from envs.dynamics import finger_pad_geom_ids
-    from training.recovery_runtime import capture_nominal, capture_pads
+    from controllers.cartesian.jacobian import gains_from_cfg
+    from envs.simulation.object_dynamics import finger_pad_geom_ids
+    from training.recovery_execution import capture_nominal, capture_pads
 
     sim, cfg = make_sim()
     gains = gains_from_cfg(cfg)

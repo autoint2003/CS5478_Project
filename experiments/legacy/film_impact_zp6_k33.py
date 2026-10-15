@@ -7,6 +7,7 @@ reads that checkpoint and writes a video plus a contact trace.
 
 from __future__ import annotations
 
+
 import csv
 import sys
 from pathlib import Path
@@ -21,22 +22,24 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import training.natural_loss_recatch_transformer_v3 as v3
-from controllers.geometry_switch import hand_pose
-from controllers.recovery_actions import AIRBORNE_V3, map_action
-from envs.airborne_obs import relative_state
-from envs.physical_recovery import physical_pack
+from controllers.cartesian.tracking import TRACK
+from envs.simulation.support_contacts import restore_supports, supports_of
+import models.airborne_v3 as v3
+from controllers.recovery.geometry_switch import hand_pose
+from controllers.recovery.action_map import AIRBORNE_V3, map_action
+from envs.observations.airborne_obs import relative_state
+from envs.outcomes.physical_recovery import physical_pack
 from models.k48_policy import build_policy
-from training.autonomous_episode import (
+from training.recovery_episode import (
     T_TASK,
     Z_ABORT,
     ball_substep,
     empty_ball,
     make_training_env,
 )
-from training.autonomous_rl_sanity import restore_supports, supports_of
-from training.full_3d_airborne_recatch_dataset import TRACK
-from training.k33_checkpoint import CKPT, load_policy
+
+
+from models.historical.k33_checkpoint import CKPT, load_policy
 
 VID = ROOT / "results" / "videos"
 SPEC = {"v_mps": 6.5, "z_off_m": 0.006, "phi_deg": 0.0}

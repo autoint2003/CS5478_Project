@@ -24,25 +24,25 @@ if str(ROOT) not in sys.path:
 
 from collections import deque
 
-from controllers.residual import (
+from controllers.recovery.residual_limits import (
     RECOVERY4D_TAU_OPEN,
     RECOVERY4D_TAU_SECURE,
     RECOVERY4D_W_HY_MAX,
 )
-from controllers.jacobian_controller import (
+from controllers.cartesian.jacobian import (
     gains_from_cfg,
     jacobian_6d,
     ori_error_deg,
     rotation_error,
 )
-from envs.deterioration import body_twist
+from envs.simulation.grasp_quality import body_twist
 from controllers.nominal import grasp_orientation
-from envs.config_util import load_yaml, merge_sim_config
-from envs.dynamics import set_finger_object_sliding_mu
-from envs.grasp_sim import GraspSim
-from envs.physical_recovery import TABLE_DROP, Z_AIR, physical_pack
-from training.impact_ball import apply_ball_free_state
-from training.impact_demo_core import (
+from envs.simulation.yaml_config import load_yaml, merge_sim_config
+from envs.simulation.object_dynamics import set_finger_object_sliding_mu
+from envs.simulation.grasp_sim import GraspSim
+from envs.outcomes.physical_recovery import TABLE_DROP, Z_AIR, physical_pack
+from envs.simulation.impact_ball import apply_ball_free_state
+from experiments.legacy.impact_demo import (
     RENDER_HZ,
     BallFlight,
     GuidedApproach,
@@ -53,19 +53,11 @@ from training.impact_demo_core import (
     plan_guided_release,
     save_rgb,
 )
-from training.impact_visualization_utils import apply_viewer_camera, enable_viewer_flags, tick_vw_park
-from envs.contacts import pad_span_hand
-from training.replay_core import (
-    G_HOLD,
-    disable_object_table,
-    dump_ball_contacts,
-    freeze,
-    isolate_ball_object_only,
-    object_free_adr,
-    pack_replay,
-    restore_replay,
-    tick_vw,
-)
+from visualization.impact_view import apply_viewer_camera, enable_viewer_flags, tick_vw_park
+from envs.contacts.frames import pad_span_hand
+from envs.simulation.rule_replay import G_HOLD, object_free_adr, pack_replay, restore_replay
+from envs.contacts.scene_contacts import disable_object_table, dump_ball_contacts, isolate_ball_object_only
+from controllers.cartesian.velocity_step import freeze, tick_vw
 
 LOG_DIR = ROOT / "results" / "logs" / "coupled_teleport"
 AUTH_DIR = ROOT / "results" / "logs" / "coupled_ic_recovery"
@@ -579,7 +571,7 @@ def _cam(sim) -> dict:
 
 
 def make_parent_sim() -> GraspSim:
-    cfg = merge_sim_config(load_yaml(ROOT / "config" / "nominal.yaml"))
+    cfg = merge_sim_config(load_yaml(ROOT / "config" / "simulation" / "nominal.yaml"))
     sim = GraspSim(cfg)
     sim.reset(CYL_MASS, PAIR_MU, np.zeros(3))
     set_finger_object_sliding_mu(sim.model, sim.ids, PAIR_MU, sim.data)
@@ -1700,7 +1692,7 @@ def run_reposition_regrasp_cycle(
 
 
 def build_parent() -> dict:
-    cfg = merge_sim_config(load_yaml(ROOT / "config" / "nominal.yaml"))
+    cfg = merge_sim_config(load_yaml(ROOT / "config" / "simulation" / "nominal.yaml"))
     sim = make_parent_sim()
     parent = advance_to_parent(sim, cfg)
     parent["cfg"] = cfg
@@ -1723,7 +1715,7 @@ def run_teleport_case(
     wrist_cycle: dict | None = None,
     wrist_reposition: dict | None = None,
 ) -> dict:
-    cfg = merge_sim_config(load_yaml(ROOT / "config" / "nominal.yaml"))
+    cfg = merge_sim_config(load_yaml(ROOT / "config" / "simulation" / "nominal.yaml"))
     sim = make_parent_sim()
     dt = float(sim.model.opt.timestep)
     viewer = None

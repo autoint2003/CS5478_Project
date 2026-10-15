@@ -39,7 +39,7 @@ from data_generation.rebuild_k48_recovery import (
     propose_actions,
     resolve_stored_path,
 )
-from training.unified_k47 import load_codebook
+from training.k47_codebook import load_codebook
 
 TARGET = 50
 MAX_LAUNCHES = 360
@@ -263,7 +263,7 @@ def _replay_known(env, book, have):
 
 
 def _candidate_pool(env, have_ids):
-    from training.history_aware_critic_ablation import restore_capture
+    from envs.simulation.capture import restore_capture
 
     pool = []
     for row in _load_jsonl(OLD / "candidates.jsonl"):
@@ -310,7 +310,7 @@ def _generate(env, book, have):
     reserved = _reserved_keys()
     launches = 0
     from data_generation.ball_impact_dataset import run_episode
-    from training.history_aware_critic_ablation import restore_capture
+    from envs.simulation.capture import restore_capture
 
     while len(have) < TARGET and launches < MAX_LAUNCHES:
         spec = _draw_spec(draw)

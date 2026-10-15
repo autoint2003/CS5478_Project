@@ -7,6 +7,7 @@ No GRPO, SAC, DPO, new tokens, or final-test rollouts.
 
 from __future__ import annotations
 
+
 import json
 import sys
 from pathlib import Path
@@ -18,15 +19,16 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import training.natural_loss_recatch_transformer_v3 as v3
-from envs.airborne_obs import OBS_NAMES_AIR, SCALE_PREL, SCALE_VREL
-from envs.physical_recovery import SCALE_AP
-from training.autonomous_episode import make_training_env, seat_base
-from training.autonomous_rl_sanity import supports_of
+from envs.simulation.support_contacts import restore_supports, supports_of
+import models.airborne_v3 as v3
+from envs.observations.airborne_obs import OBS_NAMES_AIR, SCALE_PREL, SCALE_VREL
+from envs.outcomes.physical_recovery import SCALE_AP
+from training.recovery_episode import make_training_env, seat_base
+
 from experiments.legacy.balanced_unified_recovery import STEPS_PER_EPOCH
 from experiments.legacy.continual_skill_addition import ContinualPolicy, copy_base, windows
 from experiments.legacy.final_rl_readiness import CAP, CKPT
-from models.k36_policy import FuturePolicy, G_NAMES, HORIZONS
+from models.historical.k36_policy import FuturePolicy, G_NAMES, HORIZONS
 from experiments.legacy.supervised_coverage_warmstart import (
     dataset,
     roll_ic,

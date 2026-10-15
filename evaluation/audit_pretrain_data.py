@@ -14,9 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from data_generation.impact_labels import near
+from data_generation.validation.impact_labels import near
 from data_generation.rebuild_k48_recovery import _load_jsonl, _scenario_key
-from training.unified_k47 import CAP, episode_arrays, load_codebook
+from training.k47_codebook import CAP, episode_arrays, load_codebook
 from training.unified_k48 import HANDOFF, episode_tensors
 
 DATA = ROOT / "data"

@@ -22,14 +22,15 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import experiments.recatch.natural_loss_recatch_data_scaling as scale
-import training.natural_loss_recatch_transformer_v3 as v3
-from envs.airborne_obs import observe_airborne, relative_state
-from envs.observable_obs import ObservableObsState
-from envs.physical_recovery import physical_pack
-from experiments.recatch.clean_natural_loss_recatch import distal_geoms, measure
+import experiments.recatch.natural_loss.natural_loss_recatch_data_scaling as scale
+import models.airborne_v3 as v3
+import experiments.legacy.airborne_v3_demos as v3_demos
+from envs.observations.airborne_obs import observe_airborne, relative_state
+from envs.observations.observable_obs import ObservableObsState
+from envs.outcomes.physical_recovery import physical_pack
+from experiments.recatch.natural_loss.clean_natural_loss_recatch import distal_geoms, measure
 from envs.ballistic_impact import assert_noslip
-from training.full_3d_airborne_recatch_dataset import (
+from data_generation.airborne_recatch_dataset import (
     TRACK,
     begin,
     carry_then_release,
@@ -42,9 +43,9 @@ from training.full_3d_airborne_recatch_dataset import (
 from experiments.legacy.long_context_recovery_pilot import jsonable
 from experiments.legacy.phase_decoupled_recovery_pilot import world
 from experiments.legacy.recovery_policy_pretraining_preparation import schedules
-from training.recovery_runtime import T_TASK, continue_long, physical_of, restore_dyn, run_impact
-from training.replay_core import park_impact_ball
-from data_generation.natural_specs import EVAL_NATURAL, TRAIN_NATURAL
+from training.recovery_execution import T_TASK, continue_long, physical_of, restore_dyn, run_impact
+from envs.simulation.scene_state import park_impact_ball
+from data_generation.initial_conditions.natural_specs import EVAL_NATURAL, TRAIN_NATURAL
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "balanced_unified_recovery"
 REPORT = ROOT / "results" / "diagnostics" / "BALANCED_UNIFIED_RECOVERY_EVALUATION.md"
@@ -417,7 +418,7 @@ def main():
         eval_natural.append(window)
 
     air_train = []
-    vertical = v3.record_air(
+    vertical = v3_demos.record_air(
         sim, {"tag": "vertical", "mode": "above", "lead": 0.0, "k": 4.0, "rz": -0.012, "vrel": 0.45},
         base, nominal, pads, pad_mu, pinch, "train",
     )
@@ -446,7 +447,7 @@ def main():
         ("gravity_inward", "sliding"),
         ("recatch_open20", "recatch"),
     ):
-        tr = v3.record_local(sim_i, skill, sched[skill], zm6, nominal_i, pads_i, pad_mu_i, None)
+        tr = v3_demos.record_local(sim_i, skill, sched[skill], zm6, nominal_i, pads_i, pad_mu_i, None)
         if tr is None:
             raise RuntimeError(f"verified local skill failed: {skill}")
         tr["pool"] = pool
@@ -517,7 +518,7 @@ def main():
         if made is None:
             continue
         if tag == "air_lat_pos":
-            tr = v3.record_air(
+            tr = v3_demos.record_air(
                 sim,
                 {"tag": "lat_pos", "mode": "below", "lead": 0.03, "k": 5.0, "rz": 0.0, "vrel": 0.55},
                 made["snap"], nominal, pads, pad_mu,

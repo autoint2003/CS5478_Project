@@ -2,9 +2,9 @@
 
 MuJoCo Panda grasp recovery. Physical success is nominal continuation that still holds the cylinder at absolute t = 12. `physical_of` returns drop, escape, or else bilateral contact with object height above 0.51 m. The published success string is `RETAINED_TO_12`.
 
-Online control is nominal until the geometry switch in `config/geometry_switch.yaml`, then the policy, then a stable-grasp exit, then nominal again through absolute t = 12. Entry is a hand-frame position error above 6 mm for 40 ms. Exit is bilateral contact, position error below 14.7 mm, orientation error below 0.35 rad, and relative speed below 0.08 m/s, held for 100 ms. The handoff is one-way. The deterioration score is not the trigger. `training/autonomous_episode.py` is the episode constructor. `training/autonomous_smoke.py` checks one impact, one slide, and an undisturbed grasp.
+Online control is nominal until the geometry switch in `config/controllers/geometry_switch.yaml`, then the policy, then a stable-grasp exit, then nominal again through absolute t = 12. Entry is a hand-frame position error above 6 mm for 40 ms. Exit is bilateral contact, position error below 14.7 mm, orientation error below 0.35 rad, and relative speed below 0.08 m/s, held for 100 ms. The handoff is one-way. The deterioration score is not the trigger. `training/recovery_episode.py` is the episode constructor. `training/autonomous_smoke.py` checks one impact, one slide, and an undisturbed grasp.
 
-The policy is a causal Transformer. It reads the 39-D `observe_airborne` state and commands `recovery7d_airborne_v3` in `controllers/recovery_actions.py`. The 39 channels are the 27-D tactile and proprioceptive prefix plus 12 object-relative pose and twist channels. The duplicate wide-scale hand twist that used to occupy indices 39–44 is not in the vector. The previous 7-D command is a separate controller-state input. Tokens are K = 32 prototypes, shape `(32, 7)`. Training uses `torch.manual_seed(1)` inside `train_equal`, 120 epochs, 80 steps per epoch, batch 16, and equal weight across the families that are present. There is no viability classifier. The handoff head is not this policy.
+The policy is a causal Transformer. It reads the 39-D `observe_airborne` state and commands `recovery7d_airborne_v3` in `controllers/recovery/action_map.py`. The 39 channels are the 27-D tactile and proprioceptive prefix plus 12 object-relative pose and twist channels. The duplicate wide-scale hand twist that used to occupy indices 39–44 is not in the vector. The previous 7-D command is a separate controller-state input. Tokens are K = 32 prototypes, shape `(32, 7)`. Training uses `torch.manual_seed(1)` inside `train_equal`, 120 epochs, 80 steps per epoch, batch 16, and equal weight across the families that are present. There is no viability classifier. The handoff head is not this policy.
 
 Object position, orientation, and twist in that vector are exact MuJoCo body state, used as a noise-free proxy for an RGB-D tracker. The project does not run a camera or a learned tracker. On the tested moderate sensing profile (2 mm position noise, 1 deg orientation noise, 0.03 m/s linear velocity, 0.3 rad/s angular velocity, 40 ms object-channel delay, 50 ms smoothing, 0.5 mm center-of-pressure noise, and 1 N force noise) the 39-D policy scores 15, 16, and 16 out of 24, so that profile does not reduce the clean 15/24. Center-of-pressure and lateral-estimate noise remain the more sensitive part of the observation: on the 45-D sweep, 0.5–1 mm perturbations there moved impact and one open-finger case. Those tactile channels are unchanged in the 39-D vector.
 
@@ -12,7 +12,7 @@ Object position, orientation, and twist in that vector are exact MuJoCo body sta
 
 From the repository root:
 
-1. Load `results/archive/demo_results/diagnostics/raw/balanced_unified_recovery/ckpt_39d.pt` with `training.natural_loss_recatch_transformer_v3.load_airborne_policy`. That loader refuses a checkpoint whose first layer was built for a different observation width, including the archived 45-D weights.
+1. Load `results/archive/demo_results/diagnostics/raw/balanced_unified_recovery/ckpt_39d.pt` with `models.airborne_v3.load_airborne_policy`. That loader refuses a checkpoint whose first layer was built for a different observation width, including the archived 45-D weights.
 2. Build the 24 cases the same way as `build_cases` in `training/observation_study_common.py`: seated grasp, impact snapshots, schedule suffixes, airborne carries, and the held-out natural-loss windows.
 3. Score each case through `continue_long` to absolute t = 12.
 
@@ -24,8 +24,8 @@ From the repository root:
 | 39-D benchmark and robustness log | `results/archive/demo_results/diagnostics/raw/balanced_39d/summary.json` |
 | Archived 45-D balanced weights | `results/archive/demo_results/diagnostics/raw/balanced_unified_recovery/ckpt.pt` |
 | Archived 45-D 24-case log | `results/archive/demo_results/diagnostics/raw/balanced_unified_recovery/summary.json` |
-| Geometry entry and exit | `config/geometry_switch.yaml` |
-| Online episode | `training/autonomous_episode.py` |
+| Geometry entry and exit | `config/controllers/geometry_switch.yaml` |
+| Online episode | `training/recovery_episode.py` |
 
 The 39-D checkpoint stores the same K = 32 prototypes as the archived 45-D run. Its weights are not a resized copy of those weights.
 
@@ -61,18 +61,18 @@ Grip in these recipes uses −1 for +2 N·m (open) and +1 for −18 N·m (secure
 
 | piece | where |
 | --- | --- |
-| nominal grasp / lift | `envs/grasp_sim.py`, `controllers/nominal.py`, `training/demo_ballistic_impact.py` |
-| 39-D airborne observation | `envs/airborne_obs.py` |
-| v3 action map | `controllers/recovery_actions.py` |
-| geometry entry and stable exit | `config/geometry_switch.yaml`, `controllers/geometry_switch.py` |
-| online episode | `training/autonomous_episode.py` |
-| t = 12 continuation | `continue_long` and `physical_of` in `training/recovery_runtime.py` |
+| nominal grasp / lift | `envs/simulation/grasp_sim.py`, `controllers/nominal.py`, `training/demo_ballistic_impact.py` |
+| 39-D airborne observation | `envs/observations/airborne_obs.py` |
+| v3 action map | `controllers/recovery/action_map.py` |
+| geometry entry and stable exit | `config/controllers/geometry_switch.yaml`, `controllers/recovery/geometry_switch.py` |
+| online episode | `training/recovery_episode.py` |
+| t = 12 continuation | `continue_long` and `physical_of` in `training/recovery_execution.py` |
 | snapshot restore | `restore_dyn` |
 | balanced training and the 24-case definitions | `training/balanced_unified_recovery.py` |
 | 39-D train, benchmark, and sensor check | `training/final_39d_balanced_policy.py` |
-| scene and gains | `config/nominal.yaml`, `config/sim.yaml`, `config/rule_based_recovery.yaml` |
+| scene and gains | `config/simulation/nominal.yaml`, `config/simulation/sim.yaml`, `config/controllers/rule_based_recovery.yaml` |
 
-`map_recovery4d` remains in `controllers/residual.py` so the wrist embedding can be checked against the older 4D map. Training rollouts do not call it.
+`map_recovery4d` remains in `controllers/recovery/residual_limits.py` so the wrist embedding can be checked against the older 4D map. Training rollouts do not call it.
 
 ## Diagnostics worth keeping
 

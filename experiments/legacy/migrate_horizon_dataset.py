@@ -17,9 +17,9 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from training.autonomous_episode import make_training_env
-from training.k36_checkpoint import load_models
-from envs.horizon_outcome import (
+from training.recovery_episode import make_training_env
+from models.historical.k36_checkpoint import load_models
+from envs.outcomes.horizon_outcome import (
     LAMBDA_TIME,
     NOMINAL_S,
     T_RECOVERY_MAX,
@@ -27,9 +27,10 @@ from envs.horizon_outcome import (
     replay_commands,
 )
 from training.grpo_math import advantages
-from training.unified_k47 import CAP, episode_arrays, group_advantage, load_codebook, read_jsonl, supervised_loss
+from training.k47_codebook import CAP, episode_arrays, group_advantage, load_codebook, read_jsonl
+from experiments.legacy.k47_training import supervised_loss
 import torch
-from data_generation.impact_labels import mechanism
+from data_generation.validation.impact_labels import mechanism
 
 RAW = ROOT / "results/archive/demo_results/diagnostics/raw/legal_recovery_v2"
 OUT = ROOT / "results/archive/demo_results/diagnostics/raw/horizon_migration"
@@ -251,7 +252,7 @@ def timing(env, book, model):
     path = ROOT / "results/archive/demo_results/diagnostics/raw/ball_impact_dataset_v2/accepted/train/ball_train_v2_0021.pkl"
     with path.open("rb") as handle:
         blob = pickle.load(handle)
-    from training.history_aware_critic_ablation import restore_capture
+    from envs.simulation.capture import restore_capture
     restore_capture(env, blob["capture"])
     err = float(np.max(np.abs(np.array(env.sim.data.qpos) - blob["capture"]["physics"]["qpos"])))
     actions = np.load(RAW / "trajectories/ball_train_v2_0021__release_long.npz")["actions"]
@@ -264,7 +265,7 @@ def timing(env, book, model):
     t0 = float(env.sim.data.time)
     for action in actions[:10]:
         step_legal(env.sim, action)
-    from envs.horizon_outcome import finish_recovery
+    from envs.outcomes.horizon_outcome import finish_recovery
     forced = finish_recovery(env, blob["ref"], t0, "forced")
     nominal = float(full["nominal_elapsed"])
     if abs(nominal - (float(full["t_end"]) - float(full["t_handoff"]))) > 1e-6:
@@ -293,7 +294,7 @@ def timing(env, book, model):
     rows = read_jsonl(source)
     case = next(row for row in rows if row["id"] == "ball_train_v2_0021" and row["strategy"] == "release_long")
     device = torch.device("cpu")
-    from training.unified_k47 import collate
+    from experiments.legacy.k47_training import collate
     obs, prev, tokens, residuals, mask, weight = collate([case], book, device)
     if int(mask.sum()) != 46:
         raise RuntimeError("0021 was split")
@@ -319,7 +320,7 @@ def timing(env, book, model):
 
 
 def eval_checkpoint(env, book, model):
-    from envs.horizon_outcome import roll_policy
+    from envs.outcomes.horizon_outcome import roll_policy
     del model
     device = torch.device("cpu")
     loaded, _ref = load_models(CKPT, ROOT / "results/archive/demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt", device)
@@ -354,7 +355,7 @@ def eval_checkpoint(env, book, model):
 
 
 def main():
-    from training.unified_k47 import build_model
+    from training.k47_codebook import build_model
     mode = sys.argv[1] if len(sys.argv) > 1 else "--timing"
     device = torch.device("cpu")
     book = load_codebook()

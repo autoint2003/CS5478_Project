@@ -18,7 +18,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from models.k48_policy import build_policy
-from training.autonomous_episode import make_training_env
+from training.recovery_episode import make_training_env
 from experiments.legacy.final_rl_readiness import CAP, SIGMA
 from experiments.legacy.future_state_ablation import FuturePolicy
 from experiments.legacy.pre_grpo_sanity import (

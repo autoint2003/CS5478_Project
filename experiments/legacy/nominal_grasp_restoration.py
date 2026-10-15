@@ -6,6 +6,7 @@ Does not train and does not edit the frozen observation, codebook, or exit rule.
 
 from __future__ import annotations
 
+
 import json
 import sys
 from pathlib import Path
@@ -17,25 +18,26 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import experiments.recatch.natural_loss_recatch_data_scaling as scale
-import training.natural_loss_recatch_transformer_v3 as v3
-from controllers.geometry_switch import GeometrySwitch, hand_pose
-from controllers.recovery_actions import AIRBORNE_V3, grip_tau, normalize_action
-from training.autonomous_episode import T_TASK, Z_ABORT, fresh_nominal_state, make_training_env, nominal_substep, seat_base
-from training.autonomous_rl_sanity import restore_supports, supports_of
+from envs.simulation.capture import restore_capture, take_capture
+from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
+from controllers.cartesian.tracking import TRACK
+from envs.simulation.support_contacts import restore_supports, supports_of
+import experiments.recatch.natural_loss.natural_loss_recatch_data_scaling as scale
+import models.airborne_v3 as v3
+from controllers.recovery.geometry_switch import GeometrySwitch, hand_pose
+from controllers.recovery.action_map import AIRBORNE_V3, grip_tau, normalize_action
+from training.recovery_episode import T_TASK, Z_ABORT, fresh_nominal_state, make_training_env, nominal_substep, seat_base
+
 from experiments.legacy.film_impact_zp6_k33 import load_policy
-from training.full_3d_airborne_recatch_dataset import TRACK, drop_supports, restore_to
-from training.history_aware_critic_ablation import restore_capture, take_capture
-from training.nominal_pose_audit import (
+from data_generation.airborne_recatch_dataset import drop_supports, restore_to
+
+from experiments.legacy.nominal_pose_audit import (
     HORIZON,
     PERSIST,
     SPEC_ZP6,
-    capture_ref,
     choose_tol,
-    errors,
     nominal_hold,
     policy_action,
-    rotvec,
     undisturbed,
     until_impact,
 )
@@ -370,7 +372,7 @@ def main():
     controls = []
     print("CONTROLS", flush=True)
     base, _q = seat_base(env.sim, env.nominal, env.pads, env.pad_mu)
-    from training.nominal_pose_audit import roll_policy
+    from experiments.legacy.nominal_pose_audit import roll_policy
 
     def enter_offset(spec):
         info = restore_to(env.sim, base, env.nominal, env.pads, env.pad_mu)

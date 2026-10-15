@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from envs.horizon_outcome import LOST_STEPS, NOMINAL_S, physical_reward
+from envs.outcomes.horizon_outcome import LOST_STEPS, NOMINAL_S, physical_reward
 from training.grpo_math import advantages
 from training.reward_v2 import (
     NominalHoldTrace,
@@ -21,7 +21,7 @@ from training.reward_v2 import (
     grpo_return,
     reward_components,
 )
-from training.unified_k47 import group_advantage
+from training.k47_codebook import group_advantage
 
 LIMIT = 4.0
 PHYSICS_DT = 0.002
@@ -193,7 +193,9 @@ def compare_saved_traces():
         ),
         "saved_eval_fields": sorted(rows[0]),
     }
-    out = ROOT / "results/archive/demo_results/diagnostics/raw/unified_k48/reward_v2/saved_trace_comparison.json"
+    import os
+    import tempfile
+    out = Path(os.environ["REWARD_TRACE_OUT"]) if os.environ.get("REWARD_TRACE_OUT") else Path(tempfile.mkdtemp(prefix="reward_v2_")) / "saved_trace_comparison.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     payload = {"summary": summary, "rows": scored}
     out.write_text(json.dumps(payload, indent=2), encoding="utf-8")

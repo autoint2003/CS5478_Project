@@ -1,31 +1,42 @@
-"""Physics regression after the layout move.
+"""Physics regression.
 
-Replays saved action tapes through envs.step_legal. Does not train and does
-not rewrite manifests, checkpoints, or videos.
+Two replays of one tape check determinism. tests/fixtures/physics_state_baseline.npz
+is a later-change baseline from this tree, not a pre-refactor ground truth.
+Does not train and does not rewrite manifests, checkpoints, or videos.
 """
 
 from __future__ import annotations
 
+
 import json
+import os
+import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
+import mujoco
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from envs.simulation.capture import restore_capture, take_capture
 from data_generation.strategies.vertical_recatch_search import load_blob, make_env
-from envs.airborne_obs import observe_airborne
-from envs.contacts import extract_contacts
-from envs.horizon_outcome import nominal_verify
-from envs.observable_obs import ObservableObsState
+from envs.observations.airborne_obs import observe_airborne
+from envs.contacts.frames import extract_contacts
+from envs.outcomes.horizon_outcome import nominal_verify
+from envs.observations.observable_obs import ObservableObsState
 from envs.step_legal import step_legal
-from training.history_aware_critic_ablation import restore_capture
-from training.unified_k47 import decode_action, load_codebook
+
+from training.k47_codebook import decode_action, load_codebook
 
 ATOL = 1e-4
+STATE_ATOL = 1e-8
+BASELINE = ROOT / "tests" / "fixtures" / "physics_state_baseline.npz"
+BASELINE_META = ROOT / "tests" / "fixtures" / "physics_state_baseline.json"
+SCENE_CONFIG = "config/simulation/nominal.yaml"
 
 
 def _check(name, cond, detail=""):
@@ -50,7 +61,7 @@ def _restore(env, blob):
     if isinstance(blob, dict) and "capture" in blob:
         restore_capture(env, blob["capture"])
         return blob
-    from training.recovery_runtime import restore_ballistic
+    from training.recovery_execution import restore_ballistic
 
     restore_ballistic(env.sim, blob)
     return blob
@@ -73,10 +84,20 @@ def _replay(env, blob, actions, persistent_hist):
         qpos.append(np.array(sim.data.qpos, float).copy())
         qvel.append(np.array(sim.data.qvel, float).copy())
         rows, _summary = extract_contacts(sim)
-        contacts.append([(int(row["geom1"]), int(row["geom2"]), round(float(row["Fn"]), 6), row["side"]) for row in rows])
+        contacts.append([
+            (
+                int(row["geom1"]),
+                int(row["geom2"]),
+                round(float(row["Fn"]), 6),
+                str(row["side"]),
+                tuple(round(float(value), 6) for value in row["n_w"]),
+            )
+            for row in rows
+        ])
         control.append((
             str(sim.fsm.phase),
             np.array(sim.fsm.p_des, float).copy(),
+            np.array(sim.fsm.r_des, float).reshape(-1).copy(),
             np.array(sim.fsm.v_cmd, float).copy(),
             np.array(sim.fsm.w_cmd, float).copy(),
         ))
@@ -97,8 +118,14 @@ def _compare_tape(env, row, persistent_hist):
     _check(row["id"] + " qpos", qpos_err < 1e-8, str(qpos_err))
     _check(row["id"] + " qvel", qvel_err < 1e-8, str(qvel_err))
     _check(row["id"] + " contact", contacts == contacts2)
+    obs_err = float(np.max(np.abs(obs - obs2)))
+    _check(row["id"] + " observation replay", obs_err <= STATE_ATOL, str(obs_err))
     same_control = all(
-        a[0] == b[0] and np.allclose(a[1], b[1]) and np.allclose(a[2], b[2]) and np.allclose(a[3], b[3])
+        a[0] == b[0]
+        and np.allclose(a[1], b[1], atol=STATE_ATOL)
+        and np.allclose(a[2], b[2], atol=STATE_ATOL)
+        and np.allclose(a[3], b[3], atol=STATE_ATOL)
+        and np.allclose(a[4], b[4], atol=STATE_ATOL)
         for a, b in zip(control, control2)
     )
     _check(row["id"] + " controller", same_control)
@@ -107,13 +134,128 @@ def _compare_tape(env, row, persistent_hist):
         _check(row["id"] + " observation", err <= ATOL, str(err))
     else:
         raise RuntimeError(f"{row['id']} obs shape {obs.shape} saved {saved_obs.shape}")
-    return blob, actions
+    return blob, actions, obs, qpos, qvel, contacts, control
+
+
+def _case_rows():
+    rows = []
+    for key, folder in (
+        ("controlled_sliding", "data/controlled_sliding"),
+        ("inward_sliding", "data/inward_sliding"),
+        ("horizontal_recatch", "data/recatch"),
+    ):
+        manifest = ROOT / folder / "manifest.jsonl"
+        rows.append((key, json.loads(manifest.open(encoding="utf-8").readline())))
+    rows.append(("vertical_recatch", _row(ROOT / "data/vertical_recatch/manifest.jsonl", "ball_train_v2_0070", "follow_early")))
+    return rows
+
+
+def _object_rows(rows):
+    packed = np.empty(len(rows), dtype=object)
+    for index, row in enumerate(rows):
+        packed[index] = row
+    return packed
+
+
+def _record(prefix, obs, actions, qpos, qvel, contacts, control):
+    phase, p_des, r_des, v_cmd, w_cmd = zip(*control)
+    return {
+        prefix + "obs": np.asarray(obs, np.float32),
+        prefix + "actions": np.asarray(actions, np.float32),
+        prefix + "qpos": np.stack(qpos),
+        prefix + "qvel": np.stack(qvel),
+        prefix + "contacts": _object_rows(contacts),
+        prefix + "phase": np.array(phase),
+        prefix + "p_des": np.stack(p_des),
+        prefix + "r_des": np.stack(r_des),
+        prefix + "v_cmd": np.stack(v_cmd),
+        prefix + "w_cmd": np.stack(w_cmd),
+    }
+
+
+def _baseline_meta(rows):
+    head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    dirty = subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip()
+    return {
+        "role": "Baseline for later code changes. This is the current verified tree, not a pre-refactor ground truth.",
+        "git_head": head,
+        "working_tree": "dirty" if dirty else "clean",
+        "parent_note": "HEAD 85a117b is the round-2 rollback commit. Round 3 and this cleanup are uncommitted on that commit.",
+        "mujoco": mujoco.__version__,
+        "scene_config": SCENE_CONFIG,
+        "sim_config": "config/simulation/sim.yaml",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "observation_atol_vs_saved_tape": ATOL,
+        "state_atol": STATE_ATOL,
+        "contact_force_decimals": 6,
+        "contact_fields": ["geom1", "geom2", "Fn", "side", "n_w"],
+        "cases": [
+            {
+                "key": key,
+                "id": row.get("id"),
+                "strategy": row.get("strategy"),
+                "snapshot": row.get("snapshot"),
+                "continuous_npz": row.get("continuous_npz"),
+            }
+            for key, row in rows
+        ],
+    }
+
+
+def _compare_baseline(saved, prefix, obs, qpos, qvel, contacts, control):
+    _check(prefix + "baseline obs", np.allclose(obs, saved[prefix + "obs"], atol=STATE_ATOL))
+    _check(prefix + "baseline qpos", np.allclose(np.stack(qpos), saved[prefix + "qpos"], atol=STATE_ATOL))
+    _check(prefix + "baseline qvel", np.allclose(np.stack(qvel), saved[prefix + "qvel"], atol=STATE_ATOL))
+    _check(prefix + "baseline contact", contacts == list(saved[prefix + "contacts"]))
+    phase, p_des, r_des, v_cmd, w_cmd = zip(*control)
+    _check(prefix + "baseline phase", list(phase) == list(saved[prefix + "phase"]))
+    _check(prefix + "baseline p_des", np.allclose(np.stack(p_des), saved[prefix + "p_des"], atol=STATE_ATOL))
+    _check(prefix + "baseline r_des", np.allclose(np.stack(r_des), saved[prefix + "r_des"], atol=STATE_ATOL))
+    _check(prefix + "baseline v_cmd", np.allclose(np.stack(v_cmd), saved[prefix + "v_cmd"], atol=STATE_ATOL))
+    _check(prefix + "baseline w_cmd", np.allclose(np.stack(w_cmd), saved[prefix + "w_cmd"], atol=STATE_ATOL))
+
+
+def test_state_baseline(records):
+    """Compare with the saved state tape, or write it when explicitly requested.
+
+    A missing fixture is not treated as proof that the current run matches the
+    pre-refactor controller.
+    """
+    if os.environ.get("WRITE_PHYSICS_BASELINE") == "1":
+        BASELINE.parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(BASELINE, **records)
+        BASELINE_META.write_text(json.dumps(_baseline_meta(_case_rows()), indent=2), encoding="utf-8")
+        _check("baseline written", BASELINE.is_file(), str(BASELINE))
+        return
+    _check("baseline fixture", BASELINE.is_file() and BASELINE_META.is_file(), str(BASELINE))
+    meta = json.loads(BASELINE_META.read_text(encoding="utf-8"))
+    _check("baseline role", "not a pre-refactor ground truth" in meta["role"])
+    _check("baseline mujoco", meta["mujoco"] == mujoco.__version__, meta["mujoco"])
+    with np.load(BASELINE, allow_pickle=True) as saved:
+        for key, _row_item in _case_rows():
+            prefix = key + "_"
+            _compare_baseline(
+                saved,
+                prefix,
+                records[prefix + "obs"],
+                list(records[prefix + "qpos"]),
+                list(records[prefix + "qvel"]),
+                list(records[prefix + "contacts"]),
+                list(zip(
+                    records[prefix + "phase"],
+                    records[prefix + "p_des"],
+                    records[prefix + "r_des"],
+                    records[prefix + "v_cmd"],
+                    records[prefix + "w_cmd"],
+                )),
+            )
 
 
 def test_vertical():
     row = _row(ROOT / "data/vertical_recatch/manifest.jsonl", "ball_train_v2_0070", "follow_early")
     env = make_env()
-    blob, actions = _compare_tape(env, row, persistent_hist=True)
+    blob, actions, obs, qpos, qvel, contacts, control = _compare_tape(env, row, persistent_hist=True)
+    records = _record("vertical_recatch_", obs, actions, qpos, qvel, contacts, control)
     with np.load(ROOT / row["token_residual_npz"]) as packed:
         tokens = np.asarray(packed["tokens"])
         residuals = np.asarray(packed["residuals"], np.float32)
@@ -136,14 +278,24 @@ def test_vertical():
         step_legal(env.sim, action)
     held = nominal_verify(env, blob["ref"])
     _check("vertical SUCCESS_12S", held["reason"] == "SUCCESS_12S", str(held["reason"]))
+    env = make_env()
+    restore_capture(env, blob["capture"])
+    for action in actions:
+        step_legal(env.sim, action)
+    held_again = nominal_verify(env, blob["ref"])
+    _check("vertical outcome replay", held_again["reason"] == held["reason"], held_again["reason"])
+    return records
 
 
 def test_other_tapes():
     env = make_env()
-    for folder in ("data/controlled_sliding", "data/inward_sliding", "data/recatch"):
-        manifest = ROOT / folder / "manifest.jsonl"
-        first = json.loads(manifest.open(encoding="utf-8").readline())
-        _compare_tape(env, first, persistent_hist=True)
+    records = {}
+    for key, row in _case_rows():
+        if key == "vertical_recatch":
+            continue
+        _blob, actions, obs, qpos, qvel, contacts, control = _compare_tape(env, row, persistent_hist=True)
+        records.update(_record(key + "_", obs, actions, qpos, qvel, contacts, control))
+    return records
 
 
 def test_manifests():
@@ -217,8 +369,9 @@ def main():
     test_manifests()
     test_table_drop_rule()
     test_checkpoint()
-    test_other_tapes()
-    test_vertical()
+    records = test_other_tapes()
+    records.update(test_vertical())
+    test_state_baseline(records)
     print("PHYSICS_REGRESSION_OK", flush=True)
 
 

@@ -10,9 +10,9 @@ from __future__ import annotations
 import mujoco
 import numpy as np
 
-from controllers.recovery_actions import AIRBORNE_V3, TAU_OPEN, TAU_SECURE, grip_tau, normalize_action
-from envs.deterioration import body_twist
-from envs.physical_recovery import physical_pack
+from controllers.recovery.action_map import AIRBORNE_V3, TAU_OPEN, TAU_SECURE, grip_tau, normalize_action
+from envs.simulation.grasp_quality import body_twist
+from envs.outcomes.physical_recovery import physical_pack
 
 CYLINDER_RADIUS = 0.018
 CYLINDER_DIAMETER = 0.036

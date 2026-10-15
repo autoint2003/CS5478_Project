@@ -17,12 +17,12 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from envs.dynamics import finger_pad_geom_ids
-from envs.observable_obs import OBS_NAMES, ObservableObsState, observe_observable
-from envs.observable_reward import read_tactile
-from envs.physical_recovery import physical_pack
+from envs.simulation.object_dynamics import finger_pad_geom_ids
+from envs.observations.observable_obs import OBS_NAMES, ObservableObsState, observe_observable
+from envs.observations.tactile_reward import read_tactile
+from envs.outcomes.physical_recovery import physical_pack
 from envs.ballistic_impact import make_sim
-from training.recovery_runtime import (
+from training.recovery_execution import (
     capture_nominal,
     capture_pads,
     map7,
@@ -31,8 +31,8 @@ from training.recovery_runtime import (
     run_impact,
     step_cmd,
 )
-from controllers.residual import map_recovery4d
-from controllers.skill_schedules import embed4, rep, schedules
+from controllers.recovery.residual_limits import map_recovery4d
+from controllers.recovery.skill_schedules import embed4, rep, schedules
 
 OUT = ROOT / "results" / "diagnostics" / "raw" / "recovery_policy_pretraining_preparation"
 HIST = 4
@@ -284,7 +284,7 @@ def main() -> int:
         raise RuntimeError("action audit failed")
 
     sim, cfg = make_sim()
-    from controllers.jacobian_controller import gains_from_cfg
+    from controllers.cartesian.jacobian import gains_from_cfg
     gains = gains_from_cfg(cfg)
     nominal = capture_nominal(sim)
     pad_ids, pad_mu = capture_pads(sim)

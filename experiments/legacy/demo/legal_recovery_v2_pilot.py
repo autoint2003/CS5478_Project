@@ -18,8 +18,8 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from controllers.recovery_actions import v1_normalized_to_v3
-from envs.physical_recovery import Z_AIR
+from controllers.recovery.action_map import v1_normalized_to_v3
+from envs.outcomes.physical_recovery import Z_AIR
 from experiments.ball_impact.privileged_ball_impact_search import command as release_command
 from experiments.legacy.recovery_policy_pretraining_preparation import schedules
 from experiments.sliding.sliding_vs_regrasp import (
@@ -103,8 +103,8 @@ def coverage(actions, proto):
 def main():
     import argparse
     import torch
-    from training.autonomous_episode import make_training_env
-    from training.k36_checkpoint import load_models
+    from training.recovery_episode import make_training_env
+    from models.historical.k36_checkpoint import load_models
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--max-ics", type=int, default=8)

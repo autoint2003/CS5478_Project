@@ -6,7 +6,7 @@ import numpy as np
 import torch
 
 from models.k48_policy import build_policy
-from training.unified_k47 import CAP
+from training.k47_codebook import CAP
 
 MOTION_K = 47
 HANDOFF = 47

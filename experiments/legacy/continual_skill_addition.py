@@ -7,6 +7,8 @@ at the first stage whose closed loop recovers airborne. No GRPO update.
 
 from __future__ import annotations
 
+
+
 import json
 import sys
 from pathlib import Path
@@ -18,15 +20,17 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import training.natural_loss_recatch_transformer_v3 as v3
-import envs.recovery_success as success
+from models.historical.k36_policy import ContinualPolicy
+from envs.simulation.capture import restore_capture, take_capture
+from envs.simulation.support_contacts import restore_supports, supports_of
+import models.airborne_v3 as v3
+import envs.outcomes.recovery_success as success
 from models.k48_policy import build_policy
-from training.autonomous_episode import make_training_env, seat_base
-from training.autonomous_rl_sanity import supports_of
+from training.recovery_episode import make_training_env, seat_base
+
 from experiments.legacy.final_rl_readiness import CAP, CATALOG, CKPT, GROUP, load_ic, rollout
-from training.history_aware_critic_ablation import restore_capture
+
 from experiments.legacy.supervised_coverage_warmstart import (
-from models.k36_policy import ContinualPolicy
     RECOV,
     dataset,
     load_traj,
@@ -268,9 +272,9 @@ def retained(base_rows, rows):
 
 def trace_case(env, model, kind, name):
     """First 24 recovery steps, for the interference comparison."""
-    from training.nominal_pose_audit import errors
-    from training.autonomous_episode import Z_ABORT
-    import training.natural_loss_recatch_transformer_v3 as v3
+    from envs.outcomes.nominal_pose import errors
+    from training.recovery_episode import Z_ABORT
+    import models.airborne_v3 as v3
     env.model = model.to(env.device)
     env.model.eval()
     if kind == "ic":

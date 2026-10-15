@@ -8,6 +8,7 @@ Nothing here edits step_legal, the nominal controller, or the scene.
 
 from __future__ import annotations
 
+
 import json
 import pickle
 import sys
@@ -19,23 +20,24 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from controllers.geometry_switch import GeometrySwitch
-from controllers.recovery_actions import AIRBORNE_V3, TAU_OPEN, TAU_SECURE, normalize_action
-from envs.airborne_obs import observe_airborne
-from envs.deterioration import body_twist
-from envs.observable_obs import ObservableObsState
-from envs.physical_recovery import physical_pack
+from envs.simulation.capture import restore_capture, take_capture
+from controllers.recovery.geometry_switch import GeometrySwitch
+from controllers.recovery.action_map import AIRBORNE_V3, TAU_OPEN, TAU_SECURE, normalize_action
+from envs.observations.airborne_obs import observe_airborne
+from envs.simulation.grasp_quality import body_twist
+from envs.observations.observable_obs import ObservableObsState
+from envs.outcomes.physical_recovery import physical_pack
 from data_generation.strategies.capture_geometry import capture_geometry
-from training.history_aware_critic_ablation import restore_capture
-from envs.horizon_outcome import NOMINAL_S, nominal_verify
+
+from envs.outcomes.horizon_outcome import NOMINAL_S, nominal_verify
 from envs.ballistic_impact import world
-from data_generation.oracle_search import representability
+from data_generation.oracles.representability import representability
 from envs.step_legal import step_legal
-from envs.recovery_success import nominal_step
-from training.replay_core import TABLE_TOP
-from envs.table_drop import latched
+from envs.outcomes.recovery_success import nominal_step
+from envs.simulation.scene_state import TABLE_TOP
+from envs.outcomes.table_drop import latched
 from data_generation.strategies.recatch_oracle import _class_force, contacts_now
-from training.unified_k47 import load_codebook
+from training.k47_codebook import load_codebook
 
 OUT = ROOT / "results" / "diagnostics" / "vertical_recatch"
 DT = 0.02

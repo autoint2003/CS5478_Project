@@ -14,14 +14,14 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from controllers.jacobian_controller import gains_from_cfg, ori_error_deg
-from envs.config_util import load_yaml, merge_sim_config
-from envs.physical_recovery import physical_pack
-from experiments.legacy.demo.demo_airborne_recovery import copy_masks, disable_object_table_only, prepare_high_parent
-from experiments.legacy.demo.demo_airborne_recapture import make_parent_sim
+from controllers.cartesian.jacobian import gains_from_cfg, ori_error_deg
+from envs.simulation.yaml_config import load_yaml, merge_sim_config
+from envs.outcomes.physical_recovery import physical_pack
+from experiments.legacy.demo.demonstrations.demo_airborne_recovery import copy_masks, disable_object_table_only, prepare_high_parent
+from experiments.legacy.demo.demonstrations.demo_airborne_recapture import make_parent_sim
 from envs.ballistic_impact import make_sim as make_ballistic_sim
-from experiments.legacy.demo.demo_ballistic_recovery import restore_ballistic
-from experiments.legacy.demo.demo_dynamic_recatch import (
+from experiments.legacy.demo.demonstrations.demo_ballistic_recovery import restore_ballistic
+from experiments.legacy.demo.demonstrations.demo_dynamic_recatch import (
     BOTH_OFF_MIN,
     EARLY_DOC_RHX_MM,
     EARLY_PKL,
@@ -36,7 +36,7 @@ from experiments.legacy.demo.demo_dynamic_recatch import (
     slim_row,
 )
 from experiments.legacy.demo_teleport_recovery_state import CYL_MASS, PAIR_MU, signed_rot_about_y_deg
-from experiments.legacy.demo.diagnose_omega4_throw import (
+from experiments.legacy.demo.diagnose.diagnose_omega4_throw import (
     MAX_DEG,
     OMEGA3,
     OMEGA4,
@@ -44,7 +44,7 @@ from experiments.legacy.demo.diagnose_omega4_throw import (
     step_ovr,
     tick_omega_override,
 )
-from training.replay_core import freeze
+from controllers.cartesian.velocity_step import freeze
 
 REPORT = OUT / "RELEASE_STATE_MAP_OMEGA4.md"
 FLIGHT_S = 0.120
@@ -718,11 +718,11 @@ def interactive_claimed(mode: str) -> None:
     import mujoco.viewer
     import time
 
-    from experiments.legacy.demo.demo_airborne_recovery import apply_masks, copy_masks, prepare_high_parent
-    from experiments.legacy.demo.render_grav_reposition import apply_camera_preset
+    from experiments.legacy.demo.demonstrations.demo_airborne_recovery import apply_masks, copy_masks, prepare_high_parent
+    from experiments.legacy.demo.demonstrations.render_grav_reposition import apply_camera_preset
     from experiments.legacy.demo.map_ballistic_disturbance import CAM, _viewer_overlay
 
-    cfg = merge_sim_config(load_yaml(ROOT / "config" / "nominal.yaml"))
+    cfg = merge_sim_config(load_yaml(ROOT / "config" / "simulation" / "nominal.yaml"))
     gains = gains_from_cfg(cfg)
     gains.setdefault("kp_null", 4.0)
     gains.setdefault("kd_null", 0.8)
@@ -958,7 +958,7 @@ def write_report(ics, samples, park, trials, recatch_row, candidate):
 
 def main():
     RAW.mkdir(parents=True, exist_ok=True)
-    cfg = merge_sim_config(load_yaml(ROOT / "config" / "nominal.yaml"))
+    cfg = merge_sim_config(load_yaml(ROOT / "config" / "simulation" / "nominal.yaml"))
     gains = gains_from_cfg(cfg)
     gains.setdefault("kp_null", 4.0)
     gains.setdefault("kd_null", 0.8)
@@ -1041,7 +1041,7 @@ def main():
             tr = release_trial(sim, gains, rst, ic_name, pname, odegs)
             slim = {k: v for k, v in tr.items() if k != "log"}
             dump(RAW / f"release_map_{ic_name}_{pname}.json", slim)
-            from experiments.legacy.demo.demo_dynamic_recatch import save_npz
+            from experiments.legacy.demo.demonstrations.demo_dynamic_recatch import save_npz
 
             save_npz(RAW / f"release_map_{ic_name}_{pname}.npz", tr["log"])
             trials.append(slim)
@@ -1078,7 +1078,7 @@ def main():
         rec = recatch_one(sim, gains, rst, float(cand["open_cmd_deg"]), t_close)
         recatch_row = {k: v for k, v in rec.items() if k != "log"}
         dump(RAW / "release_map_recatch.json", recatch_row)
-        from experiments.legacy.demo.demo_dynamic_recatch import save_npz
+        from experiments.legacy.demo.demonstrations.demo_dynamic_recatch import save_npz
 
         save_npz(RAW / "release_map_recatch.npz", rec["log"])
         print("RECATCH captured", rec.get("captured"), "hold", rec.get("ok_hold"), flush=True)

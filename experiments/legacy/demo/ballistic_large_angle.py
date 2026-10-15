@@ -13,11 +13,11 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
-from controllers.jacobian_controller import gains_from_cfg, ori_error_deg
-from controllers.residual import RECOVERY4D_W_HY_MAX
-from envs.config_util import load_yaml, merge_sim_config
-from envs.physical_recovery import TABLE_DROP
-from envs.deterioration import body_twist
+from controllers.cartesian.jacobian import gains_from_cfg, ori_error_deg
+from controllers.recovery.residual_limits import RECOVERY4D_W_HY_MAX
+from envs.simulation.yaml_config import load_yaml, merge_sim_config
+from envs.outcomes.physical_recovery import TABLE_DROP
+from envs.simulation.grasp_quality import body_twist
 from envs.ballistic_impact import make_sim, z_tgt_of
 
 
@@ -25,7 +25,7 @@ def dump_json(path, obj) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2, default=str), encoding="utf-8")
-from experiments.legacy.demo.demo_ballistic_recovery import (
+from experiments.legacy.demo.demonstrations.demo_ballistic_recovery import (
     HOLD_S,
     OUT,
     RAW,
@@ -40,8 +40,8 @@ from experiments.legacy.demo.demo_ballistic_recovery import (
     slim_m,
     tick_4d,
 )
-from experiments.legacy.demo.demo_ballistic_recovery import signed_rot_about_y_deg
-from training.replay_core import freeze
+from experiments.legacy.demo.demonstrations.demo_ballistic_recovery import signed_rot_about_y_deg
+from controllers.cartesian.velocity_step import freeze
 
 
 def dump(path, obj):
@@ -604,7 +604,7 @@ def write_report(doc: dict) -> None:
 
 def headless_large_angle():
     LA_RAW.mkdir(parents=True, exist_ok=True)
-    cfg = merge_sim_config(load_yaml(Path(__file__).resolve().parents[3] / "config" / "nominal.yaml"))
+    cfg = merge_sim_config(load_yaml(Path(__file__).resolve().parents[3] / "config" / "simulation" / "nominal.yaml"))
     gains = gains_from_cfg(cfg)
     snap = load_early()
     orig = load_zero_rows()
@@ -1016,7 +1016,7 @@ def append_return_audit(audit: dict) -> None:
 
 def headless_return_audit():
     LA_RAW.mkdir(parents=True, exist_ok=True)
-    cfg = merge_sim_config(load_yaml(Path(__file__).resolve().parents[3] / "config" / "nominal.yaml"))
+    cfg = merge_sim_config(load_yaml(Path(__file__).resolve().parents[3] / "config" / "simulation" / "nominal.yaml"))
     gains = gains_from_cfg(cfg)
     snap = load_early()
     plan = json.loads((RAW / "large_angle_plan.json").read_text(encoding="utf-8"))
@@ -1065,7 +1065,7 @@ def headless_return_audit():
 def interactive_large_angle(plan_path=None):
     import mujoco.viewer
 
-    cfg = merge_sim_config(load_yaml(Path(__file__).resolve().parents[3] / "config" / "nominal.yaml"))
+    cfg = merge_sim_config(load_yaml(Path(__file__).resolve().parents[3] / "config" / "simulation" / "nominal.yaml"))
     gains = gains_from_cfg(cfg)
     plan_p = Path(plan_path) if plan_path else RAW / "large_angle_plan.json"
     plan = json.loads(plan_p.read_text(encoding="utf-8")) if plan_p.is_file() else {"none": True}

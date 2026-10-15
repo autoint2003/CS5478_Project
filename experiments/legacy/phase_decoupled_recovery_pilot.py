@@ -170,11 +170,11 @@ def world():
 
 def record_sequence(sim, actions, snap, nominal, pad_ids, pad_mu, mass, friction, dx, dv, prev0):
     from training.value_guided_recovery_bootstrap import DT_POLICY
-    from envs.observable_obs import ObservableObsState
-    from envs.physical_recovery import physical_pack
+    from envs.observations.observable_obs import ObservableObsState
+    from envs.outcomes.physical_recovery import physical_pack
     from training.long_context_recovery_generalization_audit import prepare
     from experiments.legacy.recovery_policy_pretraining_preparation import legal_obs
-    from training.recovery_runtime import _dropped, _escaped, step_cmd
+    from training.recovery_execution import _dropped, _escaped, step_cmd
 
     info, _o0 = prepare(sim, snap, nominal, pad_ids, pad_mu, mass, friction, dx, dv)
     if _o0 is None:
@@ -241,7 +241,7 @@ def main() -> int:
     weight_of = {(tr["name"], tr["copy"]): tr["w"].copy() for tr in success}
 
     sim, gains, nominal, pad_ids, pad_mu, pads_l, pads_r = world()
-    from training.recovery_runtime import run_impact, stamp
+    from training.recovery_execution import run_impact, stamp
     from training.long_context_recovery_generalization_audit import record_frames
 
     snaps = {}

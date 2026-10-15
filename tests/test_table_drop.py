@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+
 import json
 import pickle
 import sys
@@ -14,11 +15,12 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from training.history_aware_critic_ablation import restore_capture, take_capture
-from envs.horizon_outcome import finish_recovery
+from envs.simulation.capture import restore_capture, take_capture
+
+from envs.outcomes.horizon_outcome import finish_recovery
 from experiments.ball_impact.privileged_ball_impact_search import step_legal
 from training.reward_v2 import reward_components
-from envs.table_drop import (
+from envs.outcomes.table_drop import (
     BOUNCE_DV,
     SUPPORT_FRACTION,
     SUPPORT_TIME_S,
@@ -263,10 +265,10 @@ def test_snapshots(env, index):
 def main():
     test_boundaries()
     test_reward_routes_existing_formulas()
-    text = (ROOT / "training" / "autonomous_episode.py").read_text(encoding="utf-8")
+    text = (ROOT / "training" / "recovery_episode.py").read_text(encoding="utf-8")
     _check("initial-grasp stepper does not monitor table drop", "observe(" not in text and "table_drop" not in text)
     import torch
-    from training.autonomous_episode import make_training_env
+    from training.recovery_episode import make_training_env
     from training.unified_k48 import load_trained_k48
 
     device = torch.device("cpu")
@@ -278,7 +280,9 @@ def main():
     bounce = test_bounce_then_regrasp(env, index)
     after = test_drop_after_handoff(env, index)
     test_snapshots(env, index)
-    out = ROOT / "results" / "diagnostics" / "table_drop_fix" / "raw"
+    import os
+    import tempfile
+    out = Path(os.environ["TABLE_DROP_OUT"]) if os.environ.get("TABLE_DROP_OUT") else Path(tempfile.mkdtemp(prefix="table_drop_"))
     out.mkdir(parents=True, exist_ok=True)
     (out / "results.json").write_text(json.dumps({
         "replays": replayed,

@@ -25,10 +25,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from envs.horizon_outcome import LAMBDA_TIME, NOMINAL_S, physical_reward
+from envs.outcomes.horizon_outcome import LAMBDA_TIME, NOMINAL_S, physical_reward
 from training.reward_v2 import grpo_return
 from training.grpo_math import SIGMA, advantages, gaussian_logprob
-from training.unified_k47 import CAP, decode_action, group_advantage, load_codebook
+from training.k47_codebook import CAP, decode_action, group_advantage, load_codebook
 from models.k48_checkpoint import (
     HANDOFF,
     LOGIT_K,
@@ -43,7 +43,7 @@ from training.k48_config import CKPT, DATA, SELECTED_LIMIT_S
 from training.dataset import assert_recovery_v3_paths, collate, episode_tensors, recorded_end_includes_handoff
 from training.train_sft import check, supervised_loss, train_supervised
 from training.train_grpo import grpo_ic_schedule, step_logprob, train_grpo
-from training.trainer import (
+from training.grpo_progress import (
     _completed_grpo_update,
     assert_selected_reward,
     epoch_progress,
@@ -124,13 +124,13 @@ def main():
     parser.add_argument("--eval-output", default="")
     parser.add_argument("--eval-data", default="data/valid_recovery.jsonl")
     parser.add_argument("--grpo", action="store_true")
-    parser.add_argument("--config", default="config/unified_k48.yaml")
+    parser.add_argument("--config", default="config/training/k48/unified_k48.yaml")
     parser.add_argument("--checkpoint", default="")
     args = parser.parse_args()
     if args.check:
         check()
         return
-    from envs.config_util import load_yaml
+    from envs.simulation.yaml_config import load_yaml
     cfg = load_yaml(args.config)
     if abs(float(cfg.get("recovery_limit_s", SELECTED_LIMIT_S)) - SELECTED_LIMIT_S) > 1e-9:
         raise RuntimeError("recovery limit does not match the selected 4 second maximum")

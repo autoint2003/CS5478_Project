@@ -30,7 +30,7 @@ from data_generation.rebuild_k48_recovery import (
     legal_verify,
     legalize,
 )
-from training.unified_k47 import load_codebook
+from training.k47_codebook import load_codebook
 
 TARGET = 50
 MAX_LAUNCHES = 180
@@ -90,7 +90,7 @@ def main():
         if outcome.get("success"):
             print("LAUNCH", launches, episode_id, "nominal_solvable", flush=True)
             continue
-        from training.history_aware_critic_ablation import restore_capture
+        from envs.simulation.capture import restore_capture
 
         restore_capture(env, blob["capture"])
         _pack, bilateral = _grasp_now(env.sim)

@@ -6,6 +6,7 @@ diagnostic cases are not reused as this split.
 
 from __future__ import annotations
 
+
 import json
 import pickle
 import sys
@@ -18,14 +19,18 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import experiments.recatch.natural_loss_recatch_data_scaling as scale
-import training.natural_loss_recatch_transformer_v3 as v3
-import envs.recovery_success as success
-from controllers.geometry_switch import GeometrySwitch, hand_pose
-from controllers.recovery_actions import AIRBORNE_V2, AIRBORNE_V3, normalize_action
-from envs.physical_recovery import physical_pack
+from envs.simulation.capture import restore_capture, take_capture
+from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
+from controllers.cartesian.tracking import TRACK
+from envs.simulation.support_contacts import restore_supports, supports_of
+import experiments.recatch.natural_loss.natural_loss_recatch_data_scaling as scale
+import models.airborne_v3 as v3
+import envs.outcomes.recovery_success as success
+from controllers.recovery.geometry_switch import GeometrySwitch, hand_pose
+from controllers.recovery.action_map import AIRBORNE_V2, AIRBORNE_V3, normalize_action
+from envs.outcomes.physical_recovery import physical_pack
 from models.k48_policy import build_policy
-from training.autonomous_episode import (
+from training.recovery_episode import (
     T_TASK,
     Z_ABORT,
     ball_substep,
@@ -35,11 +40,11 @@ from training.autonomous_episode import (
     nominal_substep,
     seat_base,
 )
-from training.autonomous_rl_sanity import reward_detail, restore_supports, supports_of
-from training.full_3d_airborne_recatch_dataset import TRACK, drop_supports, restore_to, step_mapped
-from training.history_aware_critic_ablation import restore_capture, take_capture
+from experiments.legacy.autonomous_rl_sanity import reward_detail
+from data_generation.airborne_recatch_dataset import drop_supports, restore_to, step_mapped
+
 from experiments.legacy.nominal_grasp_restoration import act_of, pinch_error
-from training.nominal_pose_audit import capture_ref, errors, until_impact
+from experiments.legacy.nominal_pose_audit import until_impact
 from experiments.legacy.recovery_policy_pretraining_preparation import schedules
 from training.grpo_math import SIGMA
 
@@ -608,7 +613,7 @@ def main():
         "checkpoint": str(CKPT.relative_to(ROOT)).replace("\\", "/"),
         "k": 35,
         "res_cap": CAP,
-        "success_config": "config/recovery_success.yaml",
+        "success_config": "config/recovery/recovery_success.yaml",
         "legacy_diagnostic_set": list(LEGACY),
         "representation": representation,
         "handoff_audit": handoff_audit,

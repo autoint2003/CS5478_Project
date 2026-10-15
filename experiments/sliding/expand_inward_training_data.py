@@ -28,7 +28,7 @@ from data_generation.strategies.k48_inward_sliding_search import (
     row_snapshot,
 )
 from data_generation.rebuild_k48_recovery import _load_blob, _load_jsonl, _open_env
-from training.unified_k47 import load_codebook
+from training.k47_codebook import load_codebook
 
 TARGET = 50
 REPLAY = ROOT / "results/archive/demo_results/diagnostics/raw/k48_inward_sliding_search_v1/old_gate_replay.jsonl"

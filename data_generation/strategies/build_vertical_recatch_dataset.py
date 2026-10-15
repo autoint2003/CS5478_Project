@@ -7,6 +7,7 @@ overwrite those shared files.
 
 from __future__ import annotations
 
+
 import json
 import sys
 from collections import Counter
@@ -18,13 +19,14 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from envs.airborne_obs import observe_airborne
-from envs.observable_obs import ObservableObsState
-from training.history_aware_critic_ablation import restore_capture
-from envs.horizon_outcome import nominal_verify
-from data_generation.oracle_search import representability
+from envs.simulation.capture import restore_capture, take_capture
+from envs.observations.airborne_obs import observe_airborne
+from envs.observations.observable_obs import ObservableObsState
+
+from envs.outcomes.horizon_outcome import nominal_verify
+from data_generation.oracles.representability import representability
 from envs.step_legal import step_legal
-from training.unified_k47 import load_codebook
+from training.k47_codebook import load_codebook
 from data_generation.strategies.vertical_recatch_search import (
     DT,
     OUT,

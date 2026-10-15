@@ -6,12 +6,14 @@ regrasp and chase law. They are not the same controller.
 
 from __future__ import annotations
 
+from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
+
 import numpy as np
 
-from controllers.recovery_actions import AIRBORNE_V3, grip_tau, normalize_action
+from controllers.recovery.action_map import AIRBORNE_V3, grip_tau, normalize_action
 from data_generation.ball_impact_dataset import grasp_sample
-from envs.physical_recovery import physical_pack
-from training.nominal_pose_audit import hand_R
+from envs.outcomes.physical_recovery import physical_pack
+
 
 STRATEGIES = (
     {"name": "lift_squeeze", "kp": 4.0, "ff": 1.0, "close": 1.0, "partial": 1.0, "open_m": -1.0, "wrist": 0.8},

@@ -16,7 +16,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from envs.horizon_outcome import LAMBDA_TIME, NOMINAL_S, physical_reward
+from envs.outcomes.horizon_outcome import LAMBDA_TIME, NOMINAL_S, physical_reward
 from envs.step_legal import step_legal
 from models.k48_checkpoint import (
     HANDOFF,
@@ -30,10 +30,10 @@ from models.k48_checkpoint import (
 from training.grpo_math import SIGMA, advantages, gaussian_logprob
 from training.k48_config import CKPT, DATA, ROOT, SELECTED_LIMIT_S
 from training.reward_v2 import grpo_return
-from training.unified_k47 import CAP, categorical_kl, decode_action, episode_arrays, group_advantage, load_codebook, read_jsonl
+from training.k47_codebook import CAP, categorical_kl, decode_action, episode_arrays, group_advantage, load_codebook, read_jsonl
 
 from training.dataset import assert_recovery_v3_paths, collate, episode_tensors
-from training.trainer import (
+from training.grpo_progress import (
     _completed_grpo_update,
     assert_selected_reward,
     format_seconds,
@@ -81,11 +81,11 @@ def grpo_checkpoint_updates(updates, every):
     return [update for update in range(1, int(updates) + 1) if update % step == 0 or update == int(updates)]
 
 def train_grpo(cfg, checkpoint):
-    from training.autonomous_episode import make_training_env
-    from training.history_aware_critic_ablation import restore_capture
-    from envs.horizon_outcome import finish_recovery, physical_reward, recovery_failed
+    from training.recovery_episode import make_training_env
+    from envs.simulation.capture import restore_capture
+    from envs.outcomes.horizon_outcome import finish_recovery, physical_reward, recovery_failed
     from envs.step_legal import step_legal
-    from training.unified_k47 import categorical_kl, read_jsonl
+    from training.k47_codebook import categorical_kl, read_jsonl
 
     ics = read_jsonl(ROOT / cfg["grpo_initial_conditions"])
     rebuilt = assert_recovery_v3_paths(cfg)
@@ -210,7 +210,7 @@ def train_grpo(cfg, checkpoint):
                         break
                 if how == "drop":
                     elapsed = float(env.sim.data.time) - t0
-                    from envs.table_drop import terminal_reason
+                    from envs.outcomes.table_drop import terminal_reason
                     reason = terminal_reason(env.sim)
                     outcome = {
                         "reason": reason,
@@ -232,7 +232,7 @@ def train_grpo(cfg, checkpoint):
                     "label": outcome["reason"],
                     "reward_log": scored,
                 })
-            from training.unified_k47 import group_advantage
+            from training.k47_codebook import group_advantage
             adv, skipped = group_advantage([member["return"] for member in members], [member["truncated"] for member in members])
             opt.zero_grad(set_to_none=True)
             kl_value = None

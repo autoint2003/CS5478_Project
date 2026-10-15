@@ -26,8 +26,8 @@ from experiments.legacy.demo_teleport_recovery_state import (
     run_teleport_case,
     slim,
 )
-from envs.deterioration import body_twist
-from envs.contacts import extract_contacts
+from envs.simulation.grasp_quality import body_twist
+from envs.contacts.frames import extract_contacts
 
 OUT = ROOT / "results" / "diagnostics" / "inward_slide_return"
 FIG = OUT / "figures"
@@ -375,7 +375,7 @@ def write_md(code_fact, A, B, C, classif, q, balance, t_marks, fig_ts, fig_pad):
     L("")
     L(code_fact)
     L("")
-    L("Existing helpers `envs/contact.py:_contact_normal` and `contact_debug` only keep `abs(wrench[0])` as Fn. They do **not** export Ft, live `contact.friction`, or world wrench. This audit uses a separate extractor (`extract_contacts` in `training/vertical_slip_contact_mechanics_audit.py`).")
+    L("Existing helpers `envs/contacts/touch.py:_contact_normal` and `contact_debug` only keep `abs(wrench[0])` as Fn. They do **not** export Ft, live `contact.friction`, or world wrench. This audit uses a separate extractor (`extract_contacts` in `training/vertical_slip_contact_mechanics_audit.py`).")
     L("")
     L("## 2. Live friction")
     L("")

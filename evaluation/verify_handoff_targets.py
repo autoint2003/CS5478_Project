@@ -19,7 +19,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from data_generation.rebuild_k48_recovery import _load_blob, _load_jsonl, _open_env, legal_verify
-from training.unified_k47 import episode_arrays, load_codebook
+from training.k47_codebook import episode_arrays, load_codebook
 from training.unified_k48 import (
     HANDOFF,
     SELECTED_LIMIT_S,

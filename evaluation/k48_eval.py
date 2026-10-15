@@ -10,9 +10,9 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from training.autonomous_episode import make_training_env
-from envs.horizon_outcome import roll_policy
-from training.unified_k47 import read_jsonl
+from training.recovery_episode import make_training_env
+from envs.outcomes.horizon_outcome import roll_policy
+from training.k47_codebook import read_jsonl
 from training.unified_k48 import (
     HANDOFF,
     LOGIT_K,

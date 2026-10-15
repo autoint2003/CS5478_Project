@@ -12,6 +12,7 @@ not train a policy and does not search VALIDATION or FINAL_TEST.
 
 from __future__ import annotations
 
+
 import argparse
 import json
 import sys
@@ -24,13 +25,15 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from controllers.recovery_actions import AIRBORNE_V3, grip_tau, normalize_action
-from controllers.geometry_switch import hand_pose
-from envs.physical_recovery import physical_pack
-from training.autonomous_episode import make_training_env
+from envs.simulation.capture import restore_capture, take_capture
+from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
+from controllers.recovery.action_map import AIRBORNE_V3, grip_tau, normalize_action
+from controllers.recovery.geometry_switch import hand_pose
+from envs.outcomes.physical_recovery import physical_pack
+from training.recovery_episode import make_training_env
 from data_generation.ball_impact_dataset import ids_for, label_states, load_episode
-from training.history_aware_critic_ablation import restore_capture
-from training.nominal_pose_audit import errors, hand_R
+
+
 from experiments.ball_impact.privileged_ball_impact_search import (
     PROTO_PATH,
     STRATEGIES,
@@ -738,7 +741,7 @@ def main():
         print("REPORT", path, flush=True)
         return
     import torch
-    from training.k36_checkpoint import load_models
+    from models.historical.k36_checkpoint import load_models
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model, _reference = load_models(PROTO_PATH, PROTO_PATH.with_name("policy_A_reference.pt"), device)

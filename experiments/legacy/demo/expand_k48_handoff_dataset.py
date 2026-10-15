@@ -6,6 +6,7 @@ historical checkpoints.
 
 from __future__ import annotations
 
+
 import json
 import pickle
 import sys
@@ -18,17 +19,18 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from training.autonomous_episode import make_training_env
-from envs.horizon_outcome import (
+from envs.simulation.capture import restore_capture, take_capture
+from training.recovery_episode import make_training_env
+from envs.outcomes.horizon_outcome import (
     CONTROL_PERIOD_S,
     finish_recovery,
     recovery_failed,
     replay_commands,
 )
-from training.history_aware_critic_ablation import restore_capture
+
 from experiments.legacy.migrate_horizon_dataset import mechanism
 from experiments.ball_impact.privileged_ball_impact_search import representability, step_legal
-from training.unified_k47 import CAP, load_codebook, read_jsonl
+from training.k47_codebook import CAP, load_codebook, read_jsonl
 from training.unified_k48 import HANDOFF, SELECTED_LIMIT_S
 
 RAW = ROOT / "results/archive/demo_results/diagnostics/raw/legal_recovery_v2"
@@ -508,7 +510,7 @@ def main():
     import torch
     device = torch.device("cpu")
     book = load_codebook()
-    from training.unified_k47 import build_model
+    from training.k47_codebook import build_model
     env = make_training_env(device, model=build_model(book, device))
     if mode == "--limits":
         limits(env)

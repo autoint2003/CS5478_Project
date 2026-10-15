@@ -97,7 +97,7 @@ def main():
             handle.write(json.dumps(item) + "\n")
     from models.k48_policy import build_policy
     from experiments.legacy.continual_skill_addition import ContinualPolicy
-    from training.k36_checkpoint import load_models
+    from models.historical.k36_checkpoint import load_models
 
     model = build_policy(book, torch.device("cpu"), 0.25)
     logits, residual, action = model(torch.zeros(4, 39), torch.zeros(4, 7))

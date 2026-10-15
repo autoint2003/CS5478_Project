@@ -17,9 +17,10 @@ if str(ROOT) not in sys.path:
 
 import torch
 
-import experiments.recatch.natural_loss_recatch_data_scaling as scale
-import training.natural_loss_recatch_transformer_v3 as v3
-from envs.airborne_obs import (
+import experiments.recatch.natural_loss.natural_loss_recatch_data_scaling as scale
+import models.airborne_v3 as v3
+import experiments.legacy.airborne_v3_demos as v3_demos
+from envs.observations.airborne_obs import (
     SCALE_PREL,
     SCALE_ROT,
     SCALE_VREL,
@@ -27,8 +28,8 @@ from envs.airborne_obs import (
     observe_airborne,
     rotvec,
 )
-from envs.observable_obs import SCALE_PAD_V, ObservableObsState
-from envs.physical_recovery import SCALE_EX, SCALE_F, physical_pack
+from envs.observations.observable_obs import SCALE_PAD_V, ObservableObsState
+from envs.outcomes.physical_recovery import SCALE_EX, SCALE_F, physical_pack
 from experiments.legacy.balanced_unified_recovery import (
     CKPT_39,
     EVAL_NATURAL,
@@ -37,9 +38,9 @@ from experiments.legacy.balanced_unified_recovery import (
     longest,
     mechanism_of,
 )
-from experiments.recatch.clean_natural_loss_recatch import distal_geoms
+from experiments.recatch.natural_loss.clean_natural_loss_recatch import distal_geoms
 from envs.ballistic_impact import assert_noslip
-from training.full_3d_airborne_recatch_dataset import (
+from data_generation.airborne_recatch_dataset import (
     TRACK,
     begin,
     carry_then_release,
@@ -51,8 +52,8 @@ from training.full_3d_airborne_recatch_dataset import (
 )
 from experiments.legacy.phase_decoupled_recovery_pilot import world
 from experiments.legacy.recovery_policy_pretraining_preparation import schedules
-from training.recovery_runtime import T_TASK, continue_long, physical_of, restore_dyn, run_impact
-from training.replay_core import park_impact_ball
+from training.recovery_execution import T_TASK, continue_long, physical_of, restore_dyn, run_impact
+from envs.simulation.scene_state import park_impact_ball
 
 DT = 0.02
 SLOW_TAU = 0.20
@@ -74,7 +75,7 @@ def build_cases():
     for _ in range(40):
         hold_step(sim, TRACK)
     pinch = np.array(
-        __import__("envs.airborne_obs", fromlist=["relative_state"]).relative_state(
+        __import__("envs.observations.airborne_obs", fromlist=["relative_state"]).relative_state(
             sim.model, sim.data, sim.ids
         )["p_rel_h"],
         float,
@@ -214,7 +215,7 @@ def collect_train(ctx):
         ("gravity_inward", "sliding"),
         ("recatch_open20", "recatch"),
     ):
-        tr = v3.record_local(sim_i, skill, sched[skill], zm6, ctx["nominal_i"], ctx["pads_i"], ctx["pad_mu_i"], None)
+        tr = v3_demos.record_local(sim_i, skill, sched[skill], zm6, ctx["nominal_i"], ctx["pads_i"], ctx["pad_mu_i"], None)
         if tr is None:
             raise RuntimeError(f"local skill failed {skill}")
         tr["pool"] = pool

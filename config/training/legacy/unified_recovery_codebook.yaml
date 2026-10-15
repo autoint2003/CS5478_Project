@@ -1,0 +1,36 @@
+# Codebook record. The trainer reads config/training/k47/unified_k47.yaml, not this file.
+# formal_grpo.py remains the K=36 launcher and still refuses this (47, 7) table.
+
+codebook: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy
+tokens_frozen: [0, 35]
+k: 47
+residual_cap: 0.25
+decoder: clip(prototype[token] + clip(residual, -0.25, 0.25), -1, 1)
+network_residual: 0.25 * tanh(residual_head)
+architecture:
+  observation_dim: 39
+  previous_action_dim: 7
+  d_model: 64
+  layers: 2
+  heads: 4
+  feedforward: 128
+  position_embeddings: 160
+head: training.action_representation_expansion.build_policy
+incompatible_heads:
+  - training.continual_skill_addition.ContinualPolicy
+  - training.future_state_ablation.FuturePolicy
+grpo_initial_conditions: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/grpo_initial_conditions.jsonl
+supervised_targets: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/supervised_targets.jsonl
+fragile_trajectories: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/fragile_trajectories.jsonl
+held_out_train_rule: id number divisible by 5
+validation: sealed
+final_test: sealed
+preserved_checkpoints:
+  - results/archive/demo_results/diagnostics/raw/pre_grpo_sanity/policy_B_init.pt
+  - results/archive/demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt
+  - results/archive/demo_results/diagnostics/raw/formal_grpo_pilot
+first_experiment:
+  supervised_epochs: 40
+  physical_eval: held-out TRAIN initial conditions only
+  grpo_updates: 20
+  launch: false

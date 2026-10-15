@@ -14,7 +14,7 @@ from dataclasses import asdict, dataclass
 import numpy as np
 import mujoco
 
-from envs.ids import PandaIds
+from envs.simulation.mujoco_ids import PandaIds
 
 # Fingertip pad 1 from assets/panda_torque.xml class fingertip_pad_collision_1:
 #   geom type="box" size="0.0085 0.004 0.0085" pos="0 0.0055 0.0445"

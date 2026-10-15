@@ -20,10 +20,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import envs.horizon_outcome as horizon
+import envs.outcomes.horizon_outcome as horizon
 import data_generation.rebuild_k48_recovery as rebuild
-from training.autonomous_episode import make_training_env
-from training.replay_core import raw_object_contacts
+from training.recovery_episode import make_training_env
+from envs.contacts.scene_contacts import raw_object_contacts
 from training.unified_k48 import load_trained_k48
 
 OUT = ROOT / "results" / "diagnostics" / "recatch_legality_audit"

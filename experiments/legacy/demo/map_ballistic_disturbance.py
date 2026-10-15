@@ -19,11 +19,11 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from controllers.gripper_controller import finger_opening
-from controllers.jacobian_controller import gains_from_cfg
-from envs.config_util import load_yaml, merge_sim_config
-from envs.deterioration import body_twist
-from envs.physical_recovery import TABLE_DROP, Z_AIR, physical_pack
+from controllers.gripper.controller import finger_opening
+from controllers.cartesian.jacobian import gains_from_cfg
+from envs.simulation.yaml_config import load_yaml, merge_sim_config
+from envs.simulation.grasp_quality import body_twist
+from envs.outcomes.physical_recovery import TABLE_DROP, Z_AIR, physical_pack
 from envs.ballistic_impact import (
     AFTER_DROP_S,
     HAND_RISE_M,
@@ -38,10 +38,10 @@ from envs.ballistic_impact import (
     pack_row,
     z_tgt_of,
 )
-from experiments.legacy.demo.render_grav_reposition import apply_camera_preset
-from training.impact_ball import apply_ball_free_state, incoming_hand_x
-from training.replay_core import tick_vw
-from training.write_ballistic_impact_scene import BALL_M, CYL_H, CYL_R
+from experiments.legacy.demo.demonstrations.render_grav_reposition import apply_camera_preset
+from envs.simulation.impact_ball import apply_ball_free_state, incoming_hand_x
+from controllers.cartesian.velocity_step import tick_vw
+from envs.simulation.ballistic_scene import BALL_M, CYL_H, CYL_R
 
 OUT = ROOT / "results" / "diagnostics" / "ballistic_impact_noslip1"
 MAP = OUT / "disturbance_map"
@@ -514,7 +514,7 @@ def tag(site: str, v: float) -> str:
 def run_headless() -> dict:
     MAP.mkdir(parents=True, exist_ok=True)
     (MAP / "figures").mkdir(exist_ok=True)
-    cfg = merge_sim_config(load_yaml(ROOT / "config" / "nominal.yaml"))
+    cfg = merge_sim_config(load_yaml(ROOT / "config" / "simulation" / "nominal.yaml"))
     gains = gains_from_cfg(cfg)
     results = []
     found_c = None

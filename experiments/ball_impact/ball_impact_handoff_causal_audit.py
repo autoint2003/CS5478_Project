@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+
 import csv
 import json
 import pickle
@@ -14,21 +15,22 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from controllers.geometry_switch import rot_angle
-from controllers.recovery_actions import AIRBORNE_V3, map_action
-from envs.airborne_obs import relative_state, rotvec
-from envs.deterioration import body_twist
+from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
+from controllers.recovery.geometry_switch import rot_angle
+from controllers.recovery.action_map import AIRBORNE_V3, map_action
+from envs.observations.airborne_obs import relative_state, rotvec
+from envs.simulation.grasp_quality import body_twist
 from experiments.ball_impact.ball_impact_recoverability import WIN, _cell, _fly, _oracle, _setup
 from data_generation.strategies.capture_geometry import capture_geometry
-from envs.horizon_outcome import NOMINAL_S, nominal_verify
-from experiments.recatch.legal_recatch_transfer import _bottom
-from training.nominal_pose_audit import hand_R
+from envs.outcomes.horizon_outcome import NOMINAL_S, nominal_verify
+from experiments.recatch.legal.legal_recatch_transfer import _bottom
+
 from experiments.ball_impact.privileged_ball_impact_search import step_legal
-from experiments.recatch.recovery_ic_expansion import _table_touch
-from training.recovery_runtime import make_snap, restore_ballistic
-from envs.recovery_success import apply_handoff, nominal_step
-from training.replay_core import TABLE_TOP
-from envs.table_drop import latched, restore_state
+from experiments.recatch.top_impact.recovery_ic_expansion import _table_touch
+from training.recovery_execution import make_snap, restore_ballistic
+from envs.outcomes.recovery_success import apply_handoff, nominal_step
+from envs.simulation.scene_state import TABLE_TOP
+from envs.outcomes.table_drop import latched, restore_state
 
 OUT = ROOT / "results" / "diagnostics" / "ball_impact_handoff_causal_audit"
 SRC = ROOT / "results" / "diagnostics" / "ball_impact_recoverability" / "success"
@@ -160,7 +162,7 @@ def _nominal(sim, ref, rows):
             rows.append(_obs(sim, "nominal"))
         both = rows[-1]["nL"] > 0 and rows[-1]["nR"] > 0 if rows else False
         # The official check uses its own contact count. Recompute here.
-        from envs.horizon_outcome import _dropped, _monitor
+        from envs.outcomes.horizon_outcome import _dropped, _monitor
 
         monitor = _monitor(sim)
         both = int(monitor["nL"]) > 0 and int(monitor["nR"]) > 0
@@ -201,7 +203,7 @@ def _nominal(sim, ref, rows):
 
 
 def _escaped(sim):
-    from training.recovery_runtime import _escaped as escaped
+    from training.recovery_execution import _escaped as escaped
 
     return escaped(sim)
 
@@ -308,7 +310,7 @@ def _save_series(path, rows):
 
 
 def _video(sim, rows, dest, title):
-    from experiments.recatch.recatch_interface_comparison import _render
+    from experiments.recatch.airborne.recatch_interface_comparison import _render
 
     _render(sim, {"rows": rows}, dest, title)
 

@@ -29,8 +29,8 @@ CASES = [
 
 def main():
     import torch
-    from training.autonomous_episode import make_training_env
-    from training.k36_checkpoint import load_models
+    from training.recovery_episode import make_training_env
+    from models.historical.k36_checkpoint import load_models
     from experiments.sliding.sliding_vs_regrasp import _replay_actions
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

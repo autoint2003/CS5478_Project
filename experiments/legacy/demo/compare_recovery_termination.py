@@ -8,6 +8,7 @@ contact-free control steps below 0.44 m, or on escape.
 
 from __future__ import annotations
 
+
 import json
 import pickle
 import sys
@@ -20,15 +21,17 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from training.autonomous_episode import make_training_env
-from experiments.legacy.demo.diagnose_k47_closed_loop import CKPT, load_model
-from training.history_aware_critic_ablation import restore_capture
-from envs.horizon_outcome import recovery_failed
-from training.nominal_pose_audit import errors
+from envs.simulation.capture import restore_capture, take_capture
+from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
+from training.recovery_episode import make_training_env
+from experiments.legacy.demo.diagnose.diagnose_k47_closed_loop import CKPT, load_model
+
+from envs.outcomes.horizon_outcome import recovery_failed
+
 from experiments.ball_impact.privileged_ball_impact_search import step_legal
-from training.recovery_runtime import _escaped
-from envs.recovery_success import PERSIST_STEPS, basin_ok
-from training.unified_k47 import decode_action, load_codebook, read_jsonl
+from training.recovery_execution import _escaped
+from envs.outcomes.recovery_success import PERSIST_STEPS, basin_ok
+from training.k47_codebook import decode_action, load_codebook, read_jsonl
 
 IDS = (
     "ball_train_v2_0015",

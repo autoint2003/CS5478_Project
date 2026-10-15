@@ -20,17 +20,17 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from controllers.jacobian_controller import gains_from_cfg, ori_error_deg
+from controllers.cartesian.jacobian import gains_from_cfg, ori_error_deg
 from controllers.nominal import grasp_orientation
-from envs.config_util import load_yaml, merge_sim_config
-from envs.dynamics import set_finger_object_sliding_mu
-from envs.physical_recovery import physical_pack
+from envs.simulation.yaml_config import load_yaml, merge_sim_config
+from envs.simulation.object_dynamics import set_finger_object_sliding_mu
+from envs.outcomes.physical_recovery import physical_pack
 from experiments.legacy.demo_teleport_recovery_state import (
     PAIR_MU,
     advance_to_parent,
     make_parent_sim,
 )
-from training.replay_core import freeze, tick_vw
+from controllers.cartesian.velocity_step import freeze, tick_vw
 from experiments.legacy.vertical_slip_contact_mechanics_audit import extract_contacts
 
 OUT = ROOT / "results" / "diagnostics" / "nominal_grasp_creep_root_cause"
@@ -463,7 +463,7 @@ def run_hold(
     title="NOMINAL STATIC PINCH",
     show_construction=False,
 ):
-    cfg = merge_sim_config(load_yaml(ROOT / "config" / "nominal.yaml"))
+    cfg = merge_sim_config(load_yaml(ROOT / "config" / "simulation" / "nominal.yaml"))
     sim = make_parent_sim()
     if show_construction and interactive:
         return run_full_viewer(sim, cfg, playback, title)
@@ -504,8 +504,8 @@ def run_hold(
     if interactive:
         import mujoco.viewer as mjviewer
         from experiments.legacy.demo_teleport_recovery_state import _cam
-        from training.impact_demo_core import RENDER_HZ, RealtimePacer
-        from training.impact_visualization_utils import apply_viewer_camera, enable_viewer_flags
+        from experiments.legacy.impact_demo import RENDER_HZ, RealtimePacer
+        from visualization.impact_view import apply_viewer_camera, enable_viewer_flags
 
         cm = mjviewer.launch_passive(sim.model, sim.data)
         viewer = cm.__enter__()
@@ -569,8 +569,8 @@ def run_hold(
 def run_full_viewer(sim, cfg, playback, title):
     import mujoco.viewer as mjviewer
     from experiments.legacy.demo_teleport_recovery_state import Z_AIR, PARENT_HOLD, _cam
-    from training.impact_demo_core import RENDER_HZ, RealtimePacer
-    from training.impact_visualization_utils import apply_viewer_camera, enable_viewer_flags
+    from experiments.legacy.impact_demo import RENDER_HZ, RealtimePacer
+    from visualization.impact_view import apply_viewer_camera, enable_viewer_flags
 
     dt = float(sim.model.opt.timestep)
     cm = mjviewer.launch_passive(sim.model, sim.data)
@@ -892,7 +892,7 @@ def main(argv=None) -> int:
     FIG.mkdir(parents=True, exist_ok=True)
 
     if args.view:
-        cfg = merge_sim_config(load_yaml(ROOT / "config" / "nominal.yaml"))
+        cfg = merge_sim_config(load_yaml(ROOT / "config" / "simulation" / "nominal.yaml"))
         if args.view == "natural":
             sim = make_parent_sim()
             run_full_viewer(sim, cfg, args.playback_speed, "NOMINAL STATIC PINCH")
@@ -909,7 +909,7 @@ def main(argv=None) -> int:
         return 0
 
     print("natural parent ...", flush=True)
-    cfg = merge_sim_config(load_yaml(ROOT / "config" / "nominal.yaml"))
+    cfg = merge_sim_config(load_yaml(ROOT / "config" / "simulation" / "nominal.yaml"))
     sim = make_parent_sim()
     parent = advance_to_parent(sim, cfg, mode="ZERO")
     if not parent.get("ok"):

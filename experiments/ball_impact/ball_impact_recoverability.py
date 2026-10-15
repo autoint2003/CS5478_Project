@@ -5,6 +5,7 @@ Does not train and does not change step_legal, K48, TABLE_DROP, or nominal contr
 
 from __future__ import annotations
 
+
 import csv
 import json
 import sys
@@ -15,24 +16,25 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
 from data_generation.strategies.recatch_oracle import _nominal_fail, _action_from, _setup
 
-from controllers.recovery_actions import AIRBORNE_V3, normalize_action
-from envs.airborne_obs import relative_state, rotvec
-from envs.deterioration import body_twist
+from controllers.recovery.action_map import AIRBORNE_V3, normalize_action
+from envs.observations.airborne_obs import relative_state, rotvec
+from envs.simulation.grasp_quality import body_twist
 from data_generation.ball_impact_dataset import aim_ball, cylinder_contacts
 from data_generation.strategies.capture_geometry import capture_geometry
-from envs.horizon_outcome import NOMINAL_S, nominal_verify
-from training.impact_ball import apply_ball_free_state
-from experiments.recatch.legal_recatch_transfer import _bottom, _enable_supports, _prepare, _sample
-from training.nominal_pose_audit import hand_R
+from envs.outcomes.horizon_outcome import NOMINAL_S, nominal_verify
+from envs.simulation.impact_ball import apply_ball_free_state
+from experiments.recatch.legal.legal_recatch_transfer import _bottom, _enable_supports, _prepare, _sample
+
 from experiments.ball_impact.privileged_ball_impact_search import representability, step_legal
-from experiments.recatch.recovery_ic_expansion import _flight_step, _ref_now
-from training.recovery_runtime import make_snap, restore_ballistic
-from envs.recovery_success import nominal_step
-from training.replay_core import TABLE_TOP, park_impact_ball
-from envs.table_drop import latched, restore_state
-from training.unified_k47 import load_codebook
+from experiments.recatch.top_impact.recovery_ic_expansion import _flight_step, _ref_now
+from training.recovery_execution import make_snap, restore_ballistic
+from envs.outcomes.recovery_success import nominal_step
+from envs.simulation.scene_state import TABLE_TOP, park_impact_ball
+from envs.outcomes.table_drop import latched, restore_state
+from training.k47_codebook import load_codebook
 
 OUT = ROOT / "results" / "diagnostics" / "ball_impact_recoverability"
 OLD = ROOT / "results" / "diagnostics" / "recovery_ic_expansion" / "IC_MANIFEST.csv"
@@ -278,7 +280,7 @@ def _finish(sim, ref):
 
     env = Env()
     env.sim = sim
-    import envs.horizon_outcome as horizon
+    import envs.outcomes.horizon_outcome as horizon
 
     saved = {}
     real = horizon.apply_handoff
@@ -375,7 +377,7 @@ def main():
     (OUT / "videos").mkdir(exist_ok=True)
     sim, seated, _nominal, _pads, _pad_mu = _prepare()
     _enable_supports(sim)
-    from experiments.recatch.multi_disturbance_airborne_feasibility import restore
+    from experiments.recatch.airborne.multi_disturbance_airborne_feasibility import restore
 
     restore(sim, seated, _nominal, _pads, _pad_mu)
     sim.park_ball()
@@ -513,7 +515,7 @@ def main():
         # Second independent replay.
         again = _replay(sim, snap, result["decoded"])
         out2, hand2 = _finish(sim, ref)
-        from experiments.recatch.recatch_interface_comparison import _render
+        from experiments.recatch.airborne.recatch_interface_comparison import _render
 
         _render(sim, {"rows": result["rolled"]["rows"]}, OUT / "videos" / "success.mp4", cell["id"])
         payload["success"] = {
@@ -560,8 +562,8 @@ def verify():
     """Replay the discovered impact twice and probe the nearby parameter region."""
     import pickle
 
-    from experiments.recatch.recovery_ic_expansion import _table_touch
-    from experiments.recatch.recatch_interface_comparison import _render
+    from experiments.recatch.top_impact.recovery_ic_expansion import _table_touch
+    from experiments.recatch.airborne.recatch_interface_comparison import _render
 
     sim, base, ref, target, book = _setup()
     cell = _cell(40.0, 8.0, 0.0)

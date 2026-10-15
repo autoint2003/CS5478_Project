@@ -14,13 +14,13 @@ Formal packages (`controllers/`, `envs/`, `sensors/`, `models/`, `data_generatio
 
 Each shared function now has one body. Experiment files import that body.
 
-- Finger-cylinder contact rows and `pad_span_hand` are in `envs/contacts.py`. Geom ids, contact frame, normal force, and the summary fields are the previous extractor.
-- Seating, `apply_offset`, `apply_spec`, and `target_hand` are in `envs/grasp_seat.py`. The horizontal offset grid stays in the freefall experiment.
-- The fixed 7D skill tapes are in `controllers/skill_schedules.py`. They are action sequences, not learning-rate schedules.
+- Finger-cylinder contact rows and `pad_span_hand` are in `envs/contacts/frames.py`. Geom ids, contact frame, normal force, and the summary fields are the previous extractor.
+- Seating, `apply_offset`, `apply_spec`, and `target_hand` are in `envs/initialization/grasp_seat.py`. The horizontal offset grid stays in the freefall experiment.
+- The fixed 7D skill tapes are in `controllers/recovery/skill_schedules.py`. They are action sequences, not learning-rate schedules.
 - `SIGMA`, `gaussian_logprob`, and `advantages` are in `training/grpo_math.py`.
 - Slide and privileged chase commands are in `data_generation/strategies/recovery_laws.py`.
 - The dataset builder's horizontal recatch helpers are in `data_generation/strategies/recatch_oracle.py`. Vertical `follow_early` stays in `vertical_recatch_search.py`.
-- `step_legal` and representability are imported from `envs/step_legal.py` and `data_generation/oracle_search.py`.
+- `step_legal` and representability are imported from `envs/step_legal.py` and `data_generation/oracles/representability.py`.
 
 ## Files split
 
@@ -36,11 +36,11 @@ K47 was not merged into K48. `training/unified_k47.py` still owns the codebook, 
 
 ## Shared implementations extracted
 
-`envs/contacts.py`, `envs/grasp_seat.py`, `controllers/skill_schedules.py`, `training/grpo_math.py`, `training/jsonable.py`, `training/policy_rollout.py`, `training/k33_checkpoint.py`, `training/k36_checkpoint.py`, `models/k36_policy.py`, `models/action_kmeans.py`, `data_generation/natural_specs.py`, `data_generation/impact_labels.py`, `data_generation/strategies/recovery_laws.py`, `data_generation/strategies/recatch_oracle.py`.
+`envs/contacts/frames.py`, `envs/initialization/grasp_seat.py`, `controllers/recovery/skill_schedules.py`, `training/grpo_math.py`, `data_generation/jsonable.py`, `data_generation/policy_rollout.py`, `models/historical/k33_checkpoint.py`, `models/historical/k36_checkpoint.py`, `models/historical/k36_policy.py`, `data_generation/action_kmeans.py`, `data_generation/initial_conditions/natural_specs.py`, `data_generation/validation/impact_labels.py`, `data_generation/strategies/recovery_laws.py`, `data_generation/strategies/recatch_oracle.py`.
 
 ## Duplicate implementations removed from the old sites
 
-The old function bodies were deleted where the formal module replaced them. `build_policy` callers use `models/k48_policy.py`. `load_models` callers use `training/k36_checkpoint.py`.
+The old function bodies were deleted where the formal module replaced them. `build_policy` callers use `models/k48_policy.py`. `load_models` callers use `models/historical/k36_checkpoint.py`.
 
 ## Legacy kept, and why
 

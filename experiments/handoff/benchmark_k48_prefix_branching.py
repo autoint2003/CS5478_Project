@@ -6,6 +6,7 @@ All conditions sample the u783 policy. Suffixes are stochastic, not argmax.
 
 from __future__ import annotations
 
+
 import argparse
 import json
 import pickle
@@ -22,14 +23,15 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from training.autonomous_episode import make_training_env
-from training.history_aware_critic_ablation import restore_capture, take_capture
-import training.natural_loss_recatch_transformer_v3 as v3
-from envs.horizon_outcome import _contacts, finish_recovery, recovery_failed
+from envs.simulation.capture import restore_capture, take_capture
+from training.recovery_episode import make_training_env
+
+import models.airborne_v3 as v3
+from envs.outcomes.horizon_outcome import _contacts, finish_recovery, recovery_failed
 from training.grpo_math import SIGMA
 from experiments.ball_impact.privileged_ball_impact_search import step_legal
-from envs.recovery_success import CONTROL_PERIOD_S
-from training.unified_k47 import decode_action, load_codebook
+from envs.outcomes.recovery_success import CONTROL_PERIOD_S
+from training.k47_codebook import decode_action, load_codebook
 from training.unified_k48 import HANDOFF, load_trained_k48
 
 OUT = ROOT / "results/diagnostics/k48_prefix_branching"
@@ -189,7 +191,7 @@ def rollout(env, model, book, blob, rng, device, capture=None, lost_low=0, t0=No
         physics += int(v3.N_SUB)
         failed, lost_low = recovery_failed(env.sim, blob["ref"], lost_low)
         if failed:
-            from envs.table_drop import terminal_reason
+            from envs.outcomes.table_drop import terminal_reason
             outcome = {
                 "reason": terminal_reason(env.sim),
                 "success": False,
@@ -951,7 +953,7 @@ def main():
     parser = argparse.ArgumentParser(description="K48 prefix-branching exploration benchmark")
     parser.add_argument("--stage", choices=("smoke", "diagnostic", "full"), default="smoke")
     parser.add_argument("--checkpoint", default="results/grpo/v2/checkpoint_u0783.pt")
-    parser.add_argument("--config", default="config/unified_k48_recovery_v3_reward_v2.yaml")
+    parser.add_argument("--config", default="config/training/k48/unified_k48_recovery_v3_reward_v2.yaml")
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--trunks", type=int, default=4)

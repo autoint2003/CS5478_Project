@@ -16,7 +16,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from envs.horizon_outcome import LAMBDA_TIME, NOMINAL_S, physical_reward
+from envs.outcomes.horizon_outcome import LAMBDA_TIME, NOMINAL_S, physical_reward
 from envs.step_legal import step_legal
 from models.k48_checkpoint import (
     HANDOFF,
@@ -30,10 +30,10 @@ from models.k48_checkpoint import (
 from training.grpo_math import SIGMA, advantages, gaussian_logprob
 from training.k48_config import CKPT, DATA, ROOT, SELECTED_LIMIT_S
 from training.reward_v2 import grpo_return
-from training.unified_k47 import CAP, categorical_kl, decode_action, episode_arrays, group_advantage, load_codebook, read_jsonl
+from training.k47_codebook import CAP, categorical_kl, decode_action, episode_arrays, group_advantage, load_codebook, read_jsonl
 
 from training.dataset import assert_recovery_v3_paths, collate, episode_tensors
-from training.trainer import reward_order
+from training.grpo_progress import reward_order
 
 def supervised_loss(model, obs, prev, tokens, residuals, weight, mask):
     logits, pred, _act = model(obs, prev)
@@ -115,8 +115,8 @@ def check():
     }, flush=True)
 
 def train_supervised(cfg, checkpoint):
-    from envs.config_util import load_yaml
-    from training.unified_k47 import read_jsonl
+    from envs.simulation.yaml_config import load_yaml
+    from training.k47_codebook import read_jsonl
 
     del load_yaml
     book = load_codebook(ROOT / cfg["codebook"])

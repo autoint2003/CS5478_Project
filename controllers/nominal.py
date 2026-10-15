@@ -7,19 +7,19 @@ from dataclasses import dataclass, field
 import numpy as np
 import mujoco
 
-from controllers.gripper_controller import (
+from controllers.gripper.controller import (
     clip_fg,
     fg_to_tau,
     finger_opening,
     gripper_torque,
     read_touch,
 )
-from controllers.jacobian_controller import (
+from controllers.cartesian.jacobian import (
     apply_cartesian_ctrl,
     gains_from_cfg,
     ori_error_deg,
 )
-from envs.ids import PandaIds
+from envs.simulation.mujoco_ids import PandaIds
 
 PHASES = ("approach", "descend", "close", "lift")
 

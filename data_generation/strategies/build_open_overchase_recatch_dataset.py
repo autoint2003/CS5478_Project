@@ -21,15 +21,15 @@ if str(ROOT) not in sys.path:
 
 from data_generation.strategies.recatch_oracle import _nominal_fail, _setup
 from data_generation.strategies.capture_geometry import capture_geometry
-from data_generation.oracle_search import representability
+from data_generation.oracles.representability import representability
 from envs.step_legal import step_legal
-from training.recovery_runtime import apply_dyn, restore_ballistic
-from envs.recovery_success import nominal_step
-from envs.table_drop import latched, restore_state
+from training.recovery_execution import apply_dyn, restore_ballistic
+from envs.outcomes.recovery_success import nominal_step
+from envs.outcomes.table_drop import latched, restore_state
 from data_generation.strategies.recatch_oracle import _bottom
 from data_generation.strategies.recatch_oracle import _finish, _impact
 from data_generation.strategies.recatch_oracle import _base_spec, rollout, staged_choose
-from training.unified_k47 import load_codebook
+from training.k47_codebook import load_codebook
 
 DATA = ROOT / "data" / "recatch"
 DIAG = ROOT / "results" / "diagnostics" / "open_overchase_recatch_dataset"
@@ -116,7 +116,7 @@ def _baseline(sim, snap, ref, nominal, cell):
 
     env = Env()
     env.sim = sim
-    from envs.horizon_outcome import NOMINAL_S, nominal_verify
+    from envs.outcomes.horizon_outcome import NOMINAL_S, nominal_verify
 
     out = nominal_verify(env, ref, seconds=NOMINAL_S)
     return {"ok": bool(out.get("success")), "why": out.get("reason"), "t": round(float(out.get("nominal_elapsed") or 0.0), 3)}

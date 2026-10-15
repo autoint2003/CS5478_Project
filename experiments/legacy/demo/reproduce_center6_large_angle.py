@@ -12,8 +12,8 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from controllers.jacobian_controller import gains_from_cfg
-from envs.config_util import load_yaml, merge_sim_config
+from controllers.cartesian.jacobian import gains_from_cfg
+from envs.simulation.yaml_config import load_yaml, merge_sim_config
 from experiments.legacy.demo.ballistic_large_angle import (
     BRAKE_S,
     GRIP_S,
@@ -66,7 +66,7 @@ def _slip_summary(events):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    cfg = merge_sim_config(load_yaml(ROOT / "config" / "nominal.yaml"))
+    cfg = merge_sim_config(load_yaml(ROOT / "config" / "simulation" / "nominal.yaml"))
     gains = gains_from_cfg(cfg)
     snap = load_early()
     sim, _ = make_sim()

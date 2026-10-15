@@ -1,12 +1,14 @@
 # File moves
 
+Round 3 moved formal modules into subpackages and renamed files whose names did not match their jobs. The current map is `docs/MODULE_ORGANIZATION.md`. The list below is the cumulative rename log; destinations are the paths after that move.
+
 Git renames from this layout change. Imports were rewritten to the new modules.
 
-- `training/align_data_layout.py` -> `data_generation/align_data_layout.py`
+- `training/align_data_layout.py` -> `data_generation/maintenance/align_data_layout.py`
 - `training/ball_impact_dataset.py` -> `data_generation/ball_impact_dataset.py`
-- `training/consolidate_snapshots.py` -> `data_generation/consolidate_snapshots.py`
+- `training/consolidate_snapshots.py` -> `data_generation/maintenance/consolidate_snapshots.py`
 - `training/rebuild_k48_recovery.py` -> `data_generation/rebuild_k48_recovery.py`
-- `training/relocate_training_data.py` -> `data_generation/relocate_training_data.py`
+- `training/relocate_training_data.py` -> `data_generation/maintenance/relocate_training_data.py`
 - `training/build_open_overchase_recatch_dataset.py` -> `data_generation/strategies/build_open_overchase_recatch_dataset.py`
 - `training/build_vertical_recatch_dataset.py` -> `data_generation/strategies/build_vertical_recatch_dataset.py`
 - `training/capture_geometry.py` -> `data_generation/strategies/capture_geometry.py`
@@ -17,9 +19,9 @@ Git renames from this layout change. Imports were rewritten to the new modules.
 - `CS5478_Project_Proposal.pdf` -> `docs/coursework/CS5478_Project_Proposal.pdf`
 - `CS5478_Project_Proposal_Presentation.pdf` -> `docs/coursework/CS5478_Project_Proposal_Presentation.pdf`
 - `training/demo_ballistic_impact.py` -> `envs/ballistic_impact.py`
-- `training/horizon_outcome.py` -> `envs/horizon_outcome.py`
-- `training/recovery_success.py` -> `envs/recovery_success.py`
-- `training/table_drop.py` -> `envs/table_drop.py`
+- `training/horizon_outcome.py` -> `envs/outcomes/horizon_outcome.py`
+- `training/recovery_success.py` -> `envs/outcomes/recovery_success.py`
+- `training/table_drop.py` -> `envs/outcomes/table_drop.py`
 - `training/audit_pretrain_data.py` -> `evaluation/audit_pretrain_data.py`
 - `training/audit_recatch_legality.py` -> `evaluation/audit_recatch_legality.py`
 - `training/verify_handoff_targets.py` -> `evaluation/verify_handoff_targets.py`
@@ -33,9 +35,9 @@ Git renames from this layout change. Imports were rewritten to the new modules.
 - `training/continual_skill_addition.py` -> `experiments/legacy/continual_skill_addition.py`
 - `demo/__init__.py` -> `experiments/legacy/demo/__init__.py`
 - `demo/abc_recovery_validation.py` -> `experiments/legacy/demo/abc_recovery_validation.py`
-- `demo/audit_controlled_sliding.py` -> `experiments/legacy/demo/audit_controlled_sliding.py`
-- `demo/audit_historical_skill_physics.py` -> `experiments/legacy/demo/audit_historical_skill_physics.py`
-- `demo/audit_nominal_handoff.py` -> `experiments/legacy/demo/audit_nominal_handoff.py`
+- `demo/audit_controlled_sliding.py` -> `experiments/legacy/demo/audit/audit_controlled_sliding.py`
+- `demo/audit_historical_skill_physics.py` -> `experiments/legacy/demo/audit/audit_historical_skill_physics.py`
+- `demo/audit_nominal_handoff.py` -> `experiments/legacy/demo/audit/audit_nominal_handoff.py`
 - `demo/ballistic_large_angle.py` -> `experiments/legacy/demo/ballistic_large_angle.py`
 - `demo/ballistic_slip_sufficiency.py` -> `experiments/legacy/demo/ballistic_slip_sufficiency.py`
 - `demo/build_k48_handoff_policy.py` -> `experiments/legacy/demo/build_k48_handoff_policy.py`
@@ -45,18 +47,18 @@ Git renames from this layout change. Imports were rewritten to the new modules.
 - `demo/compare_recovery_termination.py` -> `experiments/legacy/demo/compare_recovery_termination.py`
 - `demo/coverage_all_holds.py` -> `experiments/legacy/demo/coverage_all_holds.py`
 - `demo/coverage_counts.py` -> `experiments/legacy/demo/coverage_counts.py`
-- `demo/demo_airborne_recapture.py` -> `experiments/legacy/demo/demo_airborne_recapture.py`
-- `demo/demo_airborne_recovery.py` -> `experiments/legacy/demo/demo_airborne_recovery.py`
-- `demo/demo_ballistic_recovery.py` -> `experiments/legacy/demo/demo_ballistic_recovery.py`
-- `demo/demo_ballistic_recovery_comparison.py` -> `experiments/legacy/demo/demo_ballistic_recovery_comparison.py`
-- `demo/demo_dynamic_recatch.py` -> `experiments/legacy/demo/demo_dynamic_recatch.py`
-- `demo/demo_grav_reposition_comparison.py` -> `experiments/legacy/demo/demo_grav_reposition_comparison.py`
-- `demo/demo_grav_reposition_recovery.py` -> `experiments/legacy/demo/demo_grav_reposition_recovery.py`
-- `demo/diagnose_compound_orientation.py` -> `experiments/legacy/demo/diagnose_compound_orientation.py`
-- `demo/diagnose_grpo_v2_handoff_regression.py` -> `experiments/legacy/demo/diagnose_grpo_v2_handoff_regression.py`
-- `demo/diagnose_k47_closed_loop.py` -> `experiments/legacy/demo/diagnose_k47_closed_loop.py`
-- `demo/diagnose_omega4_throw.py` -> `experiments/legacy/demo/diagnose_omega4_throw.py`
-- `demo/diagnose_sft_epoch40_closed_loop.py` -> `experiments/legacy/demo/diagnose_sft_epoch40_closed_loop.py`
+- `demo/demo_airborne_recapture.py` -> `experiments/legacy/demo/demonstrations/demo_airborne_recapture.py`
+- `demo/demo_airborne_recovery.py` -> `experiments/legacy/demo/demonstrations/demo_airborne_recovery.py`
+- `demo/demo_ballistic_recovery.py` -> `experiments/legacy/demo/demonstrations/demo_ballistic_recovery.py`
+- `demo/demo_ballistic_recovery_comparison.py` -> `experiments/legacy/demo/demonstrations/demo_ballistic_recovery_comparison.py`
+- `demo/demo_dynamic_recatch.py` -> `experiments/legacy/demo/demonstrations/demo_dynamic_recatch.py`
+- `demo/demo_grav_reposition_comparison.py` -> `experiments/legacy/demo/demonstrations/demo_grav_reposition_comparison.py`
+- `demo/demo_grav_reposition_recovery.py` -> `experiments/legacy/demo/demonstrations/demo_grav_reposition_recovery.py`
+- `demo/diagnose_compound_orientation.py` -> `experiments/legacy/demo/diagnose/diagnose_compound_orientation.py`
+- `demo/diagnose_grpo_v2_handoff_regression.py` -> `experiments/legacy/demo/diagnose/diagnose_grpo_v2_handoff_regression.py`
+- `demo/diagnose_k47_closed_loop.py` -> `experiments/legacy/demo/diagnose/diagnose_k47_closed_loop.py`
+- `demo/diagnose_omega4_throw.py` -> `experiments/legacy/demo/diagnose/diagnose_omega4_throw.py`
+- `demo/diagnose_sft_epoch40_closed_loop.py` -> `experiments/legacy/demo/diagnose/diagnose_sft_epoch40_closed_loop.py`
 - `demo/expand_k48_handoff_dataset.py` -> `experiments/legacy/demo/expand_k48_handoff_dataset.py`
 - `demo/finalize_codebook_views.py` -> `experiments/legacy/demo/finalize_codebook_views.py`
 - `demo/grpo_norm_check.py` -> `experiments/legacy/demo/grpo_norm_check.py`
@@ -68,14 +70,14 @@ Git renames from this layout change. Imports were rewritten to the new modules.
 - `demo/refactor_repository.py` -> `experiments/legacy/demo/refactor_repository.py`
 - `demo/release_coverage_v3.py` -> `experiments/legacy/demo/release_coverage_v3.py`
 - `demo/release_state_map_omega4.py` -> `experiments/legacy/demo/release_state_map_omega4.py`
-- `demo/render_grav_reposition.py` -> `experiments/legacy/demo/render_grav_reposition.py`
-- `demo/render_zero_vs_verified.py` -> `experiments/legacy/demo/render_zero_vs_verified.py`
-- `demo/replay_all_holds.py` -> `experiments/legacy/demo/replay_all_holds.py`
-- `demo/replay_c_subset.py` -> `experiments/legacy/demo/replay_c_subset.py`
-- `demo/replay_candidate_codebook.py` -> `experiments/legacy/demo/replay_candidate_codebook.py`
-- `demo/replay_codebook_v3.py` -> `experiments/legacy/demo/replay_codebook_v3.py`
-- `demo/replay_divergence.py` -> `experiments/legacy/demo/replay_divergence.py`
-- `demo/replay_raw_vs_quant.py` -> `experiments/legacy/demo/replay_raw_vs_quant.py`
+- `demo/render_grav_reposition.py` -> `experiments/legacy/demo/demonstrations/render_grav_reposition.py`
+- `demo/render_zero_vs_verified.py` -> `experiments/legacy/demo/demonstrations/render_zero_vs_verified.py`
+- `demo/replay_all_holds.py` -> `experiments/legacy/demo/replay/replay_all_holds.py`
+- `demo/replay_c_subset.py` -> `experiments/legacy/demo/replay/replay_c_subset.py`
+- `demo/replay_candidate_codebook.py` -> `experiments/legacy/demo/replay/replay_candidate_codebook.py`
+- `demo/replay_codebook_v3.py` -> `experiments/legacy/demo/replay/replay_codebook_v3.py`
+- `demo/replay_divergence.py` -> `experiments/legacy/demo/replay/replay_divergence.py`
+- `demo/replay_raw_vs_quant.py` -> `experiments/legacy/demo/replay/replay_raw_vs_quant.py`
 - `demo/reproduce_center6_large_angle.py` -> `experiments/legacy/demo/reproduce_center6_large_angle.py`
 - `demo/revise_codebook.py` -> `experiments/legacy/demo/revise_codebook.py`
 - `demo/robustness_probe.py` -> `experiments/legacy/demo/robustness_probe.py`
@@ -98,29 +100,29 @@ Git renames from this layout change. Imports were rewritten to the new modules.
 - `training/single_step_action_token_policy.py` -> `experiments/legacy/single_step_action_token_policy.py`
 - `training/supervised_coverage_warmstart.py` -> `experiments/legacy/supervised_coverage_warmstart.py`
 - `training/vertical_slip_contact_mechanics_audit.py` -> `experiments/legacy/vertical_slip_contact_mechanics_audit.py`
-- `training/airborne_intercept_recatch.py` -> `experiments/recatch/airborne_intercept_recatch.py`
-- `training/clean_natural_loss_recatch.py` -> `experiments/recatch/clean_natural_loss_recatch.py`
-- `training/contact_aware_recatch_search.py` -> `experiments/recatch/contact_aware_recatch_search.py`
-- `training/external_airborne_recatch.py` -> `experiments/recatch/external_airborne_recatch.py`
-- `training/freefall_capture_diagnostic.py` -> `experiments/recatch/freefall_capture_diagnostic.py`
-- `training/horizontal_grasp_offset_freefall_recatch.py` -> `experiments/recatch/horizontal_grasp_offset_freefall_recatch.py`
-- `training/legal_recatch_k48_handoff.py` -> `experiments/recatch/legal_recatch_k48_handoff.py`
-- `training/legal_recatch_probe.py` -> `experiments/recatch/legal_recatch_probe.py`
-- `training/legal_recatch_speed_match.py` -> `experiments/recatch/legal_recatch_speed_match.py`
-- `training/legal_recatch_transfer.py` -> `experiments/recatch/legal_recatch_transfer.py`
-- `training/multi_disturbance_airborne_feasibility.py` -> `experiments/recatch/multi_disturbance_airborne_feasibility.py`
-- `training/natural_loss_recatch_coverage_expansion.py` -> `experiments/recatch/natural_loss_recatch_coverage_expansion.py`
-- `training/natural_loss_recatch_data_scaling.py` -> `experiments/recatch/natural_loss_recatch_data_scaling.py`
+- `training/airborne_intercept_recatch.py` -> `experiments/recatch/airborne/airborne_intercept_recatch.py`
+- `training/clean_natural_loss_recatch.py` -> `experiments/recatch/natural_loss/clean_natural_loss_recatch.py`
+- `training/contact_aware_recatch_search.py` -> `experiments/recatch/legal/contact_aware_recatch_search.py`
+- `training/external_airborne_recatch.py` -> `experiments/recatch/airborne/external_airborne_recatch.py`
+- `training/freefall_capture_diagnostic.py` -> `experiments/recatch/airborne/freefall_capture_diagnostic.py`
+- `training/horizontal_grasp_offset_freefall_recatch.py` -> `experiments/recatch/airborne/horizontal_grasp_offset_freefall_recatch.py`
+- `training/legal_recatch_k48_handoff.py` -> `experiments/recatch/legal/legal_recatch_k48_handoff.py`
+- `training/legal_recatch_probe.py` -> `experiments/recatch/legal/legal_recatch_probe.py`
+- `training/legal_recatch_speed_match.py` -> `experiments/recatch/legal/legal_recatch_speed_match.py`
+- `training/legal_recatch_transfer.py` -> `experiments/recatch/legal/legal_recatch_transfer.py`
+- `training/multi_disturbance_airborne_feasibility.py` -> `experiments/recatch/airborne/multi_disturbance_airborne_feasibility.py`
+- `training/natural_loss_recatch_coverage_expansion.py` -> `experiments/recatch/natural_loss/natural_loss_recatch_coverage_expansion.py`
+- `training/natural_loss_recatch_data_scaling.py` -> `experiments/recatch/natural_loss/natural_loss_recatch_data_scaling.py`
 - `training/new_recatch_supervised.py` -> `experiments/recatch/new_recatch_supervised.py`
-- `training/probe_airborne_capability.py` -> `experiments/recatch/probe_airborne_capability.py`
-- `training/probe_gripper_unstick.py` -> `experiments/recatch/probe_gripper_unstick.py`
+- `training/probe_airborne_capability.py` -> `experiments/recatch/airborne/probe_airborne_capability.py`
+- `training/probe_gripper_unstick.py` -> `experiments/recatch/legal/probe_gripper_unstick.py`
 - `training/recatch_braking_optimization.py` -> `experiments/recatch/recatch_braking_optimization.py`
-- `training/recatch_interface_comparison.py` -> `experiments/recatch/recatch_interface_comparison.py`
-- `training/recovery_ic_expansion.py` -> `experiments/recatch/recovery_ic_expansion.py`
-- `training/top_impact_open_overchase_recatch.py` -> `experiments/recatch/top_impact_open_overchase_recatch.py`
-- `training/top_impact_progressive_recatch.py` -> `experiments/recatch/top_impact_progressive_recatch.py`
-- `training/top_impact_recatch_geometry_fix.py` -> `experiments/recatch/top_impact_recatch_geometry_fix.py`
-- `training/uncapped_cartesian_airborne_chase.py` -> `experiments/recatch/uncapped_cartesian_airborne_chase.py`
+- `training/recatch_interface_comparison.py` -> `experiments/recatch/airborne/recatch_interface_comparison.py`
+- `training/recovery_ic_expansion.py` -> `experiments/recatch/top_impact/recovery_ic_expansion.py`
+- `training/top_impact_open_overchase_recatch.py` -> `experiments/recatch/top_impact/top_impact_open_overchase_recatch.py`
+- `training/top_impact_progressive_recatch.py` -> `experiments/recatch/top_impact/top_impact_progressive_recatch.py`
+- `training/top_impact_recatch_geometry_fix.py` -> `experiments/recatch/top_impact/top_impact_recatch_geometry_fix.py`
+- `training/uncapped_cartesian_airborne_chase.py` -> `experiments/recatch/airborne/uncapped_cartesian_airborne_chase.py`
 - `training/expand_controlled_sliding.py` -> `experiments/sliding/expand_controlled_sliding.py`
 - `training/expand_inward_training_data.py` -> `experiments/sliding/expand_inward_training_data.py`
 - `training/export_inward_training_data.py` -> `experiments/sliding/export_inward_training_data.py`
@@ -149,12 +151,12 @@ These files still implement the live training runtime:
 
 Shared implementations moved out of experiment scripts. The experiment files import the new modules.
 
-- Contact extraction: `envs/contacts.py`
-- Grasp seating and seated offsets: `envs/grasp_seat.py`
-- Fixed 7D skill tapes: `controllers/skill_schedules.py`
+- Contact extraction: `envs/contacts/frames.py`
+- Grasp seating and seated offsets: `envs/initialization/grasp_seat.py`
+- Fixed 7D skill tapes: `controllers/recovery/skill_schedules.py`
 - Slide and privileged chase laws: `data_generation/strategies/recovery_laws.py`
 - Horizontal recatch oracle used by dataset generation: `data_generation/strategies/recatch_oracle.py`
-- K=36 head: `models/k36_policy.py`
+- K=36 head: `models/historical/k36_policy.py`
 - Historical K36 GRPO, pre-GRPO sanity, and the representation audit: `experiments/legacy/formal_grpo.py`, `experiments/legacy/pre_grpo_sanity.py`, `experiments/legacy/action_representation_expansion.py`
 - Top-level `demo_results/` renamed to `results/archive/demo_results/` after a SHA-256 inventory. The inventory is `results/archive/demo_results_sha256.txt`.
 

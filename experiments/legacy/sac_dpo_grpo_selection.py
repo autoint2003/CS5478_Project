@@ -9,6 +9,7 @@ and absolute t=12 rule are unchanged.
 
 from __future__ import annotations
 
+
 import json
 import math
 import sys
@@ -23,21 +24,24 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import training.autonomous_rl_sanity as sanity
-import experiments.recatch.natural_loss_recatch_data_scaling as scale
-import training.natural_loss_recatch_transformer_v3 as v3
-from controllers.geometry_switch import GeometrySwitch, hand_pose
-from controllers.recovery_actions import AIRBORNE_V2, normalize_action
-from envs.physical_recovery import physical_pack
-from training.autonomous_dataset import _until_impact_entry
-from training.autonomous_episode import (
+from envs.simulation.capture import restore_capture, take_capture
+from controllers.cartesian.tracking import TRACK
+from envs.simulation.support_contacts import restore_supports, supports_of
+import experiments.legacy.autonomous_rl_sanity as sanity
+import experiments.recatch.natural_loss.natural_loss_recatch_data_scaling as scale
+import models.airborne_v3 as v3
+from controllers.recovery.geometry_switch import GeometrySwitch, hand_pose
+from controllers.recovery.action_map import AIRBORNE_V2, normalize_action
+from envs.outcomes.physical_recovery import physical_pack
+from data_generation.autonomous_episodes import _until_impact_entry
+from training.recovery_episode import (
     Z_ABORT,
     fresh_nominal_state,
     make_training_env,
     nominal_substep,
     seat_base,
 )
-from training.autonomous_rl_sanity import (
+from experiments.legacy.autonomous_rl_sanity import (
     ACTOR_LR,
     BC_COEF,
     CRITIC_LR,
@@ -52,16 +56,14 @@ from training.autonomous_rl_sanity import (
     drop_supports,
     eval_impact,
     load_demos,
-    restore_supports,
     reward_detail,
     sample_impact,
-    supports_of,
 )
 from experiments.legacy.balanced_unified_recovery import CKPT_39, EVAL_NATURAL, TRAIN_NATURAL
-from training.full_3d_airborne_recatch_dataset import TRACK, restore_to, step_mapped
-from training.history_aware_critic_ablation import restore_capture, take_capture
-from training.natural_loss_recatch_transformer_v3 import load_airborne_policy
-from training.recovery_runtime import T_TASK
+from data_generation.airborne_recatch_dataset import restore_to, step_mapped
+
+from models.airborne_v3 import load_airborne_policy
+from training.recovery_execution import T_TASK
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "algorithm_selection"
 OUT = RAW / "algorithm_selection.json"

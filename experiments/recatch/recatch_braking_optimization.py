@@ -19,13 +19,13 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from data_generation.strategies.recatch_oracle import _bottom, _prepare
 
-from envs.airborne_obs import relative_state
-from envs.deterioration import body_twist
+from envs.observations.airborne_obs import relative_state
+from envs.simulation.grasp_quality import body_twist
 from data_generation.strategies.capture_geometry import capture_geometry
 from envs.ballistic_impact import assert_noslip, make_sim
-from training.full_3d_airborne_recatch_dataset import capture_nominal, capture_pads, drop_supports
-from experiments.recatch.horizontal_grasp_offset_freefall_recatch import DT
-from experiments.recatch.recatch_interface_comparison import (
+from data_generation.airborne_recatch_dataset import capture_nominal, capture_pads, drop_supports
+from experiments.recatch.airborne.horizontal_grasp_offset_freefall_recatch import DT
+from experiments.recatch.airborne.recatch_interface_comparison import (
     _advance,
     _capture_window,
     _grip,
@@ -35,8 +35,8 @@ from experiments.recatch.recatch_interface_comparison import (
     _render,
     _step,
 )
-from training.recovery_runtime import gains_from_cfg, stamp
-from training.replay_core import TABLE_TOP
+from training.recovery_execution import gains_from_cfg, stamp
+from envs.simulation.scene_state import TABLE_TOP
 
 OUT = ROOT / "results" / "diagnostics" / "recatch_braking_optimization"
 BASE_NPZ = ROOT / "results" / "diagnostics" / "recatch_interface_comparison" / "traces" / "C_down15_k8_corr1_open18.npz"
@@ -100,7 +100,7 @@ def _pinch_target(sim, rh, p_z):
 
 
 def run(sim, snap, nominal, pads, pad_mu, brake, horizon=3.2, interface="C", drop_table=True):
-    from experiments.recatch.multi_disturbance_airborne_feasibility import restore
+    from experiments.recatch.airborne.multi_disturbance_airborne_feasibility import restore
 
     restore(sim, snap, nominal, pads, pad_mu)
     sim.model.opt.timestep = DT
@@ -109,7 +109,7 @@ def run(sim, snap, nominal, pads, pad_mu, brake, horizon=3.2, interface="C", dro
         sim._watch_drop = False
     else:
         sim._watch_drop = True
-        from envs.table_drop import restore_state
+        from envs.outcomes.table_drop import restore_state
 
         restore_state(sim, None)
     if hasattr(sim, "park_ball"):
@@ -531,7 +531,7 @@ def main():
         if row["name"] == best_name:
             row["trace"] = best_trace
     _plot(baseline, best_result, OUT / "brake_curves.png")
-    from experiments.recatch.recatch_interface_comparison import _render as render
+    from experiments.recatch.airborne.recatch_interface_comparison import _render as render
 
     render(sim, baseline, OUT / "videos" / "baseline_follow.mp4", "baseline")
     render(sim, best_result, OUT / "videos" / f"{best_name}.mp4", best_name)

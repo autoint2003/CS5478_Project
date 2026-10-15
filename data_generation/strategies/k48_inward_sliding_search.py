@@ -24,11 +24,11 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from controllers.recovery_actions import AIRBORNE_V3, grip_action, grip_tau, normalize_action
-from envs.physical_recovery import physical_pack
+from controllers.recovery.action_map import AIRBORNE_V3, grip_action, grip_tau, normalize_action
+from envs.outcomes.physical_recovery import physical_pack
 from data_generation.ball_impact_dataset import run_episode
-from envs.horizon_outcome import recovery_failed
-from data_generation.oracle_search import representability
+from envs.outcomes.horizon_outcome import recovery_failed
+from data_generation.oracles.representability import representability
 from envs.step_legal import step_legal
 from data_generation.rebuild_k48_recovery import (
     CAP_STEPS,
@@ -41,7 +41,7 @@ from data_generation.rebuild_k48_recovery import (
     legal_verify,
     legalize,
 )
-from training.unified_k47 import load_codebook
+from training.k47_codebook import load_codebook
 
 OLD = ROOT / "results/archive/demo_results/diagnostics/raw/k48_recovery_v3"
 OUT = ROOT / "results/archive/demo_results/diagnostics/raw/k48_inward_sliding_search_v1"
@@ -200,7 +200,7 @@ def _snapshot(sim) -> dict:
 
 def rollout(env, blob, actions):
     """Execute legal actions from the saved capture. Stop if the object falls."""
-    from training.history_aware_critic_ablation import restore_capture
+    from envs.simulation.capture import restore_capture
 
     restore_capture(env, blob["capture"])
     start = _snapshot(env.sim)
@@ -305,7 +305,7 @@ def diagnose_old(env, book):
             continue
         blob = _load_blob(row_snapshot(row["id"]))
         spec = {"name": "inward_reseat", "ref": blob["ref"]}
-        from training.history_aware_critic_ablation import restore_capture
+        from envs.simulation.capture import restore_capture
 
         restore_capture(env, blob["capture"])
         memory = {}
@@ -706,7 +706,7 @@ def stage_c(env, book, path, done, stage_seconds):
 
 
 def _finger_at(env, blob) -> float:
-    from training.history_aware_critic_ablation import restore_capture
+    from envs.simulation.capture import restore_capture
 
     restore_capture(env, blob["capture"])
     return float(_finger_x(env.sim))

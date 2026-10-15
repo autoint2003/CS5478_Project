@@ -1,0 +1,17 @@
+# Sealed 120-update pilot on the earlier slip/seat/air/impact catalog.
+# The launcher refuses this output directory. Do not point a new run here.
+# Ball-impact training uses config/training/legacy/formal_grpo_ballistic.yaml.
+
+initialization: results/archive/demo_results/diagnostics/raw/pre_grpo_sanity/policy_B_init.pt
+reference: results/archive/demo_results/diagnostics/raw/pre_grpo_sanity/policy_A_reference.pt
+output_dir: results/archive/demo_results/diagnostics/raw/formal_grpo_pilot
+dataset: pilot_catalog
+updates: 120
+eval_every: 12
+kl_coef: 0.05
+lr: 3.0e-5
+clip: 0.2
+group: 4
+sigma: 0.05
+grad_clip: 1.0
+seed_base: 3000

@@ -1,0 +1,26 @@
+# K=47 training on the migrated horizon. Running --supervised or --grpo starts training.
+# The historical basin-gated manifests stay in config/training/k47/unified_k47.yaml.
+
+codebook: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy
+supervised_targets: results/archive/demo_results/diagnostics/raw/horizon_migration/supervised_targets.jsonl
+grpo_initial_conditions: results/archive/demo_results/diagnostics/raw/horizon_migration/grpo_initial_conditions.jsonl
+supervised_output: results/archive/demo_results/diagnostics/raw/unified_k47_horizon/supervised
+eval_output: results/archive/demo_results/diagnostics/raw/unified_k47_horizon/eval
+baseline_eval: results/archive/demo_results/diagnostics/raw/horizon_migration/checkpoint_eval.json
+grpo_output: results/archive/demo_results/diagnostics/raw/unified_k47_horizon/grpo_pilot
+seed: 1
+device: cuda
+epochs: 40
+batch_size: 8
+lr: 0.0003
+grpo_updates: 20
+grpo_lr: 0.00003
+kl_coef: 0.05
+clip: 0.2
+group: 4
+grpo_save_every: 5
+rollout_cap_steps: 120
+eval_cap_steps: 120
+lambda_time: 0.05
+nominal_seconds: 12.0
+recovery_limit_s: 2.4

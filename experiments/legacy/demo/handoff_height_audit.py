@@ -5,6 +5,7 @@ Does not change the evaluator. Does not train.
 
 from __future__ import annotations
 
+
 import json
 import sys
 from pathlib import Path
@@ -15,12 +16,14 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import envs.recovery_success as success
-from envs.physical_recovery import TABLE_DROP, Z_AIR
-from training.autonomous_episode import Z_ABORT, make_training_env
+from envs.simulation.capture import restore_capture, take_capture
+from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
+import envs.outcomes.recovery_success as success
+from envs.outcomes.physical_recovery import TABLE_DROP, Z_AIR
+from training.recovery_episode import Z_ABORT, make_training_env
 from data_generation.ball_impact_dataset import load_episode
-from training.history_aware_critic_ablation import restore_capture
-from training.nominal_pose_audit import errors
+
+
 from experiments.ball_impact.privileged_ball_impact_search import step_legal
 from experiments.sliding.sliding_vs_regrasp import HANDOFF_Z
 
@@ -68,7 +71,7 @@ def scan(env, episode_id, tag):
 
 
 def main():
-    from training.k36_checkpoint import load_models
+    from models.historical.k36_checkpoint import load_models
     import torch
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

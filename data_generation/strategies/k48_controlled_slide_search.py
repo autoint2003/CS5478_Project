@@ -23,13 +23,13 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from controllers.geometry_switch import hand_pose
-from controllers.recovery_actions import AIRBORNE_V3, grip_action, grip_tau, normalize_action
-from envs.physical_recovery import RH_Z_NOM, physical_pack
+from controllers.recovery.geometry_switch import hand_pose
+from controllers.recovery.action_map import AIRBORNE_V3, grip_action, grip_tau, normalize_action
+from envs.outcomes.physical_recovery import RH_Z_NOM, physical_pack
 from data_generation.ball_impact_dataset import run_episode
-from envs.horizon_outcome import recovery_failed
+from envs.outcomes.horizon_outcome import recovery_failed
 from data_generation.strategies.k48_inward_sliding_search import _priority_cuts, _verify_prefix
-from data_generation.oracle_search import representability
+from data_generation.oracles.representability import representability
 from envs.step_legal import step_legal
 from data_generation.rebuild_k48_recovery import (
     CAP_STEPS,
@@ -39,7 +39,7 @@ from data_generation.rebuild_k48_recovery import (
     _open_env,
     controlled_slide_action,
 )
-from training.unified_k47 import load_codebook
+from training.k47_codebook import load_codebook
 
 OLD = ROOT / "results/archive/demo_results/diagnostics/raw/k48_recovery_v3"
 OUT = ROOT / "results/archive/demo_results/diagnostics/raw/k48_controlled_slide_search_v1"
@@ -201,7 +201,7 @@ def _measure(sim, ref):
 
 
 def rollout(env, blob, actions):
-    from training.history_aware_critic_ablation import restore_capture
+    from envs.simulation.capture import restore_capture
 
     restore_capture(env, blob["capture"])
     rows = [_measure(env.sim, blob["ref"])]
@@ -278,7 +278,7 @@ def _summary(rows, drop_step, cuts):
 
 
 def _baseline_actions(env, blob):
-    from training.history_aware_critic_ablation import restore_capture
+    from envs.simulation.capture import restore_capture
 
     restore_capture(env, blob["capture"])
     spec = {"name": "controlled_slide", "ref": blob["ref"]}
@@ -310,7 +310,7 @@ def _candidate_map():
 
 
 def _select(env):
-    from training.history_aware_critic_ablation import restore_capture
+    from envs.simulation.capture import restore_capture
 
     rows = [row for row in _load_jsonl(OLD / "candidates.jsonl") if row.get("nominal_class") == "RECOVERY_CANDIDATE"]
     rows.sort(key=lambda row: (0 if row.get("split") == "valid" else 1, row["id"]))
@@ -381,7 +381,7 @@ def search(env, book):
             if len(actions) == 0:
                 outcome = {"reason": "no_actions", "success": False, "seconds": 0.0}
             elif stop == "recovery_failed":
-                from envs.table_drop import terminal_reason
+                from envs.outcomes.table_drop import terminal_reason
                 outcome = {"reason": terminal_reason(env.sim), "success": False, "during_recovery": True, "seconds": 0.0, "steps": int(len(actions))}
             else:
                 outcome = _verify_prefix(env, book, blob, actions)
@@ -521,7 +521,7 @@ def _stage_d(env, book, path, done, stage_seconds):
         if row.get("split") != seed_row.get("split"):
             continue
         blob = _load_blob(row["snapshot"])
-        from training.history_aware_critic_ablation import restore_capture
+        from envs.simulation.capture import restore_capture
         restore_capture(env, blob["capture"])
         rhx = _measure(env.sim, blob["ref"])["rhx"]
         if (1.0 if rhx >= 0.0 else -1.0) != source_sign:

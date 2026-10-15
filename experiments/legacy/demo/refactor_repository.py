@@ -133,12 +133,12 @@ def rewrite_historical_paths() -> int:
 
 def point_future_outputs() -> None:
     replacements = {
-        ROOT / "config/unified_k48_recovery_v3.yaml": {
+        ROOT / "config/training/k48/unified_k48_recovery_v3.yaml": {
             "supervised_output: results/archive/demo_results/diagnostics/raw/k48_recovery_v3/supervised": "supervised_output: results/archive/demo_results/sft",
             "eval_output: results/archive/demo_results/diagnostics/raw/k48_recovery_v3/eval": "eval_output: results/archive/demo_results/evaluations",
             "grpo_output: results/archive/demo_results/diagnostics/raw/k48_recovery_v3/grpo_v1": "grpo_output: results/archive/demo_results/grpo/v1",
         },
-        ROOT / "config/unified_k48_recovery_v3_reward_v2.yaml": {
+        ROOT / "config/training/k48/unified_k48_recovery_v3_reward_v2.yaml": {
             "supervised_output: results/archive/demo_results/diagnostics/raw/k48_recovery_v3/supervised": "supervised_output: results/archive/demo_results/sft",
             "eval_output: results/archive/demo_results/diagnostics/raw/k48_recovery_v3/eval": "eval_output: results/archive/demo_results/evaluations",
             "grpo_output: results/archive/demo_results/diagnostics/raw/k48_recovery_v3/grpo_v2": "grpo_output: results/archive/demo_results/grpo/v2",

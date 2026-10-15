@@ -1,6 +1,12 @@
-"""Render one verified vertical-cylinder recatch. Display only."""
+"""Replay a saved recovery tape and write an MP4.
+
+The command-line defaults are the verified vertical-cylinder example
+(ball_train_v2_0070, strategy follow_early). Pass --episode, --strategy,
+and --manifest to render a different tape.
+"""
 
 from __future__ import annotations
+
 
 import json
 import shutil
@@ -14,15 +20,16 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from envs.physical_recovery import physical_pack
+from envs.simulation.capture import restore_capture, take_capture
+from envs.outcomes.physical_recovery import physical_pack
 from data_generation.strategies.capture_geometry import capture_geometry
-from training.history_aware_critic_ablation import restore_capture
-from envs.horizon_outcome import NOMINAL_S
+
+from envs.outcomes.horizon_outcome import NOMINAL_S
 from envs.step_legal import step_legal
 from visualization.camera import mjv_camera_from_preset
 from visualization.overlays import caption
 from visualization.video_recorder import write_frames_mp4
-from envs.recovery_success import apply_handoff, nominal_step
+from envs.outcomes.recovery_success import apply_handoff, nominal_step
 from data_generation.strategies.vertical_recatch_search import load_blob, make_env
 
 OUT = ROOT / "results" / "diagnostics" / "vertical_recatch" / "VIDEOS"

@@ -16,7 +16,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from envs.horizon_outcome import LAMBDA_TIME, NOMINAL_S, physical_reward
+from envs.outcomes.horizon_outcome import LAMBDA_TIME, NOMINAL_S, physical_reward
 from envs.step_legal import step_legal
 from models.k48_checkpoint import (
     HANDOFF,
@@ -30,7 +30,7 @@ from models.k48_checkpoint import (
 from training.grpo_math import SIGMA, advantages, gaussian_logprob
 from training.k48_config import CKPT, DATA, ROOT, SELECTED_LIMIT_S
 from training.reward_v2 import grpo_return
-from training.unified_k47 import CAP, categorical_kl, decode_action, episode_arrays, group_advantage, load_codebook, read_jsonl
+from training.k47_codebook import CAP, categorical_kl, decode_action, episode_arrays, group_advantage, load_codebook, read_jsonl
 
 def recorded_end_includes_handoff(n_actions):
     """A recorded_end tape is supervised with token 47 only if another decision fits.
@@ -60,7 +60,7 @@ def _append_handoff_target(row, obs, prev, actions, tokens, residuals):
     return obs, prev_h, tokens, residuals
 
 def episode_tensors(row, book):
-    from training.unified_k47 import episode_arrays
+    from training.k47_codebook import episode_arrays
 
     if row.get("handoff_label") == "immediate_handoff":
         packed = np.load(ROOT / row["continuous_npz"])

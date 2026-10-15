@@ -6,30 +6,33 @@ multi-axis chase. Experiment scripts call these functions.
 
 from __future__ import annotations
 
+from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
+from controllers.cartesian.tracking import TRACK
+
 import mujoco
 import numpy as np
 
-from controllers.geometry_switch import hand_pose
-from controllers.jacobian_controller import apply_cartesian_ctrl
-from controllers.recovery_actions import TAU_OPEN, grip_action, normalize_vz
+from controllers.recovery.geometry_switch import hand_pose
+from controllers.cartesian.jacobian import apply_cartesian_ctrl
+from controllers.recovery.action_map import TAU_OPEN, grip_action, normalize_vz
 from data_generation.ball_impact_dataset import cylinder_contacts
 from data_generation.strategies.capture_geometry import PINCH_HAND, capture_geometry
-from envs.airborne_obs import relative_state
+from envs.observations.airborne_obs import relative_state
 from envs.ballistic_impact import TAU_SEC, assert_noslip, make_sim, z_tgt_of
-from envs.deterioration import body_twist
-from envs.grasp_seat import grasp_settled, restore_seated
-from envs.horizon_outcome import NOMINAL_S, nominal_verify
-from envs.airborne_obs import observe_airborne
-from envs.observable_obs import ObservableObsState
-from envs.recovery_success import nominal_step
+from envs.simulation.grasp_quality import body_twist
+from envs.initialization.grasp_seat import grasp_settled, restore_seated
+from envs.outcomes.horizon_outcome import NOMINAL_S, nominal_verify
+from envs.observations.airborne_obs import observe_airborne
+from envs.observations.observable_obs import ObservableObsState
+from envs.outcomes.recovery_success import nominal_step
 from envs.step_legal import step_legal
-from envs.table_drop import latched, object_vz, observe, restore_state
-from training.full_3d_airborne_recatch_dataset import TRACK, capture_nominal, capture_pads, drop_supports
-from training.impact_ball import apply_ball_free_state
-from training.nominal_pose_audit import hand_R
-from training.recovery_runtime import gains_from_cfg, make_snap, restore_ballistic, stamp
-from training.replay_core import TABLE_TOP, park_impact_ball
-from training.unified_k47 import load_codebook
+from envs.outcomes.table_drop import latched, object_vz, observe, restore_state
+from data_generation.airborne_recatch_dataset import capture_nominal, capture_pads, drop_supports
+from envs.simulation.impact_ball import apply_ball_free_state
+
+from training.recovery_execution import gains_from_cfg, make_snap, restore_ballistic, stamp
+from envs.simulation.scene_state import TABLE_TOP, park_impact_ball
+from training.k47_codebook import load_codebook
 
 
 def _nominal_fail(sim, snap, ref):
@@ -54,7 +57,7 @@ def _nominal_fail(sim, snap, ref):
 def _action_from(sim, v_world, w_body, tau):
     rh = np.array(sim.data.xmat[sim.ids.hand_body].reshape(3, 3), float)
     v_h = rh.T @ np.asarray(v_world, float)
-    from controllers.recovery_actions import grip_action, normalize_vz
+    from controllers.recovery.action_map import grip_action, normalize_vz
 
     action = np.zeros(7, np.float32)
     action[0] = np.clip(v_h[0] / 1.0, -1.0, 1.0)
@@ -136,7 +139,7 @@ def _apply_variant(sim, nominal, cell):
         return
     apply_dyn(sim, nominal, cell.get("mass_kg"), cell.get("friction"))
     if cell.get("friction") is not None:
-        from envs.dynamics import set_finger_object_sliding_mu
+        from envs.simulation.object_dynamics import set_finger_object_sliding_mu
 
         set_finger_object_sliding_mu(sim.model, sim.ids, float(cell["friction"]), sim.data)
 
@@ -148,10 +151,10 @@ def _flight_step(sim):
     physics step, which deletes a launch. The arm command is the same hold.
     """
     import mujoco
-    from controllers.jacobian_controller import apply_cartesian_ctrl
+    from controllers.cartesian.jacobian import apply_cartesian_ctrl
     from envs.ballistic_impact import TAU_SEC, z_tgt_of
-    from training.full_3d_airborne_recatch_dataset import TRACK
-    from envs.table_drop import object_vz, observe
+    from data_generation.airborne_recatch_dataset import TRACK
+    from envs.outcomes.table_drop import object_vz, observe
 
     vz_before = object_vz(sim)
     z_now = float(z_tgt_of(sim))

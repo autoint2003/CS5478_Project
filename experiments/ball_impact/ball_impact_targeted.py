@@ -26,8 +26,8 @@ from data_generation.ball_impact_dataset import (
     physics_record,
     run_episode,
 )
-from training.autonomous_episode import make_training_env
-from data_generation.impact_labels import cylinder_first, near
+from training.recovery_episode import make_training_env
+from data_generation.validation.impact_labels import cylinder_first, near
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "ball_impact_dataset_v2"
 ATTEMPTS = RAW / "attempts.jsonl"
@@ -273,7 +273,7 @@ def main():
     parser = argparse.ArgumentParser(description="Append targeted TRAIN ball-impact launches")
     parser.add_argument("--attempts", type=int, default=24)
     args = parser.parse_args()
-    from training.k36_checkpoint import load_models
+    from models.historical.k36_checkpoint import load_models
     import torch
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

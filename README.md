@@ -11,23 +11,23 @@ Run commands from the repository root.
 | Path | Role |
 |---|---|
 | `assets/` | MuJoCo XML, including `scene_ballistic_impact.xml` |
-| `config/` | Simulation, reward, and training YAML. Active files: `unified_k48_recovery_v3.yaml` and `unified_k48_recovery_v3_reward_v2.yaml` |
-| `controllers/` | Nominal, Jacobian, gripper, and the 7-D `recovery_actions` map |
-| `envs/` | Simulator, official `step_legal`, 39-D observations, contacts, `recovery_success`, `horizon_outcome`, and `table_drop` |
-| `sensors/` | Tactile and pose estimation |
-| `models/` | K48 Transformer (`k48_policy.py`) and checkpoint loading (`k48_checkpoint.py`) |
-| `data_generation/` | Dataset rebuild and the sliding, recatch, and vertical-recatch strategies |
-| `training/` | SFT, GRPO, the codebook loader, and the training-environment runtime |
-| `evaluation/` | Closed-loop rollout and handoff checks |
-| `visualization/` | MP4 replay from a real initial condition and a saved action tape |
-| `experiments/` | One-off searches: `ball_impact`, `sliding`, `recatch`, `handoff`, and `legacy` |
-| `scripts/` | Thin entry points |
-| `tests/` | Regression tests |
+| `config/` | `simulation/`, `controllers/`, `recovery/`, `training/k48/` (active recovery v3), `training/k47/`, `training/legacy/` |
+| `controllers/` | `nominal.py`, `cartesian/`, `gripper/`, `recovery/action_map.py` |
+| `envs/` | `step_legal.py`, `ballistic_impact.py`, `simulation/`, `observations/`, `contacts/`, `outcomes/`, `initialization/` |
+| `sensors/` | Finger-pad tactile array and the hand-x offset estimate `lateral_offset.py` |
+| `models/` | K48 policy and checkpoint. `airborne_v3.py` is the 39-D policy and `step_v3`. `historical/` is K33/K36 |
+| `data_generation/` | Official generators, `strategies/`, `oracles/`, `initial_conditions/`, `recording/`, `validation/`, `maintenance/` |
+| `training/` | `train_sft.py`, `train_grpo.py`, `dataset.py`, `grpo_progress.py`, `k47_codebook.py`, `reward_v2.py`, `unified_k48.py` |
+| `evaluation/` | Closed-loop K48 eval, data audit, recatch legality, handoff-target check |
+| `visualization/` | Camera, captions, MP4 encoding, and tape replay |
+| `experiments/` | `ball_impact/`, `sliding/`, `recatch/{airborne,natural_loss,legal,top_impact}/`, `handoff/`, `legacy/` |
+| `scripts/` | Thin entry points. Package roles are in `docs/MODULE_ORGANIZATION.md`. |
+| `tests/` | Regression tests. `tests/fixtures/physics_state_baseline.npz` is the later-change state baseline |
 | `data/` | Manifests, demonstrations, and `data/snapshots/` |
 | `results/` | New SFT, GRPO, evaluation, and diagnostic outputs |
 | `results/archive/demo_results/` | Historical diagnostics and the K=47 checkpoint used to initialize K=48 |
 | `mujoco_menagerie/` | Vendored robot models. Not project control code |
-| `docs/` | Architecture notes and the course PDFs in `docs/coursework/` |
+| `docs/` | Architecture notes, `docs/FINAL_REFACTOR_CHECK.md`, and the course PDFs in `docs/coursework/` |
 
 `data/`, `results/archive/demo_results/`, and `results/` are gitignored. Training writes under `results/sft/`, `results/grpo/`, and `results/evaluations/`. File moves are listed in `docs/MIGRATION.md`.
 
@@ -94,7 +94,7 @@ python -u scripts/train.py --check
 40 epochs, batch 8, seed 1, learning rate 3e-4. The initialization checkpoint is the historical K=47 epoch-40 model. Checkpoints go to `results/sft/`. The last file is `results/sft/checkpoint_epoch_0040.pt`.
 
 ```powershell
-python -u scripts/train.py --supervised --config config/unified_k48_recovery_v3.yaml --checkpoint results/archive/demo_results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+python -u scripts/train.py --supervised --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/archive/demo_results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
 ```
 
 ### GRPO reward v1
@@ -102,15 +102,15 @@ python -u scripts/train.py --supervised --config config/unified_k48_recovery_v3.
 Three passes over the 87 training recovery initial conditions, 261 updates. Writes `results/grpo/v1/`. The last file is `results/grpo/v1/checkpoint_u0261.pt`. The success terminal is only `SUCCESS_12S`.
 
 ```powershell
-python -u scripts/train.py --grpo --config config/unified_k48_recovery_v3.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
+python -u scripts/train.py --grpo --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
 ```
 
 ### GRPO reward v2
 
-`config/unified_k48_recovery_v3_reward_v2.yaml` runs nine passes, 783 updates, and writes `results/grpo/v2/`. A checkpoint saved after update 261 is the end of the first three passes. This command continues that file from update 262 through 783 and appends `training_log.jsonl` and `rollouts.jsonl`. It does not overwrite `checkpoint_u0261.pt`. The frozen KL reference stays `results/sft/checkpoint_epoch_0040.pt`. The last new file is `results/grpo/v2/checkpoint_u0783.pt`.
+`config/training/k48/unified_k48_recovery_v3_reward_v2.yaml` runs nine passes, 783 updates, and writes `results/grpo/v2/`. A checkpoint saved after update 261 is the end of the first three passes. This command continues that file from update 262 through 783 and appends `training_log.jsonl` and `rollouts.jsonl`. It does not overwrite `checkpoint_u0261.pt`. The frozen KL reference stays `results/sft/checkpoint_epoch_0040.pt`. The last new file is `results/grpo/v2/checkpoint_u0783.pt`.
 
 ```powershell
-python -u scripts/train.py --grpo --config config/unified_k48_recovery_v3_reward_v2.yaml --checkpoint results/grpo/v2/checkpoint_u0261.pt
+python -u scripts/train.py --grpo --config config/training/k48/unified_k48_recovery_v3_reward_v2.yaml --checkpoint results/grpo/v2/checkpoint_u0261.pt
 ```
 
 ### Evaluation
@@ -120,25 +120,25 @@ The default IC list is `data/valid_recovery.jsonl` (8 validation recovery initia
 SFT epoch 40:
 
 ```powershell
-python -u scripts/evaluate.py --eval --config config/unified_k48_recovery_v3.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
+python -u scripts/evaluate.py --eval --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
 ```
 
 GRPO v1, same 8 validation initial conditions:
 
 ```powershell
-python -u scripts/evaluate.py --eval --config config/unified_k48_recovery_v3.yaml --checkpoint results/grpo/v1/checkpoint_u0261.pt
+python -u scripts/evaluate.py --eval --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/grpo/v1/checkpoint_u0261.pt
 ```
 
 GRPO v2, same 8 validation initial conditions:
 
 ```powershell
-python -u scripts/evaluate.py --eval --config config/unified_k48_recovery_v3_reward_v2.yaml --checkpoint results/grpo/v2/checkpoint_u0261.pt
+python -u scripts/evaluate.py --eval --config config/training/k48/unified_k48_recovery_v3_reward_v2.yaml --checkpoint results/grpo/v2/checkpoint_u0261.pt
 ```
 
 `--eval-data` selects another recovery list. The 87 training recovery initial conditions are `data/grpo_initial_conditions.jsonl`. Pass `--eval-output` so this does not overwrite `results/evaluations/heldout_train.json`. The rows are written to `closed_loop.json` in that directory.
 
 ```powershell
-python -u scripts/evaluate.py --eval --config config/unified_k48_recovery_v3.yaml --checkpoint results/grpo/v1/checkpoint_u0261.pt --eval-data data/grpo_initial_conditions.jsonl --eval-output results/evaluations/raw/grpo_v1_train_eval
+python -u scripts/evaluate.py --eval --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/grpo/v1/checkpoint_u0261.pt --eval-data data/grpo_initial_conditions.jsonl --eval-output results/evaluations/raw/grpo_v1_train_eval
 ```
 
 Replace the checkpoint path to evaluate another run on the same 87 initial conditions. Reward v1 and reward v2 use the same rollout. The config selects the codebook and the 4 s / 12 s limits.
@@ -160,4 +160,4 @@ The policy is `models/k48_policy.py`: width 64, 2 layers, 4 heads, feed-forward 
 
 One-off searches live under `experiments/`. The old `demo/` scripts are in `experiments/legacy/demo/`. Their previous outputs, reports, and raw traces are in `results/archive/demo_results/`. A stored path that still begins with `results/` is resolved to `results/archive/demo_results/` when that historical file exists, so old manifest provenance is left unchanged.
 
-Older K=47 commands in this file's previous revision used `config/unified_k47_horizon.yaml` and wrote under what is now `results/archive/demo_results/diagnostics/raw/unified_k47_horizon/`. Those configs still point at that historical tree. Package roles are in `docs/ARCHITECTURE.md`.
+Older K=47 commands in this file's previous revision used `config/training/k47/unified_k47_horizon.yaml` and wrote under what is now `results/archive/demo_results/diagnostics/raw/unified_k47_horizon/`. Those configs still point at that historical tree. Package roles are in `docs/ARCHITECTURE.md`.

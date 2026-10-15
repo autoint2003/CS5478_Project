@@ -1,0 +1,125 @@
+sim: config/simulation/sim.yaml
+
+mass: 0.08
+friction: 1.0
+randomize: false
+use_contact: true
+grasp_offset: [0.0, 0.0, 0.0]
+
+cartesian:
+  kp_pos: 180.0
+  kd_pos: 28.0
+  kp_ori: 16.0
+  kd_ori: 2.4
+  kp_null: 4.0
+  kd_null: 0.8
+
+reach:
+  duration: 4.0
+  n_trials: 20
+  pos_tol: 0.02
+  ori_tol_deg: 10.0
+  min_success_rate: 0.80
+  x_range: [0.35, 0.55]
+  y_range: [-0.20, 0.20]
+  z_range: [0.50, 0.65]
+  yaw_range_deg: [-20.0, 20.0]
+  pitch_range_deg: [-15.0, 15.0]
+
+fsm:
+  approach_offset_z: 0.22
+  grasp_offset_z: 0.103
+  lift_offset_z: 0.18
+  lift_clearance: 0.08
+  lift_speed: 0.08
+  pos_tol: 0.015
+  ori_tol_deg: 12.0
+  dwell_approach: 0.35
+  dwell_descend: 0.30
+  dwell_close: 0.40
+  close_timeout: 1.50
+  pinch_opening: 0.022
+  hold_success: 1.00
+  hold_xy_tol: 0.08
+  episode_timeout: 12.0
+
+gripper:
+  open_tau: 8.0
+  close_tau: -18.0
+  close_boost: -32.0
+  touch_threshold: 0.02
+  contact_aware: true
+  fg_nom: 18.0
+  fg_min: 8.0
+  fg_max: 45.0
+
+# The deterioration score is not the recovery trigger.
+# Online entry and exit live in config/controllers/geometry_switch.yaml.
+deterioration:
+  p_scale: 0.02
+  v_scale: 0.08
+  theta_scale: 0.25
+  omega_scale: 1.0
+  w_p: 1.0
+  w_v: 1.0
+  w_theta: 1.0
+  w_omega: 0.5
+  w_c: 1.0
+  contact_eps: 0.05
+  lost_contact_force: 0.5
+  D_enter: 0.85
+  D_exit: 0.40
+  N_stable: 10
+  drop_z_margin: 0.004
+  workspace_xy: 0.18
+
+recovery:
+  timeout: 6.0  # training episode horizon; not demo/video duration
+  action: recovery4d
+  dv_max: [0.06, 0.06, 0.12]
+  dw_max: [0.6, 0.6, 0.6]
+  dfg_max: 16.0
+  dv_rate: 0.80
+  dw_rate: 4.0
+  dfg_rate: 80.0
+  mild_max: 1.40
+  moderate_max: 2.40
+  z_recovery_min: 0.48
+  # Consumed by RecoveryEnv + must equal RECOVERY4D_W_HY_MAX. Simulation policy only; not hardware-safe.
+  w_hy_max: 4.0
+  v_hx_max: 0.08
+  v_z_max: 0.08
+  tau_secure: -18.0
+  tau_open: -1.0  # 7d/heuristic leftover; recovery4d grip uses residual.py +2 / -18
+  success_hold: 0.20
+  contact_loss_hold: 0.15  # unused by formulation A (BOTH_OFF is not failure)
+
+reward:
+  mode: oracle  # oracle | observable_tactile
+  t_progress: 0.100  # PROVISIONAL; tactile audit 100 ms FP=0
+  e_hat_dot_tol: 0.02  # PROVISIONAL; |Δe_hat|/dt_policy, not GT v_rel
+  lambda_D: 0.0
+  e_scale: 0.0075
+  lambda_cap: 0.02  # unused by formulation A
+  lambda_a: 0.001  # recovery4d: a0^2+a1^2+a2^2 only; grip a3 unpenalized
+  lambda_f: 0.00015
+  lambda_c: 0.15
+  lambda_t: 0.01  # unused by formulation A
+  recovered: 10.0
+  drop: 10.0
+  timeout_penalty: 2.0
+  gamma: 0.99
+
+heuristic:
+  kp_F: 8.0
+  kd_F: 1.5
+  kp_v: 0.10
+  kd_v: 0.02
+
+sac:
+  learning_starts: 1024
+  batch_size: 256
+  buffer_size: 200000
+  tau: 0.005
+  gamma: 0.99
+  total_timesteps: 80000

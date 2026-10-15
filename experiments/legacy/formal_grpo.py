@@ -19,9 +19,9 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from envs.config_util import load_yaml
+from envs.simulation.yaml_config import load_yaml
 from models.k48_policy import build_policy
-from training.autonomous_episode import make_training_env
+from training.recovery_episode import make_training_env
 from experiments.legacy.final_rl_readiness import CATALOG, GROUP
 from training.grpo_math import SIGMA
 from experiments.legacy.pre_grpo_sanity import (
@@ -33,7 +33,7 @@ from experiments.legacy.pre_grpo_sanity import (
     sha256,
 )
 from experiments.legacy.supervised_coverage_warmstart import roll_ic
-from training.k36_checkpoint import _reject_head_mismatch, load_models
+from models.historical.k36_checkpoint import _reject_head_mismatch, load_models
 
 IC_DIR = ROOT / "results" / "diagnostics" / "raw" / "final_rl_readiness" / "ics"
 SANITY_DIR = ROOT / "results" / "diagnostics" / "raw" / "pre_grpo_sanity"
@@ -146,7 +146,7 @@ def ball_splits():
 
 def validation_eval_ball(env, model, episode_ids):
     from data_generation.ball_impact_dataset import load_episode
-    from training.history_aware_critic_ablation import restore_capture
+    from envs.simulation.capture import restore_capture
     from experiments.legacy.supervised_coverage_warmstart import det_roll
 
     model.eval()
@@ -172,7 +172,7 @@ def validation_eval_ball(env, model, episode_ids):
 
 def main():
     parser = argparse.ArgumentParser(description="Formal critic-free GRPO")
-    parser.add_argument("--config", default="config/formal_grpo.yaml")
+    parser.add_argument("--config", default="config/training/legacy/formal_grpo.yaml")
     args = parser.parse_args()
     cfg = load_yaml(args.config)
     updates, every, init_path, ref_path, out, dataset = assert_config(cfg)

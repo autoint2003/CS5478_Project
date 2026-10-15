@@ -6,6 +6,7 @@ does not open FINAL, and does not modify historical snapshots or manifests.
 
 from __future__ import annotations
 
+
 import argparse
 import json
 import pickle
@@ -21,26 +22,28 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from envs.simulation.capture import restore_capture, take_capture
+from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
 from data_generation.ball_impact_dataset import physics_record, run_episode
-from data_generation.impact_labels import cylinder_first, near
-from training.history_aware_critic_ablation import restore_capture
-from envs.horizon_outcome import (
+from data_generation.validation.impact_labels import cylinder_first, near
+
+from envs.outcomes.horizon_outcome import (
     NOMINAL_S,
     finish_recovery,
     recovery_failed,
     replay_commands,
 )
-from data_generation.impact_labels import mechanism
-from training.nominal_pose_audit import errors
-from data_generation.oracle_search import representability
+from data_generation.validation.impact_labels import mechanism
+
+from data_generation.oracles.representability import representability
 from data_generation.strategies.recovery_laws import STRATEGIES, command
 from envs.step_legal import step_legal
-from envs.recovery_success import PERSIST_STEPS, basin_ok
-from controllers.geometry_switch import hand_pose
-from controllers.recovery_actions import AIRBORNE_V3, grip_action, grip_tau, normalize_action
-from envs.physical_recovery import physical_pack
+from envs.outcomes.recovery_success import PERSIST_STEPS, basin_ok
+from controllers.recovery.geometry_switch import hand_pose
+from controllers.recovery.action_map import AIRBORNE_V3, grip_action, grip_tau, normalize_action
+from envs.outcomes.physical_recovery import physical_pack
 from data_generation.strategies.recovery_laws import slide_action
-from training.unified_k47 import CAP, load_codebook, read_jsonl
+from training.k47_codebook import CAP, load_codebook, read_jsonl
 
 OUT = ROOT / "results/archive/demo_results/diagnostics/raw/k48_recovery_v3"
 AUDIT = ROOT / "results/archive/demo_results/diagnostics/raw/k48_handoff/nominal_audit"
@@ -115,7 +118,7 @@ def _split_for_key(key):
 
 def _open_env():
     import torch
-    from training.autonomous_episode import make_training_env
+    from training.recovery_episode import make_training_env
     from training.unified_k48 import load_trained_k48
 
     before = (CKPT.stat().st_mtime, CKPT.stat().st_size)
@@ -283,7 +286,7 @@ def legal_verify(env, blob, actions):
         contacts.append(_contacts(env))
         failed, lost_low = recovery_failed(env.sim, blob["ref"], lost_low)
         if failed:
-            from envs.horizon_outcome import _fail_recovery
+            from envs.outcomes.horizon_outcome import _fail_recovery
             out = _fail_recovery(env.sim, blob["ref"], t0)
             out["recovery_steps"] = len(executed)
             return out, observations, executed, contacts, qpos_error, phase_ok
@@ -1206,7 +1209,7 @@ def _write_yaml(name, reward, updates, save_every):
         "expand_handoff: true",
         "",
     ])
-    path = ROOT / "config" / name
+    path = ROOT / "config" / "training" / "k48" / name
     path.write_text(text, encoding="utf-8")
 
 
@@ -1870,10 +1873,10 @@ def write_report(started):
         "These commands are not part of dataset generation. Supervised training starts from the K=47 checkpoint so the HANDOFF row is expanded again, and it reads only the rebuilt manifest.",
         "",
         "```",
-        "python -u training/unified_k48.py --supervised --config config/unified_k48_recovery_v3.yaml --checkpoint results/archive/demo_results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt",
-        "python -u training/unified_k48.py --grpo --config config/unified_k48_recovery_v3.yaml --checkpoint results/archive/demo_results/diagnostics/raw/k48_recovery_v3/supervised/checkpoint_epoch_0040.pt",
-        "python -u training/unified_k48.py --grpo --config config/unified_k48_recovery_v3_reward_v2.yaml --checkpoint results/archive/demo_results/diagnostics/raw/k48_recovery_v3/supervised/checkpoint_epoch_0040.pt",
-        "python -u training/unified_k48.py --eval --config config/unified_k48_recovery_v3.yaml --checkpoint results/archive/demo_results/diagnostics/raw/k48_recovery_v3/supervised/checkpoint_epoch_0040.pt",
+        "python -u training/unified_k48.py --supervised --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/archive/demo_results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt",
+        "python -u training/unified_k48.py --grpo --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/archive/demo_results/diagnostics/raw/k48_recovery_v3/supervised/checkpoint_epoch_0040.pt",
+        "python -u training/unified_k48.py --grpo --config config/training/k48/unified_k48_recovery_v3_reward_v2.yaml --checkpoint results/archive/demo_results/diagnostics/raw/k48_recovery_v3/supervised/checkpoint_epoch_0040.pt",
+        "python -u training/unified_k48.py --eval --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/archive/demo_results/diagnostics/raw/k48_recovery_v3/supervised/checkpoint_epoch_0040.pt",
         "```",
         "",
         "The old 26 v1 VALID snapshots stay a separate no-intervention benchmark. They are not in this training pool.",

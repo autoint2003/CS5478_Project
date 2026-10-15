@@ -11,9 +11,9 @@ from pathlib import Path
 
 import numpy as np
 
-from controllers.jacobian_controller import gains_from_cfg
-from envs.config_util import load_yaml, merge_sim_config
-from envs.physical_recovery import TABLE_DROP, physical_pack
+from controllers.cartesian.jacobian import gains_from_cfg
+from envs.simulation.yaml_config import load_yaml, merge_sim_config
+from envs.outcomes.physical_recovery import TABLE_DROP, physical_pack
 from sensors.spatial_tactile import PAD1_HALF, measure_spatial_tactile
 from experiments.legacy.demo.ballistic_large_angle import (
     BRAKE_S,
@@ -27,11 +27,11 @@ from experiments.legacy.demo.ballistic_large_angle import (
     tick_log,
 )
 from envs.ballistic_impact import make_sim, z_tgt_of
-from experiments.legacy.demo.demo_ballistic_recovery import HOLD_S, OUT, continue_zero, measure, restore_ballistic, slim_m
+from experiments.legacy.demo.demonstrations.demo_ballistic_recovery import HOLD_S, OUT, continue_zero, measure, restore_ballistic, slim_m
 from experiments.legacy.demo_teleport_recovery_state import d_in_pack, pad_span_hand
-from training.replay_core import freeze
+from controllers.cartesian.velocity_step import freeze
 from experiments.legacy.vertical_slip_contact_mechanics_audit import extract_contacts
-from training.write_ballistic_impact_scene import CYL_R
+from envs.simulation.ballistic_scene import CYL_R
 
 DURS = (0.70, 1.00, 1.30, 1.60)
 PAD_U_HALF = float(PAD1_HALF[0])
@@ -409,7 +409,7 @@ def conclude(rows: list[dict]) -> str:
 
 def headless_slip_sufficiency():
     LA_RAW.mkdir(parents=True, exist_ok=True)
-    cfg = merge_sim_config(load_yaml(Path(__file__).resolve().parents[3] / "config" / "nominal.yaml"))
+    cfg = merge_sim_config(load_yaml(Path(__file__).resolve().parents[3] / "config" / "simulation" / "nominal.yaml"))
     gains = gains_from_cfg(cfg)
     snap = load_early()
     plan = json.loads((RAW / "large_angle_plan.json").read_text(encoding="utf-8"))

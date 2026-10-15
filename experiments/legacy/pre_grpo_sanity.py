@@ -12,6 +12,7 @@ steps are not in that mean. FINAL_TEST is not rolled out.
 
 from __future__ import annotations
 
+
 import hashlib
 import json
 import shutil
@@ -25,16 +26,19 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import envs.recovery_success as success
+from envs.simulation.capture import restore_capture, take_capture
+from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
+from envs.simulation.support_contacts import restore_supports, supports_of
+import envs.outcomes.recovery_success as success
 from models.k48_policy import build_policy
-from training.autonomous_episode import Z_ABORT, make_training_env, seat_base
-from training.autonomous_rl_sanity import supports_of
+from training.recovery_episode import Z_ABORT, make_training_env, seat_base
+
 from experiments.legacy.final_rl_readiness import CAP, CATALOG, CKPT, GROUP, load_ic
 from experiments.legacy.future_state_ablation import FuturePolicy, counts, evaluate, run34
-from training.history_aware_critic_ablation import restore_capture
-from training.nominal_pose_audit import errors
+
+
 from experiments.legacy.supervised_coverage_warmstart import dataset
-import training.natural_loss_recatch_transformer_v3 as v3
+import models.airborne_v3 as v3
 from training.grpo_math import LOG2PI, SIGMA, advantages, gaussian_logprob
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "pre_grpo_sanity"
@@ -497,7 +501,7 @@ def main():
     if present:
         raise SystemExit(
             "Refusing to overwrite the completed pre-GRPO sanity artifacts. "
-            "Formal training is: python -u training/formal_grpo.py --config config/formal_grpo.yaml"
+            "Formal training is: python -u training/formal_grpo.py --config config/training/legacy/formal_grpo.yaml"
         )
     RAW.mkdir(parents=True, exist_ok=True)
     copy_a = RAW / "policy_A_reference.pt"

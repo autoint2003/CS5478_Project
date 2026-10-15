@@ -13,12 +13,12 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from training.jsonable import jsonable
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from data_generation.jsonable import jsonable
 OUT = ROOT / "results" / "diagnostics" / "raw" / "long_context_recovery_pilot"
 OBS_DIM = 27
 ACT_DIM = 7
@@ -409,12 +409,12 @@ def gate_passed(reports) -> bool:
 
 
 def closed_loop(models):
-    from envs.dynamics import finger_pad_geom_ids
-    from envs.observable_obs import ObservableObsState
-    from envs.physical_recovery import physical_pack
+    from envs.simulation.object_dynamics import finger_pad_geom_ids
+    from envs.observations.observable_obs import ObservableObsState
+    from envs.outcomes.physical_recovery import physical_pack
     from envs.ballistic_impact import make_sim
     from experiments.legacy.recovery_policy_pretraining_preparation import legal_obs
-    from training.recovery_runtime import (
+    from training.recovery_execution import (
         _dropped,
         _escaped,
         capture_nominal,
@@ -425,12 +425,12 @@ def closed_loop(models):
         step_cmd,
         stamp,
     )
-    from training.replay_core import park_impact_ball
+    from envs.simulation.scene_state import park_impact_ball
     from training.value_guided_recovery_bootstrap import DT_POLICY, HELD_DYN
     import torch
 
     sim, cfg = make_sim()
-    from controllers.jacobian_controller import gains_from_cfg
+    from controllers.cartesian.jacobian import gains_from_cfg
     gains = gains_from_cfg(cfg)
     nominal = capture_nominal(sim)
     pad_ids, pad_mu = capture_pads(sim)

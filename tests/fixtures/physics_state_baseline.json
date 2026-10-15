@@ -1,0 +1,50 @@
+{
+  "role": "Baseline for later code changes. This is the current verified tree, not a pre-refactor ground truth.",
+  "git_head": "85a117b8a467612d4e54456c0a578975307a425c",
+  "working_tree": "dirty",
+  "parent_note": "HEAD 85a117b is the round-2 rollback commit. Round 3 and this cleanup are uncommitted on that commit.",
+  "mujoco": "3.12.0",
+  "scene_config": "config/simulation/nominal.yaml",
+  "sim_config": "config/simulation/sim.yaml",
+  "generated_at": "2026-10-15T14:46:32.180111+00:00",
+  "observation_atol_vs_saved_tape": 0.0001,
+  "state_atol": 1e-08,
+  "contact_force_decimals": 6,
+  "contact_fields": [
+    "geom1",
+    "geom2",
+    "Fn",
+    "side",
+    "n_w"
+  ],
+  "cases": [
+    {
+      "key": "controlled_sliding",
+      "id": "ball_train_v2_0070",
+      "strategy": "controlled_slide",
+      "snapshot": "data/snapshots/train/ball_train_v2_0070.pkl",
+      "continuous_npz": "data/controlled_sliding/train/ball_train_v2_0070__controlled_slide__verified.npz"
+    },
+    {
+      "key": "inward_sliding",
+      "id": "ball_train_0017",
+      "strategy": "inward_reseat",
+      "snapshot": "data/snapshots/train/ball_train_0017.pkl",
+      "continuous_npz": "data/inward_sliding/train/ball_train_0017__inward_reseat.npz"
+    },
+    {
+      "key": "horizontal_recatch",
+      "id": "ref_s6_p10_a0_e0",
+      "strategy": "reference",
+      "snapshot": "data/snapshots/train/ref_s6_p10_a0_e0.pkl",
+      "continuous_npz": "data/recatch/train/ref_s6_p10_a0_e0__reference.npz"
+    },
+    {
+      "key": "vertical_recatch",
+      "id": "ball_train_v2_0070",
+      "strategy": "follow_early",
+      "snapshot": "data/snapshots/train/ball_train_v2_0070.pkl",
+      "continuous_npz": "data/vertical_recatch/train/ball_train_v2_0070__follow_early.npz"
+    }
+  ]
+}

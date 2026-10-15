@@ -8,6 +8,7 @@ appended codebook row, is the only representation change under test.
 
 from __future__ import annotations
 
+
 import json
 import sys
 import time
@@ -20,13 +21,15 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import training.natural_loss_recatch_transformer_v3 as v3
+from controllers.cartesian.tracking import TRACK
+from envs.simulation.support_contacts import restore_supports, supports_of
+import models.airborne_v3 as v3
 import experiments.legacy.sac_dpo_grpo_selection as sel
-from training.autonomous_dataset import _until_impact_entry
-from training.autonomous_episode import T_TASK, Z_ABORT, make_training_env, seat_base
-from training.autonomous_rl_sanity import restore_supports, supports_of
+from data_generation.autonomous_episodes import _until_impact_entry
+from training.recovery_episode import T_TASK, Z_ABORT, make_training_env, seat_base
+
 from experiments.legacy.balanced_unified_recovery import CKPT_39, EPOCHS, STEPS_PER_EPOCH
-from training.full_3d_airborne_recatch_dataset import TRACK
+
 from experiments.recatch.new_recatch_supervised import _enter_air, _enter_impact
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "action_representation"
