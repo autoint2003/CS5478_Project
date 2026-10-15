@@ -19,6 +19,7 @@ from training.demo_ballistic_impact import z_tgt_of
 from training.nominal_pose_audit import errors
 from training.privileged_ball_impact_search import step_legal
 from training.recovery_runtime import _escaped
+from training.table_drop import latched, terminal_reason
 from training.recovery_success import (
     CONTROL_PERIOD_S,
     PERSIST_STEPS,
@@ -43,6 +44,7 @@ REASONS = (
     "LOST_GRASP",
     "NOMINAL_LIFT_NOT_COMPLETED",
     "PHYSICAL_VERIFICATION_FAILED",
+    "TABLE_DROP",
     "INVALID",
 )
 
@@ -55,7 +57,7 @@ def recovery_failed(sim, ref, lost_low):
         lost_low += 1
     else:
         lost_low = 0
-    failed = bool(_escaped(sim) or float(row["z"]) < 0.30 or lost_low >= 50)
+    failed = bool(latched(sim) or _escaped(sim) or float(row["z"]) < 0.30 or lost_low >= 50)
     return failed, lost_low
 
 
@@ -118,7 +120,9 @@ def nominal_verify(env, ref, seconds=NOMINAL_S):
     reason = None
     end_row = None
     hold_trace = NominalHoldTrace(seconds)
-    while float(sim.data.time) - t0 < float(seconds) - 1e-9:
+    if latched(sim):
+        reason = "TABLE_DROP"
+    while reason is None and float(sim.data.time) - t0 < float(seconds) - 1e-9:
         t_prev = float(sim.data.time)
         nominal_step(sim)
         row = _monitor(sim)
@@ -130,6 +134,9 @@ def nominal_verify(env, ref, seconds=NOMINAL_S):
         hold_trace.observe(float(sim.data.time) - t_prev, bilateral, dropped, command_reached)
         if bilateral and command_reached:
             lift_done = True
+        if latched(sim):
+            reason = "TABLE_DROP"
+            break
         if dropped:
             reason = "DROP_AFTER_HANDOFF"
             break
@@ -182,7 +189,7 @@ def nominal_verify(env, ref, seconds=NOMINAL_S):
 def _fail_recovery(sim, ref, t0):
     row = _row(sim, ref)
     return {
-        "reason": "DROP_DURING_RECOVERY",
+        "reason": terminal_reason(sim),
         "success": False,
         "handoff": None,
         "recovery_elapsed": float(sim.data.time) - t0,
@@ -202,7 +209,7 @@ def _fail_recovery(sim, ref, t0):
             "nR": int(row["nR"]),
             "z": round(float(row["z"]), 4),
         },
-        "reward": physical_reward("DROP_DURING_RECOVERY", float(sim.data.time) - t0),
+        "reward": physical_reward(terminal_reason(sim), float(sim.data.time) - t0),
     }
 
 

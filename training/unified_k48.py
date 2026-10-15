@@ -664,13 +664,15 @@ def train_grpo(cfg, checkpoint):
                         break
                 if how == "drop":
                     elapsed = float(env.sim.data.time) - t0
+                    from training.table_drop import terminal_reason
+                    reason = terminal_reason(env.sim)
                     outcome = {
-                        "reason": "DROP_DURING_RECOVERY",
+                        "reason": reason,
                         "handoff": None,
                         "recovery_elapsed": elapsed,
                         "lift_completed": False,
                         "q_nominal": 0.0,
-                        "reward": physical_reward("DROP_DURING_RECOVERY", elapsed),
+                        "reward": physical_reward(reason, elapsed),
                     }
                     invalid = False
                 else:

@@ -182,6 +182,8 @@ def _switch_blob(switch):
 
 
 def take_capture(env):
+    from training.table_drop import export_state as export_table_drop
+
     hist = env._hist
     return {
         "physics": _physics_blob(env.sim),
@@ -193,6 +195,7 @@ def take_capture(env):
         "obs_seq": [np.asarray(x, np.float32).copy() for x in env._obs_seq],
         "prev_seq": [np.asarray(x, np.float32).copy() for x in env._prev_seq],
         "prev": np.asarray(env._prev, np.float32).copy(),
+        "table_drop": export_table_drop(env.sim),
     }
 
 
@@ -252,6 +255,8 @@ def restore_capture(env, cap):
     env._prev = cap["prev"].copy()
     sim.captured = physics["captured"]
     mujoco.mj_forward(sim.model, sim.data)
+    from training.table_drop import restore_state
+    restore_state(sim, cap.get("table_drop"))
     err = float(np.max(np.abs(np.array(sim.data.qpos, float) - physics["qpos"])))
     if err > 1e-6:
         raise RuntimeError(f"qpos restore error {err}")

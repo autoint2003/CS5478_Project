@@ -600,7 +600,9 @@ def train_grpo(cfg, checkpoint):
                     break
             if how == "drop":
                 elapsed = float(env.sim.data.time) - t0
-                outcome = {"reason": "DROP_DURING_RECOVERY", "reward": physical_reward("DROP_DURING_RECOVERY", elapsed)}
+                from training.table_drop import terminal_reason
+                reason = terminal_reason(env.sim)
+                outcome = {"reason": reason, "reward": physical_reward(reason, elapsed)}
             else:
                 outcome = finish_recovery(env, blob["ref"], t0, "forced" if how is None else how)
                 invalid = outcome["reason"] == "INVALID"

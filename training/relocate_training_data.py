@@ -46,7 +46,7 @@ def _category(strategy: str) -> str:
     if strategy in SLIDE:
         return "controlled_sliding"
     if strategy == "immediate_handoff":
-        return "control"
+        return "immediate_handoff"
     raise KeyError(strategy)
 
 
@@ -150,7 +150,7 @@ def main():
         train.append(row)
     _dump(DATA / "supervised_targets.jsonl", train)
     _dump(DATA / "valid_demonstrations.jsonl", valid)
-    for category in ("recatch", "controlled_sliding", "control"):
+    for category in ("recatch", "controlled_sliding", "immediate_handoff"):
         subset = [row for row in placed if _category(row.get("strategy")) == category]
         _dump(DATA / category / "manifest.jsonl", subset)
     snap_for = {}
@@ -210,9 +210,11 @@ def main():
         "grpo_initial_conditions": "data/grpo_initial_conditions.jsonl",
         "eval_manifest": "data/valid_recovery.jsonl",
         "categories": {
+            "regrasp": "data/regrasp/manifest.jsonl",
             "recatch": "data/recatch/manifest.jsonl",
             "controlled_sliding": "data/controlled_sliding/manifest.jsonl",
             "inward_sliding": "data/inward_sliding/manifest.jsonl",
+            "immediate_handoff": "data/immediate_handoff/manifest.jsonl",
         },
         "counts": summary,
     }, indent=2), encoding="utf-8")

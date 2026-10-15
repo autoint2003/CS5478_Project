@@ -380,7 +380,8 @@ def search(env, book):
             if len(actions) == 0:
                 outcome = {"reason": "no_actions", "success": False, "seconds": 0.0}
             elif stop == "recovery_failed":
-                outcome = {"reason": "DROP_DURING_RECOVERY", "success": False, "during_recovery": True, "seconds": 0.0, "steps": int(len(actions))}
+                from training.table_drop import terminal_reason
+                outcome = {"reason": terminal_reason(env.sim), "success": False, "during_recovery": True, "seconds": 0.0, "steps": int(len(actions))}
             else:
                 outcome = _verify_prefix(env, book, blob, actions)
                 verifies += 1

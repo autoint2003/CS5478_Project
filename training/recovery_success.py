@@ -79,6 +79,9 @@ def apply_handoff(sim, ref):
 
 
 def nominal_step(sim):
+    from training.table_drop import object_vz, observe
+
+    vz_before = object_vz(sim)
     z_now = float(z_tgt_of(sim))
     lift_hold = str(sim.fsm.phase) == "lift" and float(sim.fsm.p_des[2]) >= z_now - 1e-9
     if lift_hold:
@@ -86,6 +89,7 @@ def nominal_step(sim):
     else:
         sim.physics_step(None, in_recovery=False)
         sim.maybe_capture_reference()
+    observe(sim, vz_before)
 
 
 def nominal_validate(env, ref, seconds=None):

@@ -88,13 +88,13 @@ def reward_components(reason, recovery_elapsed_s, recovery_limit_s, q_nominal=0.
         recovery_progress = 0.0
         nominal_progress = 0.0
         q_nom_used = q_nom
-    elif reason == "DROP_DURING_RECOVERY":
+    elif reason == "DROP_DURING_RECOVERY" or (reason == "TABLE_DROP" and not lift_completed):
         terminal = DROP_BASE
         time_penalty = 0.0
         recovery_progress = DROP_PROGRESS * q_rec
         nominal_progress = 0.0
         q_nom_used = 0.0
-    elif reason in AFTER_HANDOFF_FAILURES:
+    elif reason in AFTER_HANDOFF_FAILURES or (reason == "TABLE_DROP" and lift_completed):
         terminal = HANDOFF_FAIL_BASE
         time_penalty = TIME_PENALTY * elapsed
         recovery_progress = 0.0
@@ -108,7 +108,7 @@ def reward_components(reason, recovery_elapsed_s, recovery_limit_s, q_nominal=0.
         "time_penalty": time_penalty,
         "recovery_progress": recovery_progress,
         "nominal_progress": nominal_progress,
-        "q_recovery": q_rec if reason == "DROP_DURING_RECOVERY" else None,
+        "q_recovery": q_rec if reason == "DROP_DURING_RECOVERY" or (reason == "TABLE_DROP" and not lift_completed) else None,
         "q_nominal": q_nom_used,
         "recovery_elapsed": elapsed,
         "recovery_limit_s": limit,

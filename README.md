@@ -30,7 +30,7 @@ Training writes under `results/sft/`, `results/grpo/`, and `results/evaluations/
 
 Train and validation initial conditions do not overlap. All 258 recovery demonstrations replay to `SUCCESS_12S` through the K48 codebook. A recovery tape that ends before 4 seconds supervises token 47 on the observation after its last action. A tape that lands exactly on the 4 second limit does not add an extra HANDOFF target; the environment forces handoff before the next observation. The current `recorded_end` tapes all end before that limit.
 
-Category manifests are `data/recatch/`, `data/controlled_sliding/` (50), and `data/inward_sliding/` (50). One initial condition may have more than one strategy, so category totals exceed the number of distinct initial conditions.
+Category manifests are `data/regrasp/` (the earlier recovery set), `data/recatch/` (Open, over-chase, close, brake), `data/vertical_recatch/` (14 vertical-cylinder recatch demonstrations), `data/controlled_sliding/` (50), `data/inward_sliding/` (50), and `data/immediate_handoff/` (7). Initial states are in `data/snapshots/`. One initial condition may have more than one strategy, so category totals exceed the number of distinct initial conditions.
 
 ## Setup
 

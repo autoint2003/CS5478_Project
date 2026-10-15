@@ -255,7 +255,8 @@ def execute(env, ref, actions=None, policy=None, spec=None, noise=None, rng=None
             lost_low += 1
         else:
             lost_low = 0
-        if _escaped(env.sim) or float(row["z"]) < 0.30 or lost_low >= 50:
+        from training.table_drop import latched
+        if latched(env.sim) or _escaped(env.sim) or float(row["z"]) < 0.30 or lost_low >= 50:
             fell = True
             break
         inside = success.basin_ok(row, float(act[6]) > 0.5)
@@ -271,7 +272,8 @@ def execute(env, ref, actions=None, policy=None, spec=None, noise=None, rng=None
             break
     packed = np.stack(actions_out, axis=0) if actions_out else np.zeros((0, 7), np.float32)
     primary = _primary(hold)
-    label = success.label_of(fell and not handed, basin_run >= success.PERSIST_STEPS or handed, handed, hold)
+    from training.table_drop import latched
+    label = "TABLE_DROP" if latched(env.sim) else success.label_of(fell and not handed, basin_run >= success.PERSIST_STEPS or handed, handed, hold)
     metrics = _metrics(packed, samples, rows, z0, memory.get("switch"))
     return {
         "actions": packed,

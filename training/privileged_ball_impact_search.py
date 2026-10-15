@@ -72,6 +72,8 @@ def step_legal(sim, action):
     sim.fsm.v_des = vel.copy()
     sim.fsm.w_des = ang.copy()
     sim.fsm.fg_cmd = float(-tau)
+    from training.table_drop import object_vz, observe
+
     dt = float(sim.model.opt.timestep)
     for _ in range(v3.N_SUB):
         sim.fsm.r_des = _integrate_rot(sim.fsm.r_des, ang, dt)
@@ -79,7 +81,9 @@ def step_legal(sim, action):
             sim.model, sim.data, sim.ids, sim.fsm.p_des, sim.fsm.r_des,
             gripper_tau=tau, v_des=vel, w_des=ang, **TRACK,
         )
+        vz_before = object_vz(sim)
         mujoco.mj_step(sim.model, sim.data)
+        observe(sim, vz_before)
     return action
 
 
