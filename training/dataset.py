@@ -105,6 +105,11 @@ def collate(rows, book, device):
         raise RuntimeError("HANDOFF labels outnumber motion labels in this batch")
     return obs, prev, tokens, residuals, mask, torch.tensor(weights, device=device, dtype=torch.float32)
 
+RECOVERY_V3 = "k48_recovery_v3"
+RECOVERY_V3_ROOT = ROOT / "results/archive/demo_results/diagnostics/raw/k48_recovery_v3"
+DATA_ROOT = ROOT / "data"
+
+
 def assert_recovery_v3_paths(cfg):
     """Training reads data/. The diagnostic copy under k48_recovery_v3 remains readable."""
     if str(cfg.get("dataset_version") or "") != RECOVERY_V3:

@@ -136,7 +136,20 @@ def _score_view(outcome, recovery_physics, physics_dt):
 def rollout(env, model, book, blob, rng, device, capture=None, lost_low=0, t0=None, keep_captures=False):
     """One stochastic K48 rollout. Matches train_grpo sampling, including noise before HANDOFF."""
     if capture is None:
-        restore_capture(env, blob["capture"])
+        if "capture" in blob:
+            restore_capture(env, blob["capture"])
+        else:
+            from models.airborne_v3 import DT_POLICY
+            from envs.observations.observable_obs import ObservableObsState
+            from training.recovery_execution import restore_ballistic
+
+            if "ref" not in blob:
+                raise RuntimeError("ballistic snapshot has no nominal grasp reference")
+            restore_ballistic(env.sim, blob)
+            env._hist = ObservableObsState(DT_POLICY)
+            env._obs_seq = []
+            env._prev_seq = []
+            env._prev = np.zeros(7, np.float32)
         lost_low = 0
         t0 = float(env.sim.data.time)
     else:

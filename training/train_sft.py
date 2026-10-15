@@ -137,7 +137,14 @@ def train_supervised(cfg, checkpoint):
         raise RuntimeError(f"K=48 supervised file has {len(rows)} rows")
     device = torch.device(cfg.get("device") or "cpu")
     torch.manual_seed(int(cfg["seed"]))
-    model, _book = load_expanded(Path(checkpoint), device)
+    if device.type == "cuda":
+        torch.cuda.manual_seed_all(int(cfg["seed"]))
+    if str(cfg.get("init") or "") == "scratch":
+        model = build_k48(book, device)
+        print("SUPERVISED_INIT", "scratch", "rows", len(rows), flush=True)
+    else:
+        model, _book = load_expanded(Path(checkpoint), device)
+        print("SUPERVISED_INIT", "expanded_k47", str(checkpoint), flush=True)
     opt = torch.optim.Adam(model.parameters(), lr=float(cfg["lr"]))
     out = ROOT / cfg["supervised_output"]
     historical = ROOT / "results/archive/demo_results/diagnostics/raw/unified_k47/supervised"

@@ -35,15 +35,19 @@ Run commands from the repository root.
 
 | File | Rows |
 |---|---:|
-| `data/supervised_targets.jsonl` | 251 training demonstrations (244 recovery, 7 nominal-solvable controls with weight 0) |
-| `data/valid_demonstrations.jsonl` | 14 validation demonstrations |
+| `data/supervised_targets.jsonl` | 303 training demonstrations (296 recovery, 7 nominal-solvable controls with weight 0) |
+| `data/valid_demonstrations.jsonl` | 22 validation demonstrations |
 | `data/grpo_initial_conditions.jsonl` | 87 confirmed-recoverable training initial conditions |
 | `data/nominal_solvable_control.jsonl` | 7 nominal-solvable controls, excluded from the GRPO recovery pool |
 | `data/valid_recovery.jsonl` | 8 validation recovery initial conditions |
 
-Train and validation initial conditions do not overlap. All 258 recovery demonstrations replay to `SUCCESS_12S` through the K48 codebook. A recovery tape that ends before 4 seconds supervises token 47 on the observation after its last action. A tape that lands exactly on the 4 second limit does not add an extra HANDOFF target; the environment forces handoff before the next observation. The current `recorded_end` tapes all end before that limit.
+SFT reads `data/supervised_targets.jsonl` only. The 22 validation rows stay out of the supervised loss. Train and validation snapshots do not overlap. Every recovery row has `verified_success: true` and `nominal_class: RECOVERY_CANDIDATE`. The 7 control rows are `NOMINAL_SOLVABLE` with `sample_weight` 0. A recovery tape that ends before 4 seconds supervises token 47 on the observation after its last action. A tape that lands exactly on the 4 second limit does not add an extra HANDOFF target; the environment forces handoff before the next observation.
 
-Category manifests are `data/regrasp/` (the earlier recovery set), `data/recatch/` (Open, over-chase, close, brake), `data/vertical_recatch/` (14 vertical-cylinder recatch demonstrations), `data/controlled_sliding/` (50), `data/inward_sliding/` (50), and `data/immediate_handoff/` (7). Initial states are in `data/snapshots/`. One initial condition may have more than one strategy, so category totals exceed the number of distinct initial conditions.
+Supervised strategy counts: `chase_lost` 101, `inward_reseat` 65, `controlled_slide` 47, `release_long` 47, `follow_early` 26, `immediate_handoff` 7, `release_short` 6, `later_close` 4. Validation: `inward_reseat` 10, `chase_lost` 4, `controlled_slide` 4, `follow_early` 4. `controlled_slide` and `inward_reseat` are one Gravity-Assisted In-Hand Sliding family. Task success is `SUCCESS_12S` after a legal recovery and the unchanged nominal handoff. Finger slip and post-impact tilt are diagnostic fields, not extra success gates.
+
+Independent nominal-fail snapshots in the current set, with at least one legal successful tape: sliding 77 train / 11 valid, horizontal recatch 22 / 6, vertical recatch 41 / 5. One snapshot can hold several tapes, so these counts are lower than the jsonl row counts. The quota targets 100/20, 50/10, and 50/10 are not filled. The census is `results/diagnostics/dataset_expansion/CORRECTION_REPORT.md`.
+
+Category manifests: `data/gravity_assisted_in_hand_sliding/`, `data/controlled_sliding/`, `data/inward_sliding/`, `data/recatch/` (horizontal cylinder), `data/vertical_recatch/`, `data/regrasp/`, and `data/immediate_handoff/`. Initial states are in `data/snapshots/`. Two vertical rows, `ball_train_v2_0168` and `ball_train_v2_0261`, remain `SUCCESS_12S` but have `counts_as_recatch: false` because the stored-action replay shows only one both-off contact sample. They are not in the supervised jsonl as vertical recatch.
 
 ## Setup
 
@@ -89,13 +93,23 @@ Check the codebook, the HANDOFF head, one supervised loss, and the reward order.
 python -u scripts/train.py --check
 ```
 
-### Supervised training
+### Supervised training on the current set
 
-40 epochs, batch 8, seed 1, learning rate 3e-4. The initialization checkpoint is the historical K=47 epoch-40 model. Checkpoints go to `results/sft/`. The last file is `results/sft/checkpoint_epoch_0040.pt`.
+40 epochs, batch 8, seed 1, learning rate 3e-4. The run reads the 303-row `data/supervised_targets.jsonl` and trains from scratch. `init: scratch` builds a new K48 network with PyTorch's default linear and transformer initialization. The residual head starts at zero. No K=47 or K=48 checkpoint is loaded. The 47 motion codes remain the fixed codebook; they are not learned parameters.
+
+`config/training/k48/unified_k48_recovery_v3_current.yaml` writes `results/sft/current/checkpoint_epoch_0001.pt` through `checkpoint_epoch_0040.pt`. The previous K=48 file `results/sft/checkpoint_epoch_0040.pt` is left in place. Do not pass `--checkpoint`, and do not use `config/training/k48/unified_k48_recovery_v3.yaml` for this run. That older config still expands the historical K=47 checkpoint.
 
 ```powershell
-python -u scripts/train.py --supervised --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/archive/demo_results/diagnostics/raw/unified_k47/supervised/checkpoint_epoch_0040.pt
+python -u scripts/train.py --supervised --config config/training/k48/unified_k48_recovery_v3_current.yaml
 ```
+
+After it finishes, evaluate the new weights on the valid snapshots from the current quota table: 11 sliding, 6 horizontal recatch, and 5 vertical recatch. Five vertical snapshots are also sliding snapshots, so the closed-loop run has 17 episodes. The list is `data/valid_skill_quotas.jsonl`. The summary goes to `results/evaluations/current/heldout_train.json` and includes `by_category`. It does not use the older 8-row `data/valid_recovery.jsonl`.
+
+```powershell
+python -u scripts/evaluate.py --eval --config config/training/k48/unified_k48_recovery_v3_current.yaml --checkpoint results/sft/current/checkpoint_epoch_0040.pt
+```
+
+The GRPO commands below still load `results/sft/checkpoint_epoch_0040.pt`. Point them at `results/sft/current/checkpoint_epoch_0040.pt` only after this SFT run has finished and that file exists.
 
 ### GRPO reward v1
 

@@ -288,7 +288,20 @@ def roll_policy(env, model, book, blob, device, cap_steps=None, limit_s=None):
     limit = T_RECOVERY_MAX if limit_s is None else float(limit_s)
     cap = recovery_steps(limit) if cap_steps is None else int(cap_steps)
     handoff_index = getattr(model, "handoff_index", None)
-    restore_capture(env, blob["capture"])
+    if "capture" in blob:
+        restore_capture(env, blob["capture"])
+    else:
+        from models.airborne_v3 import DT_POLICY
+        from envs.observations.observable_obs import ObservableObsState
+        from training.recovery_execution import restore_ballistic
+
+        if "ref" not in blob:
+            raise RuntimeError("ballistic snapshot has no nominal grasp reference")
+        restore_ballistic(env.sim, blob)
+        env._hist = ObservableObsState(DT_POLICY)
+        env._obs_seq = []
+        env._prev_seq = []
+        env._prev = np.zeros(7, np.float32)
     t0 = float(env.sim.data.time)
     basin_run = 0
     lost_low = 0

@@ -75,13 +75,21 @@ def evaluate(cfg, checkpoint, eval_data=""):
             raise RuntimeError("K=48 evaluation ICs differ from the 56 K=47 baseline ICs")
         allowed_split = {None, "train"}
     rows = []
+    seated_ref = None
     for episode_id in baseline_ids:
         row = by_id[episode_id]
         with (ROOT / row["snapshot"]).open("rb") as handle:
             blob = pickle.load(handle)
         allowed = {row.get("split")} if rebuilt and explicit else allowed_split
-        if blob["spec"].get("split") not in allowed:
+        recorded_split = blob["spec"].get("split") if "spec" in blob else row.get("split")
+        if recorded_split not in allowed:
             raise RuntimeError(f"evaluation refused snapshot {episode_id}")
+        if "ref" not in blob:
+            if seated_ref is None:
+                from data_generation.strategies.recatch_oracle import _setup
+
+                _sim, _base, seated_ref, _target, _book = _setup()
+            blob["ref"] = seated_ref
         out = roll_policy(
             env, model, book, blob, device,
             cap_steps=int(cfg.get("eval_cap_steps") or 200),
@@ -100,6 +108,7 @@ def evaluate(cfg, checkpoint, eval_data=""):
             "nominal_seconds": NOMINAL_S,
             "device": device_name,
             "truncated": out["reason"] == "INVALID",
+            "categories": list(row.get("categories") or []),
         })
         print("EVAL", episode_id, out["reason"], out.get("handoff"), out.get("recovery_elapsed"), flush=True)
     elapsed = [float(row["recovery_elapsed"]) for row in rows if row.get("recovery_elapsed") is not None]
@@ -121,6 +130,14 @@ def evaluate(cfg, checkpoint, eval_data=""):
             "max": max(elapsed) if elapsed else None,
         },
     }
+    by_category = {}
+    for item in rows:
+        for name in item.get("categories") or []:
+            slot = by_category.setdefault(name, {"episodes": 0, "success": 0})
+            slot["episodes"] += 1
+            slot["success"] += int(bool(item["success"]))
+    if by_category:
+        summary["by_category"] = by_category
     out_dir = ROOT / cfg["eval_output"]
     historical = {
         (ROOT / "results/archive/demo_results/diagnostics/raw/unified_k47/eval").resolve(),

@@ -122,8 +122,10 @@ def main():
     parser.add_argument("--supervised", action="store_true")
     parser.add_argument("--eval", action="store_true")
     parser.add_argument("--eval-output", default="")
-    parser.add_argument("--eval-data", default="data/valid_recovery.jsonl")
+    parser.add_argument("--eval-data", default="")
     parser.add_argument("--grpo", action="store_true")
+    parser.add_argument("--adaptive-grpo", action="store_true")
+    parser.add_argument("--limit-ics", type=int, default=0)
     parser.add_argument("--config", default="config/training/k48/unified_k48.yaml")
     parser.add_argument("--checkpoint", default="")
     args = parser.parse_args()
@@ -143,7 +145,8 @@ def main():
             cfg["eval_output"] = args.eval_output
         evaluate(cfg, args.checkpoint, args.eval_data)
         return
-    if not args.checkpoint:
+    scratch = args.supervised and str(cfg.get("init") or "") == "scratch"
+    if not args.checkpoint and not scratch:
         raise SystemExit("pass the epoch-40 K=47 checkpoint; it is expanded and not overwritten")
     if args.supervised:
         train_supervised(cfg, args.checkpoint)
@@ -151,7 +154,14 @@ def main():
     if args.grpo:
         train_grpo(cfg, args.checkpoint)
         return
-    raise SystemExit("choose --check, --supervised, --eval, or --grpo")
+    if args.adaptive_grpo:
+        if not args.checkpoint:
+            raise SystemExit("pass results/sft/current/checkpoint_epoch_0040.pt")
+        from training.adaptive_grpo import train_adaptive
+
+        train_adaptive(cfg, args.checkpoint, None if args.limit_ics <= 0 else args.limit_ics)
+        return
+    raise SystemExit("choose --check, --supervised, --eval, --grpo, or --adaptive-grpo")
 
 
 if __name__ == "__main__":

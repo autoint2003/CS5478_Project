@@ -1,0 +1,34 @@
+# Current supervised set. Same optimizer and K48 loss as recovery v3.
+# init: scratch builds a new K48 network. It does not load K47 or K48 weights.
+# The 47-token codebook stays the fixed table. Checkpoints go to results/sft/current.
+dataset_version: k48_recovery_v3
+init: scratch
+codebook: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy
+supervised_targets: data/supervised_targets.jsonl
+grpo_initial_conditions: data/grpo_initial_conditions.jsonl
+eval_manifest: data/valid_skill_quotas.jsonl
+supervised_output: results/sft/current
+eval_output: results/evaluations/current
+grpo_output: results/grpo/current
+baseline_eval: results/archive/demo_results/diagnostics/raw/horizon_migration/checkpoint_eval.json
+seed: 1
+device: cuda
+eval_device: cpu
+epochs: 40
+batch_size: 8
+lr: 0.0003
+grpo_updates: 261
+ic_epochs: 3
+cover_all_ics: true
+grpo_lr: 0.00003
+kl_coef: 0.05
+clip: 0.2
+group: 4
+grpo_save_every: 87
+rollout_cap_steps: 200
+eval_cap_steps: 200
+lambda_time: 0.05
+nominal_seconds: 12.0
+recovery_limit_s: 4.0
+reward_version: v1
+expand_handoff: true
