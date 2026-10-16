@@ -1,0 +1,36 @@
+# Controlled ablation: same as unified_k48_recovery_v3_horizontal.yaml except
+# Sliding sample_weight is raised to 1.0 via an independent manifest.
+# Writes only under results/sft/sliding_equal_weight — does not touch results/sft/checkpoint_epoch_*.pt.
+dataset_version: k48_recovery_v3
+init: scratch
+codebook: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy
+supervised_targets: data/supervised_targets_sliding_equal_weight.jsonl
+grpo_initial_conditions: data/grpo_initial_conditions.jsonl
+eval_manifest: data/valid_skill_quotas.jsonl
+supervised_output: results/sft/sliding_equal_weight
+eval_output: results/evaluations/sft_sliding_equal_weight
+grpo_output: results/grpo/sft_sliding_equal_weight
+baseline_eval: results/archive/demo_results/diagnostics/raw/horizon_migration/checkpoint_eval.json
+seed: 1
+device: cuda
+eval_device: cpu
+epochs: 40
+batch_size: 8
+lr: 0.0003
+grpo_updates: 261
+ic_epochs: 3
+cover_all_ics: true
+grpo_lr: 0.00003
+kl_coef: 0.05
+clip: 0.2
+group: 4
+grpo_save_every: 87
+rollout_cap_steps: 200
+eval_cap_steps: 200
+lambda_time: 0.05
+nominal_seconds: 12.0
+recovery_limit_s: 4.0
+reward_version: v1
+expand_handoff: true
+experiment: sliding_equal_weight
+experiment_note: "Only change vs horizontal SFT: Sliding sample_weight 0.02->1.0 in independent manifest"

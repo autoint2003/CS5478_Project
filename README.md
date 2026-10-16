@@ -36,12 +36,17 @@ Run commands from the repository root.
 | File | Rows |
 |---|---:|
 | `data/supervised_targets.jsonl` | 303 training demonstrations (296 recovery, 7 nominal-solvable controls with weight 0) |
+| `data/supervised_targets_with_horizontal.jsonl` | 325 rows: the 303 above plus 22 Horizontal Recatch train tapes (current formal SFT entry) |
+| `data/supervised_targets_sliding_equal_weight.jsonl` | Same 325 tapes; Sliding `sample_weight` raised to 1.0 (ablation only; does not replace the main manifest) |
 | `data/valid_demonstrations.jsonl` | 22 validation demonstrations |
+| `data/valid_skill_quotas.jsonl` | 17 unique validation ICs for closed-loop skill eval (11 sliding / 6 horizontal / 5 vertical labels; some ICs carry both sliding and vertical) |
 | `data/grpo_initial_conditions.jsonl` | 87 confirmed-recoverable training initial conditions |
 | `data/nominal_solvable_control.jsonl` | 7 nominal-solvable controls, excluded from the GRPO recovery pool |
-| `data/valid_recovery.jsonl` | 8 validation recovery initial conditions |
+| `data/valid_recovery.jsonl` | 8 validation recovery initial conditions (older held-out list) |
 
-SFT reads `data/supervised_targets.jsonl` only. The 22 validation rows stay out of the supervised loss. Train and validation snapshots do not overlap. Every recovery row has `verified_success: true` and `nominal_class: RECOVERY_CANDIDATE`. The 7 control rows are `NOMINAL_SOLVABLE` with `sample_weight` 0. A recovery tape that ends before 4 seconds supervises token 47 on the observation after its last action. A tape that lands exactly on the 4 second limit does not add an extra HANDOFF target; the environment forces handoff before the next observation.
+Formal SFT with Horizontal Recatch reads `data/supervised_targets_with_horizontal.jsonl`. Older commands that still point at `data/supervised_targets.jsonl` omit those 22 tapes. Validation demonstrations stay out of the supervised loss. Train and validation snapshots do not overlap. Every recovery row has `verified_success: true` and `nominal_class: RECOVERY_CANDIDATE`. The 7 control rows are `NOMINAL_SOLVABLE` with `sample_weight` 0. A recovery tape that ends before 4 seconds supervises token 47 on the observation after its last action. A tape that lands exactly on the 4 second limit does not add an extra HANDOFF target; the environment forces handoff before the next observation.
+
+Loss uses per-trajectory mean CE (+ residual MSE), then the batch mean of `sample_weight * traj_loss` (`training/train_sft.py`). There is no class sampler: each epoch shuffles every row once. In the horizontal manifest, Sliding tapes have `sample_weight ≈ 0.02` while Horizontal and Vertical Recatch tapes are `1.0`, so Sliding is only ~4% of effective weight despite 77 Sliding ICs.
 
 Supervised strategy counts: `chase_lost` 101, `inward_reseat` 65, `controlled_slide` 47, `release_long` 47, `follow_early` 26, `immediate_handoff` 7, `release_short` 6, `later_close` 4. Validation: `inward_reseat` 10, `chase_lost` 4, `controlled_slide` 4, `follow_early` 4. `controlled_slide` and `inward_reseat` are one Gravity-Assisted In-Hand Sliding family. Task success is `SUCCESS_12S` after a legal recovery and the unchanged nominal handoff. Finger slip and post-impact tilt are diagnostic fields, not extra success gates.
 
@@ -93,37 +98,48 @@ Check the codebook, the HANDOFF head, one supervised loss, and the reward order.
 python -u scripts/train.py --check
 ```
 
-### Supervised training on the current set
+### Supervised training (Horizontal Recatch included)
 
-40 epochs, batch 8, seed 1, learning rate 3e-4. The run reads the 303-row `data/supervised_targets.jsonl` and trains from scratch. `init: scratch` builds a new K48 network with PyTorch's default linear and transformer initialization. The residual head starts at zero. No K=47 or K=48 checkpoint is loaded. The 47 motion codes remain the fixed codebook; they are not learned parameters.
+40 epochs, batch 8, seed 1, Adam learning rate 3e-4, no scheduler. `init: scratch` builds a new K48 network; residual head starts at zero. No prior K=47/K=48 weights are loaded. The 47 motion codes stay fixed.
 
-`config/training/k48/unified_k48_recovery_v3_current.yaml` writes `results/sft/current/checkpoint_epoch_0001.pt` through `checkpoint_epoch_0040.pt`. The previous K=48 file `results/sft/checkpoint_epoch_0040.pt` is left in place. Do not pass `--checkpoint`, and do not use `config/training/k48/unified_k48_recovery_v3.yaml` for this run. That older config still expands the historical K=47 checkpoint.
+`config/training/k48/unified_k48_recovery_v3_horizontal.yaml` trains on `data/supervised_targets_with_horizontal.jsonl` and writes `results/sft/checkpoint_epoch_0001.pt` through `checkpoint_epoch_0040.pt`. Do not pass `--checkpoint`. Do not use `config/training/k48/unified_k48_recovery_v3.yaml` for a scratch run; that older config expands the historical K=47 checkpoint.
+
+```powershell
+python -u scripts/train.py --supervised --config config/training/k48/unified_k48_recovery_v3_horizontal.yaml
+```
+
+Closed-loop skill eval uses the 17 unique ICs in `data/valid_skill_quotas.jsonl` (deterministic argmax). Mechanism labels (Contact-Preserving / Release–Recatch / Hybrid / Other) come from contact timelines, not data tags:
+
+```powershell
+python -u visualization/classify_validation_skills.py --device cuda
+```
+
+On that 17-IC set, the horizontal SFT Epoch 40 is **8/17** `SUCCESS_12S` and **0/17** Contact-Preserving. Tree-augmented GRPO Epoch 3 from that checkpoint is **15/17** success and still **0/17** Contact-Preserving. Reports: `results/diagnostics/validation_skill_classification/`, `results/diagnostics/sft_sliding_root_cause/`.
+
+### Sliding equal-weight SFT (controlled ablation)
+
+Hypothesis: Sliding was lost mainly because its `sample_weight` was ~0.02. This run keeps the same 325 tapes, seed, epochs, and hparams, but sets every Sliding tape weight to **1.0** in an independent manifest. Train from **scratch**; do not continue from Epoch 40.
+
+```powershell
+python -u scripts/train.py --supervised --config config/training/k48/sft_sliding_equal_weight.yaml
+python -u visualization/eval_sft_sliding_equal_weight.py --device cuda
+```
+
+Writes `results/sft/sliding_equal_weight/checkpoint_epoch_*.pt` and does **not** overwrite `results/sft/checkpoint_epoch_0040.pt`. Equal-weight Epoch 40 on the same 17 ICs: **17/17** `SUCCESS_12S`, **9/17** Contact-Preserving; Horizontal Recatch stays 6/6. Full write-up: `results/diagnostics/sft_sliding_equal_weight/REPORT.md`.
+
+Optional older path that writes under `results/sft/current/` from the 303-row manifest without Horizontal tapes:
 
 ```powershell
 python -u scripts/train.py --supervised --config config/training/k48/unified_k48_recovery_v3_current.yaml
 ```
 
-After it finishes, evaluate the new weights on the valid snapshots from the current quota table: 11 sliding, 6 horizontal recatch, and 5 vertical recatch. Five vertical snapshots are also sliding snapshots, so the closed-loop run has 17 episodes. The list is `data/valid_skill_quotas.jsonl`. The summary goes to `results/evaluations/current/heldout_train.json` and includes `by_category`. It does not use the older 8-row `data/valid_recovery.jsonl`.
-
-```powershell
-python -u scripts/evaluate.py --eval --config config/training/k48/unified_k48_recovery_v3_current.yaml --checkpoint results/sft/current/checkpoint_epoch_0040.pt
-```
-
-The GRPO commands below still load `results/sft/checkpoint_epoch_0040.pt`. Point them at `results/sft/current/checkpoint_epoch_0040.pt` only after this SFT run has finished and that file exists.
-
-### GRPO reward v1
-
-Three passes over the 87 training recovery initial conditions, 261 updates. Writes `results/grpo/v1/`. The last file is `results/grpo/v1/checkpoint_u0261.pt`. The success terminal is only `SUCCESS_12S`.
-
-```powershell
-python -u scripts/train.py --grpo --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
-```
-
 ### Tree-augmented GRPO
 
-`config/training/k48/unified_k48_recovery_v3_tree80.yaml` writes `results/grpo/tree80/`. One round visits each unique training snapshot once. `--checkpoint` selects the file to load. `--ic-epochs` is the number of new rounds; omit it to use `ic_epochs` in the config. A finished round is saved as `checkpoint_epoch_XXXX.pt` and includes the Adam first and second moments. The KL reference stays `results/sft/checkpoint_epoch_0040.pt`.
+`config/training/k48/unified_k48_recovery_v3_tree80.yaml` writes `results/grpo/tree80/`. One round visits each unique training snapshot once. `--checkpoint` selects the file to load. `--ic-epochs` is the number of new rounds; omit it to use `ic_epochs` in the config. A finished round is saved as `checkpoint_epoch_XXXX.pt` and includes the Adam first and second moments.
 
-Start from supervised epoch 40. `results/grpo/tree80` must be empty:
+The finished tree80 run started from the **downweighted** horizontal SFT (`results/sft/checkpoint_epoch_0040.pt`) and used that file as the KL reference. Epoch 3 is `results/grpo/tree80/checkpoint_epoch_0003.pt` (15/17 success, 0/17 Contact-Preserving). For a new GRPO that should keep Sliding, start from the equal-weight SFT instead and point a dedicated `grpo_output` / KL reference at that tree; do not overwrite `results/grpo/tree80/`.
+
+Start from supervised epoch 40 into an empty GRPO output directory:
 
 ```powershell
 python -u scripts/train.py --adaptive-grpo --config config/training/k48/unified_k48_recovery_v3_tree80.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt --ic-epochs 1
@@ -136,6 +152,14 @@ python -u scripts/train.py --adaptive-grpo --config config/training/k48/unified_
 ```
 
 `results/grpo/tree80/history/checkpoint_epoch_0001.pt` is the earlier weights-only pass. It has no Adam moments, and training refuses to resume it.
+
+### GRPO reward v1
+
+Three passes over the 87 training recovery initial conditions, 261 updates. Writes `results/grpo/v1/`. The last file is `results/grpo/v1/checkpoint_u0261.pt`. The success terminal is only `SUCCESS_12S`.
+
+```powershell
+python -u scripts/train.py --grpo --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
+```
 
 ### GRPO reward v2
 
@@ -182,6 +206,13 @@ Replay a saved tape from its snapshot. The default is `ball_train_v2_0070` / `fo
 ```powershell
 python -u scripts/render_video.py
 python -u scripts/render_video.py --episode ball_train_v2_0070 --strategy follow_early --extra-hold 5
+```
+
+Side-by-side **policy vs immediate nominal handoff** on the 17 validation ICs (`data/valid_skill_quotas.jsonl`). Left panel is deterministic K48; right panel hands off to nominal immediately. Labels match `horizon_outcome`.
+
+```powershell
+python -u visualization/compare_policy_nominal.py --checkpoint results/sft/sliding_equal_weight/checkpoint_epoch_0040.pt --manifest data/valid_skill_quotas.jsonl --out results/videos/policy_vs_nominal/sliding_equal_weight_epoch40 --device cuda
+python -u visualization/compare_policy_nominal.py --checkpoint results/grpo/tree80/checkpoint_epoch_0003.pt --manifest data/valid_skill_quotas.jsonl --out results/videos/policy_vs_nominal/checkpoint_epoch_0003 --device cuda
 ```
 
 ## Model
