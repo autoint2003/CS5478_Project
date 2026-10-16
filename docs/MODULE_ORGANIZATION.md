@@ -38,13 +38,16 @@ training/
   reward_v2.py  grpo_math.py  k48_config.py  k47_codebook.py
   recovery_episode.py  recovery_execution.py
 evaluation/    k48_eval.py  audit_pretrain_data.py  audit_recatch_legality.py
-               verify_handoff_targets.py
+               verify_handoff_targets.py  classify_validation_skills.py  skill_traces.py
 visualization/ render_video.py  video_recorder.py  camera.py  overlays.py  impact_view.py
+               compare_policy_nominal.py  compare_strategy_nominal.py
 scripts/       train.py  evaluate.py  generate_data.py  render_video.py
 config/        simulation/  controllers/  recovery/  training/k48/  training/k47/  training/legacy/
-experiments/   ball_impact/  handoff/  sliding/
+experiments/   ball_impact/  handoff/  sliding/  recatch/
                recatch/airborne/  recatch/natural_loss/  recatch/legal/  recatch/top_impact/
                legacy/  legacy/demo/{audit,replay,diagnose,demonstrations}/
+data_generation/validation/  impact_labels.py  recovery_checks.py
+               sliding_mechanism.py  sliding_slip.py
 ```
 
 ## 2. What each subpackage does
@@ -62,9 +65,12 @@ experiments/   ball_impact/  handoff/  sliding/
 | `models/historical/` | K33 and K36 networks used to reproduce old checkpoints. |
 | `data_generation/strategies/` | The distinct recovery laws and their search scripts. |
 | `data_generation/oracles/` | Codeword projection (`representability`). Search loops stay in `strategies/`. |
+| `data_generation/validation/` | Impact and sliding-mechanism checks used while building datasets. |
 | `data_generation/maintenance/` | One-shot layout and path repair. `generate.py` does not import it. |
 | `config/training/k48/` | K48 training YAML. Filenames still name the dataset and reward version. |
-| `experiments/recatch/` | Research scripts grouped by airborne chase, natural loss, legal search, and top impact. |
+| `experiments/sliding/` | Sliding diagnostics, equal-weight SFT ablation eval, and hard-IC mining. |
+| `experiments/recatch/` | Horizontal Recatch research, airborne/natural-loss/legal/top-impact studies, and SFT audits. |
+| `evaluation/` | Closed-loop eval, data audits, and validation skill/mechanism classification. |
 
 ## 3. Important files
 

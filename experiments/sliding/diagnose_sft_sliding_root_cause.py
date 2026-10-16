@@ -18,7 +18,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -32,8 +32,8 @@ from training.k48_config import SELECTED_LIMIT_S
 from training.prefix_rollout import sample_action
 from training.recovery_episode import make_training_env
 from training.train_grpo import step_logprob
-from visualization import audit_checkpoint3_skill as audit
-from visualization.classify_validation_skills import BOTH_OFF_HOLD_S, POST_GAP_MIGRATION_M, classify_mechanism, prepare_blob, restore_ic
+from evaluation import skill_traces as audit
+from evaluation.classify_validation_skills import BOTH_OFF_HOLD_S, POST_GAP_MIGRATION_M, classify_mechanism, prepare_blob, restore_ic
 
 OUT = ROOT / "results" / "diagnostics" / "sft_sliding_root_cause"
 MANIFEST = ROOT / "data" / "supervised_targets_with_horizontal.jsonl"
@@ -784,7 +784,7 @@ def write_reports(dataset_summary, expert_results, tf_summary, matched, conflict
         "## Repro",
         "",
         "```powershell",
-        "python -u visualization/diagnose_sft_sliding_root_cause.py --device cpu",
+        "python -u experiments/sliding/diagnose_sft_sliding_root_cause.py --device cpu",
         "```",
         "",
     ])

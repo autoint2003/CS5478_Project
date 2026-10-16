@@ -19,7 +19,7 @@ Run commands from the repository root.
 | `data_generation/` | Official generators, `strategies/`, `oracles/`, `initial_conditions/`, `recording/`, `validation/`, `maintenance/` |
 | `training/` | `train_sft.py`, `train_grpo.py`, `dataset.py`, `grpo_progress.py`, `k47_codebook.py`, `reward_v2.py`, `unified_k48.py` |
 | `evaluation/` | Closed-loop K48 eval, data audit, recatch legality, handoff-target check |
-| `visualization/` | Camera, captions, MP4 encoding, and tape replay |
+| `visualization/` | Camera, captions, MP4 encoding, tape replay, and policy-vs-nominal videos |
 | `experiments/` | `ball_impact/`, `sliding/`, `recatch/{airborne,natural_loss,legal,top_impact}/`, `handoff/`, `legacy/` |
 | `scripts/` | Thin entry points. Package roles are in `docs/MODULE_ORGANIZATION.md`. |
 | `tests/` | Regression tests. `tests/fixtures/physics_state_baseline.npz` is the later-change state baseline |
@@ -111,7 +111,7 @@ python -u scripts/train.py --supervised --config config/training/k48/unified_k48
 Closed-loop skill eval uses the 17 unique ICs in `data/valid_skill_quotas.jsonl` (deterministic argmax). Mechanism labels (Contact-Preserving / Release–Recatch / Hybrid / Other) come from contact timelines, not data tags:
 
 ```powershell
-python -u visualization/classify_validation_skills.py --device cuda
+python -u evaluation/classify_validation_skills.py --device cuda
 ```
 
 On that 17-IC set, the horizontal SFT Epoch 40 is **8/17** `SUCCESS_12S` and **0/17** Contact-Preserving. Tree-augmented GRPO Epoch 3 from that checkpoint is **15/17** success and still **0/17** Contact-Preserving. Reports: `results/diagnostics/validation_skill_classification/`, `results/diagnostics/sft_sliding_root_cause/`.
@@ -122,7 +122,7 @@ Hypothesis: Sliding was lost mainly because its `sample_weight` was ~0.02. This 
 
 ```powershell
 python -u scripts/train.py --supervised --config config/training/k48/sft_sliding_equal_weight.yaml
-python -u visualization/eval_sft_sliding_equal_weight.py --device cuda
+python -u experiments/sliding/eval_sft_sliding_equal_weight.py --device cuda
 ```
 
 Writes `results/sft/sliding_equal_weight/checkpoint_epoch_*.pt` and does **not** overwrite `results/sft/checkpoint_epoch_0040.pt`. Equal-weight Epoch 40 on the same 17 ICs: **17/17** `SUCCESS_12S`, **9/17** Contact-Preserving; Horizontal Recatch stays 6/6. Full write-up: `results/diagnostics/sft_sliding_equal_weight/REPORT.md`.

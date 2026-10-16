@@ -56,8 +56,8 @@ from envs.simulation.capture import restore_capture
 from envs.step_legal import step_legal
 from data_generation.recording.trajectory_recorder import save_pair
 from training.k47_codebook import load_codebook
-from visualization.audit_sliding_mechanism import bilateral_mask, release_regrasp, sample, slip_direction
-from visualization.scan_sliding_slip import status as slip_status
+from data_generation.validation.sliding_mechanism import bilateral_mask, release_regrasp, sample, slip_direction
+from data_generation.validation.sliding_slip import status as slip_status
 
 STAGE = ROOT / "data" / "staging" / "dataset_expansion"
 DRAW_START = 400_000

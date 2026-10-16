@@ -30,8 +30,9 @@ Commands run from the repository root. `data/`, `results/`, and `results/archive
 | `data_generation/` | Official generators, strategy laws, oracles, recording, validation, and maintenance. |
 | `training/` | SFT, GRPO, batches, `grpo_progress.py`, `k47_codebook.py`, the selected `reward_v2`, and the closed-loop episode runtime. |
 | `evaluation/` | K48 closed-loop eval and reusable data audits. |
-| `visualization/` | Camera, captions, MP4 encoding, tape replay. |
-| `experiments/` | Searches and historical trainers. They call formal modules. |
+| `visualization/` | Camera, captions, MP4 encoding, tape replay, policy-vs-nominal videos. |
+| `evaluation/` | Closed-loop eval, legality audits, validation skill/mechanism classification. |
+| `experiments/` | Searches, skill diagnostics, hard-IC mining, and historical trainers. They call formal modules. |
 | `scripts/` | `generate_data.py`, `train.py`, `evaluate.py`, `render_video.py`. |
 | `results/` | `sft/`, `grpo/`, `evaluations/`, `diagnostics/`, `videos/`, and `archive/demo_results/`. |
 | `mujoco_menagerie/` | External robot descriptions. |

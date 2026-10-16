@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -31,15 +31,15 @@ from training.dataset import episode_tensors
 from training.k47_codebook import decode_action, load_codebook
 from training.k48_config import SELECTED_LIMIT_S
 from training.recovery_episode import make_training_env
-from visualization import audit_checkpoint3_skill as audit
-from visualization.classify_validation_skills import (
+from evaluation import skill_traces as audit
+from evaluation.classify_validation_skills import (
     BOTH_OFF_HOLD_S,
     POST_GAP_MIGRATION_M,
     classify_mechanism,
     prepare_blob,
     restore_ic,
 )
-from visualization.diagnose_sft_sliding_root_cause import (
+from experiments.sliding.diagnose_sft_sliding_root_cause import (
     expert_mechanism_on_tape,
     free_rollout,
     skill_of,
@@ -75,7 +75,7 @@ def run_valid_eval(env, model, book, device, ckpt_name, valid_rows, seated_ref):
                 env, model, book, blob, device, SELECTED_LIMIT_S,
             )
         else:
-            from visualization.classify_validation_skills import roll_policy_full_ballistic
+            from evaluation.classify_validation_skills import roll_policy_full_ballistic
 
             samples, t0, traced, handoff_t = roll_policy_full_ballistic(
                 env, model, book, blob, device, SELECTED_LIMIT_S,
@@ -459,7 +459,7 @@ def write_report(eval_summary, tf_sum, matched, weight_rows):
         "",
         "```powershell",
         "python -u scripts/train.py --supervised --config config/training/k48/sft_sliding_equal_weight.yaml",
-        "python -u visualization/eval_sft_sliding_equal_weight.py --device cuda",
+        "python -u experiments/sliding/eval_sft_sliding_equal_weight.py --device cuda",
         "```",
         "",
     ])

@@ -11,14 +11,14 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from data_generation.rebuild_k48_recovery import _open_env
 from envs.simulation.capture import restore_capture
 from envs.step_legal import step_legal
-from visualization.audit_sliding_mechanism import bilateral_mask, release_regrasp, sample, slip_direction
+from data_generation.validation.sliding_mechanism import bilateral_mask, release_regrasp, sample, slip_direction
 
 OUT = ROOT / "results" / "diagnostics" / "sliding_mechanism_audit"
 

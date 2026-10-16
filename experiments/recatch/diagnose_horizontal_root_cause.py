@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-ROOT_PATH = Path(__file__).resolve().parents[1]
+ROOT_PATH = Path(__file__).resolve().parents[2]
 if str(ROOT_PATH) not in sys.path:
     sys.path.insert(0, str(ROOT_PATH))
 
@@ -27,7 +27,7 @@ from models.k48_checkpoint import HANDOFF, load_trained_k48
 from training.grpo_math import SIGMA, gaussian_logprob
 from training.k47_codebook import CAP, decode_action, load_codebook
 from training.k48_config import ROOT
-from visualization.diagnose_horizontal_recatch import (
+from experiments.recatch.diagnose_horizontal_recatch import (
     CKPT,
     begin,
     load_expert,
@@ -386,7 +386,7 @@ def main():
     write("first_step.json", first_steps)
 
     # Same-seed independent token replay, two repeats, three ICs. Stops at recovery_failed.
-    from visualization.diagnose_horizontal_recatch import rollout_policy
+    from experiments.recatch.diagnose_horizontal_recatch import rollout_policy
 
     repeats = []
     for episode_id in chosen_ids:

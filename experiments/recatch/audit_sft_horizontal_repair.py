@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-ROOT_PATH = Path(__file__).resolve().parents[1]
+ROOT_PATH = Path(__file__).resolve().parents[2]
 if str(ROOT_PATH) not in sys.path:
     sys.path.insert(0, str(ROOT_PATH))
 
@@ -28,8 +28,8 @@ from training.k47_codebook import CAP, load_codebook, read_jsonl
 from training.k48_config import ROOT
 from training.recovery_episode import make_training_env
 from training.train_sft import supervised_loss
-from visualization.audit_sft_horizontal_followup import MeanArgmax, file_sha, score_sequence
-from visualization.diagnose_horizontal_recatch import (
+from experiments.recatch.audit_sft_horizontal_followup import MeanArgmax, file_sha, score_sequence
+from experiments.recatch.diagnose_horizontal_recatch import (
     CKPT,
     begin,
     load_expert,

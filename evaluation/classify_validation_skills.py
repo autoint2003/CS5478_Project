@@ -1,6 +1,6 @@
 """Classify recovery mechanisms on all 17 validation ICs for SFT and GRPO.
 
-Reuses contact sampling and deterministic rollout from audit_checkpoint3_skill.
+Reuses contact sampling and deterministic rollout from evaluation.skill_traces.
 Writes only under results/diagnostics/validation_skill_classification/.
 """
 
@@ -28,7 +28,7 @@ from models.k48_checkpoint import load_trained_k48
 from training.k47_codebook import load_codebook
 from training.k48_config import SELECTED_LIMIT_S
 from training.recovery_episode import make_training_env
-from visualization import audit_checkpoint3_skill as audit
+from evaluation import skill_traces as audit
 from visualization.camera import mjv_camera_from_preset
 from visualization.overlays import caption
 from visualization.video_recorder import write_frames_mp4
@@ -566,7 +566,7 @@ def render_video(env, model, book, blob, device, limit_s, dest):
 
 def sliding_only_evidence():
     """ICs with sliding SUCCESS_12S and documented vertical_recatch failure."""
-    from visualization.audit_checkpoint3_skill import find_slide_row, find_vertical_fail
+    from evaluation.skill_traces import find_slide_row, find_vertical_fail
 
     rows = load_valid_rows()
     out = []
@@ -708,7 +708,7 @@ def write_report(comparison, summary):
         "Validation set: 17 globally unique ICs from `data/valid_skill_quotas.jsonl` (same as `--eval`).",
         "Action rule: official deterministic `roll_policy` (argmax token, residual mean, legal decode, 12 s nominal).",
         "",
-        "Contact extraction and snapshot restore reuse `visualization/audit_checkpoint3_skill.py`.",
+        "Contact extraction and snapshot restore reuse `evaluation/skill_traces.py`.",
         "",
         "## Classification rules",
         "",
