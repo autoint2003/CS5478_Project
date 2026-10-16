@@ -1,8 +1,9 @@
 """Adaptive hybrid exploration for K48 GRPO.
 
-Independent rollouts are the only samples that enter the GRPO loss. Tree
-branches reuse the verified prefix-branching rules and are logged as
-exploration. A tree success never becomes an independent success.
+Stage A and Stage B update from independent rollouts only. When all 16
+independent rollouts fail, each trunk contributes two uniform and two entropy
+branches. Those 64 tree trajectories join the 16 trunks in one G=80 update.
+Tree success does not trigger another independent resample.
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 STAGE_A = 8
 STAGE_B = 8
+BRANCHES_PER_METHOD = 2
 TREE_EACH = 8
 SLIDING = "gravity_assisted_in_hand_sliding"
 HORIZONTAL = "horizontal_recatch"
@@ -92,34 +94,127 @@ def select_branch_points(candidates: list[dict], rng, count: int, strategy: str)
     raise RuntimeError(f"unknown branch strategy {strategy}")
 
 
+def select_trunk_branches(candidates: list[dict], rng, count: int, strategy: str) -> list[dict]:
+    """Pick ``count`` positions on one trunk.
+
+    Distinct positions are preferred. A short trunk repeats positions instead
+    of dropping a required branch. Uniform and entropy are separate calls.
+    """
+    needed = int(count)
+    if needed <= 0:
+        return []
+    if not candidates:
+        raise RuntimeError("trunk has no branchable position")
+    if strategy == "uniform":
+        if len(candidates) >= needed:
+            picked = rng.choice(np.arange(len(candidates)), size=needed, replace=False)
+            return [candidates[int(index)] for index in picked]
+        extra = rng.choice(np.arange(len(candidates)), size=needed - len(candidates), replace=True)
+        return list(candidates) + [candidates[int(index)] for index in extra]
+    if strategy == "entropy":
+        order = sorted(range(len(candidates)), key=lambda index: (-float(candidates[index]["entropy"]), index))
+        ranked = [candidates[index] for index in order]
+        if len(ranked) >= needed:
+            return ranked[:needed]
+        return ranked + [ranked[0]] * (needed - len(ranked))
+    raise RuntimeError(f"unknown branch strategy {strategy}")
+
+
+def trunk_candidates(trunk: dict, trunk_index: int) -> list[dict]:
+    """Pre-action states that were captured on this independent rollout."""
+    captured = trunk.get("captures") or {}
+    candidates = []
+    for step in trunk.get("steps") or []:
+        index = int(step["step"])
+        if index not in captured:
+            continue
+        candidates.append({
+            "traj": int(trunk_index),
+            "step": index,
+            "entropy": float(step["entropy"]),
+            "lost_low": int(step["lost_low"]),
+            "t": float(step["t"]),
+            "token": int(step["token"]),
+        })
+    return candidates
+
+
+def allocate_tree_branches(trunks: list[dict], rng_uniform, rng_entropy, per_method: int = BRANCHES_PER_METHOD) -> tuple[list[dict], list[dict]]:
+    """Two uniform and two entropy branches on every trunk. No global pool."""
+    uniform = []
+    entropy = []
+    for index, trunk in enumerate(trunks):
+        candidates = trunk_candidates(trunk, index)
+        if not candidates:
+            raise RuntimeError(f"trunk {index} has no branchable pre-action state")
+        uniform.extend(select_trunk_branches(candidates, rng_uniform, per_method, "uniform"))
+        entropy.extend(select_trunk_branches(candidates, rng_entropy, per_method, "entropy"))
+    expected = len(trunks) * int(per_method)
+    if len(uniform) != expected or len(entropy) != expected:
+        raise RuntimeError(f"tree allocation produced {len(uniform)} uniform and {len(entropy)} entropy branches, expected {expected}")
+    return uniform, entropy
+
+
+def execute_allocated_branches(points: list[dict], rollout_one) -> list[dict]:
+    """Run every allocated branch. A success does not cancel the rest."""
+    leaves = []
+    for point in points:
+        leaves.append(rollout_one(point))
+    if len(leaves) != len(points):
+        raise RuntimeError(f"executed {len(leaves)} of {len(points)} allocated branches")
+    return leaves
+
+
 def exploration_decision(state: dict) -> dict:
-    """Return the next action for one IC. Tree successes do not authorize an update."""
+    """Stage A or B updates only after an independent SUCCESS_12S.
+
+    After the fixed tree pass, the G=80 group is updated directly. There is
+    no independent resample.
+    """
     if int(state.get("stage_a_success") or 0) > 0 and not state.get("stage_b_done"):
-        return {"action": "update", "source": "independent_stage_a", "group": "stage_a"}
+        return {"action": "update", "source": "independent_stage_a", "group": "stage_a", "stage": "A"}
     if not state.get("stage_b_done"):
         return {"action": "sample", "stage": "B"}
     independent = int(state.get("stage_a_success") or 0) + int(state.get("stage_b_success") or 0)
     if independent > 0 and not state.get("tree_done"):
-        return {"action": "update", "source": "independent_stage_ab", "group": "stage_ab"}
+        return {"action": "update", "source": "independent_stage_ab", "group": "stage_ab", "stage": "B"}
     if not state.get("tree_done"):
         return {"action": "sample", "stage": "C"}
-    tree = int(state.get("tree_uniform_success") or 0) + int(state.get("tree_entropy_success") or 0)
-    if tree > 0 and not state.get("resample_done"):
-        return {"action": "sample", "stage": "resample"}
-    if state.get("resample_done") and int(state.get("resample_success") or 0) > 0:
-        return {"action": "update", "source": "independent_resample", "group": "resample"}
-    return {"action": "skip", "source": None, "tree_success_excluded": tree > 0}
+    return {"action": "update", "source": "tree_augmented", "group": "stage_c", "stage": "C"}
 
 
 def loss_members(members: list[dict]) -> list[dict]:
-    """Keep every independent rollout in the group, including failures."""
+    """Keep every trajectory in the group, including failures and tree suffixes."""
     if not members:
         raise RuntimeError("GRPO group is empty")
-    if any(member.get("origin") != "independent" for member in members):
-        raise RuntimeError("tree or off-policy rollout entered the GRPO group")
-    if not any(member.get("label") == "SUCCESS_12S" for member in members):
-        raise RuntimeError("GRPO group has no SUCCESS_12S rollout")
+    allowed = {"independent", "tree"}
+    bad = [member.get("origin") for member in members if member.get("origin") not in allowed]
+    if bad:
+        raise RuntimeError(f"off-policy rollout entered the GRPO group: {bad[:3]}")
     return members
+
+
+def prefix_multiplicity(members: list[dict]) -> dict:
+    """How often each trunk prefix action is reused by stitched tree trajectories.
+
+    Equal trajectory weights still apply. This count is diagnostic only.
+    """
+    counts: dict[tuple[int, int], int] = {}
+    for member in members:
+        if member.get("origin") != "tree":
+            continue
+        trunk = int(member["prefix_source"])
+        for step in range(int(member.get("prefix_len") or 0)):
+            key = (trunk, step)
+            counts[key] = counts.get(key, 0) + 1
+    if not counts:
+        return {"shared_prefix_actions": 0, "max": 0, "mean": 0.0}
+    values = list(counts.values())
+    return {
+        "shared_prefix_actions": len(values),
+        "max": int(max(values)),
+        "mean": float(np.mean(values)),
+    }
 
 
 def load_train_snapshots() -> list[dict]:

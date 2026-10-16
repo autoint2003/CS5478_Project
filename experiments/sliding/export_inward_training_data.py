@@ -20,6 +20,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from envs.outcomes.horizon_outcome import recovery_failed
+from data_generation.recording.trajectory_recorder import save_pair
 from data_generation.strategies.k48_inward_sliding_search import row_snapshot
 from experiments.ball_impact.privileged_ball_impact_search import step_legal
 from data_generation.rebuild_k48_recovery import (
@@ -73,29 +74,6 @@ def propose(env, blob):
     if not actions:
         return np.zeros((0, 7), np.float32)
     return np.stack(actions, axis=0)
-
-
-def save_pair(folder, stem, executed, observations, contacts, tokens, residuals, handoff_obs):
-    folder.mkdir(parents=True, exist_ok=True)
-    continuous = folder / f"{stem}.npz"
-    tokens_path = folder / f"{stem}__tokens.npz"
-    payload = {
-        "actions": np.asarray(executed, np.float32),
-        "observations": np.asarray(observations, np.float32),
-        "timestamps": np.asarray([row["t"] for row in contacts], np.float64),
-        "nL": np.asarray([row["nL"] for row in contacts], np.int32),
-        "nR": np.asarray([row["nR"] for row in contacts], np.int32),
-        "obj_z": np.asarray([row["z"] for row in contacts], np.float32),
-    }
-    if handoff_obs is not None:
-        payload["handoff_obs"] = np.asarray(handoff_obs, np.float32)
-    np.savez_compressed(continuous, **payload)
-    np.savez_compressed(
-        tokens_path,
-        tokens=np.asarray(tokens, np.int64),
-        residuals=np.asarray(residuals, np.float32),
-    )
-    return continuous, tokens_path
 
 
 def main():

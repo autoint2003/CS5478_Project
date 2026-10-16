@@ -177,3 +177,20 @@ def restore_capture(env, cap):
     err = float(np.max(np.abs(np.array(sim.data.qpos, float) - physics["qpos"])))
     if err > 1e-6:
         raise RuntimeError(f"qpos restore error {err}")
+
+
+def take_snapshot(env):
+    """Controller capture plus a full MjData copy.
+
+    ``restore_capture`` calls ``mj_forward``, which does not reproduce the
+    pre-forward ``cvel`` or contact force. Copying ``MjData`` back afterwards
+    returns the observation to equality.
+    """
+    data = mujoco.MjData(env.sim.model)
+    mujoco.mj_copyData(data, env.sim.model, env.sim.data)
+    return {"capture": take_capture(env), "data": data}
+
+
+def restore_snapshot(env, snap):
+    restore_capture(env, snap["capture"])
+    mujoco.mj_copyData(env.sim.data, env.sim.model, snap["data"])

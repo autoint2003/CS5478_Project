@@ -119,6 +119,24 @@ Three passes over the 87 training recovery initial conditions, 261 updates. Writ
 python -u scripts/train.py --grpo --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
 ```
 
+### Tree-augmented GRPO
+
+`config/training/k48/unified_k48_recovery_v3_tree80.yaml` writes `results/grpo/tree80/`. One round visits each unique training snapshot once. `--checkpoint` selects the file to load. `--ic-epochs` is the number of new rounds; omit it to use `ic_epochs` in the config. A finished round is saved as `checkpoint_epoch_XXXX.pt` and includes the Adam first and second moments. The KL reference stays `results/sft/checkpoint_epoch_0040.pt`.
+
+Start from supervised epoch 40. `results/grpo/tree80` must be empty:
+
+```powershell
+python -u scripts/train.py --adaptive-grpo --config config/training/k48/unified_k48_recovery_v3_tree80.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt --ic-epochs 1
+```
+
+Continue from a saved epoch that contains Adam moments. Replace the checkpoint path and the round count:
+
+```powershell
+python -u scripts/train.py --adaptive-grpo --config config/training/k48/unified_k48_recovery_v3_tree80.yaml --checkpoint results/grpo/tree80/checkpoint_epoch_0001.pt --ic-epochs 1
+```
+
+`results/grpo/tree80/history/checkpoint_epoch_0001.pt` is the earlier weights-only pass. It has no Adam moments, and training refuses to resume it.
+
 ### GRPO reward v2
 
 `config/training/k48/unified_k48_recovery_v3_reward_v2.yaml` runs nine passes, 783 updates, and writes `results/grpo/v2/`. A checkpoint saved after update 261 is the end of the first three passes. This command continues that file from update 262 through 783 and appends `training_log.jsonl` and `rollouts.jsonl`. It does not overwrite `checkpoint_u0261.pt`. The frozen KL reference stays `results/sft/checkpoint_epoch_0040.pt`. The last new file is `results/grpo/v2/checkpoint_u0783.pt`.

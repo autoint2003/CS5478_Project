@@ -18,7 +18,7 @@ if str(ROOT) not in sys.path:
 from envs.simulation.capture import restore_capture, take_capture
 
 from envs.outcomes.horizon_outcome import finish_recovery
-from experiments.ball_impact.privileged_ball_impact_search import step_legal
+from envs.step_legal import step_legal
 from training.reward_v2 import reward_components
 from envs.outcomes.table_drop import (
     BOUNCE_DV,
@@ -225,7 +225,7 @@ def test_drop_after_handoff(env, index):
 
 
 def test_snapshots(env, index):
-    from experiments.handoff.benchmark_k48_prefix_branching import restore_snapshot, take_snapshot
+    from envs.simulation.capture import restore_snapshot, take_snapshot
 
     _row, blob, actions = _load_case(index, "ball_train_v2_0051", "chase_lost")
     restore_capture(env, blob["capture"])

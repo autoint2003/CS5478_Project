@@ -1,0 +1,38 @@
+# Tree-augmented GRPO. One round visits every unique train snapshot once.
+# --checkpoint is the weights to start from. --ic-epochs is how many new rounds
+# to run; 0 uses ic_epochs below. Each saved epoch stores Adam moments.
+# The weights-only history file cannot be resumed.
+# Fresh start requires an empty results/grpo/tree80:
+#   python -u scripts/train.py --adaptive-grpo --config config/training/k48/unified_k48_recovery_v3_tree80.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt --ic-epochs 1
+# Continue from a checkpoint that contains Adam moments. The KL reference stays the SFT file.
+#   python -u scripts/train.py --adaptive-grpo --config config/training/k48/unified_k48_recovery_v3_tree80.yaml --checkpoint results/grpo/tree80/checkpoint_epoch_0001.pt --ic-epochs 1
+dataset_version: k48_recovery_v3
+codebook: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy
+supervised_targets: data/supervised_targets_with_horizontal.jsonl
+grpo_initial_conditions: data/grpo_initial_conditions.jsonl
+eval_manifest: data/valid_skill_quotas.jsonl
+supervised_output: results/sft
+eval_output: results/evaluations/tree80
+grpo_output: results/grpo/tree80
+baseline_eval: results/archive/demo_results/diagnostics/raw/horizon_migration/checkpoint_eval.json
+seed: 1
+device: cuda
+eval_device: cpu
+epochs: 40
+batch_size: 8
+lr: 0.0003
+grpo_updates: 0
+ic_epochs: 1
+cover_all_ics: false
+grpo_lr: 0.00003
+kl_coef: 0.05
+clip: 0.2
+group: 8
+grpo_save_every: 1
+rollout_cap_steps: 200
+eval_cap_steps: 200
+lambda_time: 0.05
+nominal_seconds: 12.0
+recovery_limit_s: 4.0
+reward_version: v2
+expand_handoff: true

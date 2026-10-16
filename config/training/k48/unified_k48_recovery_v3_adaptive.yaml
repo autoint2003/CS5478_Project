@@ -1,4 +1,5 @@
-# Full adaptive hybrid GRPO over the unique train snapshots.
+# One adaptive hybrid GRPO pass over the unique train snapshots.
+# Starts from results/sft/checkpoint_epoch_0040.pt. Does not write that file.
 dataset_version: k48_recovery_v3
 codebook: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy
 supervised_targets: data/supervised_targets.jsonl
@@ -6,7 +7,7 @@ grpo_initial_conditions: data/grpo_initial_conditions.jsonl
 eval_manifest: data/valid_skill_quotas.jsonl
 supervised_output: results/sft/current
 eval_output: results/evaluations/adaptive_hybrid_full
-grpo_output: results/grpo/adaptive_hybrid
+grpo_output: results/grpo/adaptive_sft
 baseline_eval: results/archive/demo_results/diagnostics/raw/horizon_migration/checkpoint_eval.json
 seed: 1
 device: cuda

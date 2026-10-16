@@ -142,6 +142,12 @@ def train_supervised(cfg, checkpoint):
     if str(cfg.get("init") or "") == "scratch":
         model = build_k48(book, device)
         print("SUPERVISED_INIT", "scratch", "rows", len(rows), flush=True)
+    elif str(cfg.get("init") or "") == "k48":
+        model, loaded = load_trained_k48(Path(checkpoint), device)
+        if not np.array_equal(loaded, book):
+            raise RuntimeError("K48 checkpoint codebook differs from the configured codebook")
+        model.train()
+        print("SUPERVISED_INIT", "k48", str(checkpoint), "rows", len(rows), flush=True)
     else:
         model, _book = load_expanded(Path(checkpoint), device)
         print("SUPERVISED_INIT", "expanded_k47", str(checkpoint), flush=True)
@@ -149,8 +155,11 @@ def train_supervised(cfg, checkpoint):
     out = ROOT / cfg["supervised_output"]
     historical = ROOT / "results/archive/demo_results/diagnostics/raw/unified_k47/supervised"
     collapsed = ROOT / "results/archive/demo_results/diagnostics/raw/unified_k48/supervised"
+    current = ROOT / "results/sft/current"
     if out.resolve() == historical.resolve() or (rebuilt and out.resolve() == collapsed.resolve()):
         raise RuntimeError("refusing to write into a historical supervised directory")
+    if out.resolve() == current.resolve():
+        raise RuntimeError("refusing to write supervised checkpoints into results/sft/current")
     out.mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(int(cfg["seed"]))
     batch = int(cfg["batch_size"])

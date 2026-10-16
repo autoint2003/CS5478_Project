@@ -126,6 +126,7 @@ def main():
     parser.add_argument("--grpo", action="store_true")
     parser.add_argument("--adaptive-grpo", action="store_true")
     parser.add_argument("--limit-ics", type=int, default=0)
+    parser.add_argument("--ic-epochs", type=int, default=0, help="Adaptive GRPO rounds to run. 0 uses ic_epochs from the config.")
     parser.add_argument("--config", default="config/training/k48/unified_k48.yaml")
     parser.add_argument("--checkpoint", default="")
     args = parser.parse_args()
@@ -147,6 +148,8 @@ def main():
         return
     scratch = args.supervised and str(cfg.get("init") or "") == "scratch"
     if not args.checkpoint and not scratch:
+        if str(cfg.get("init") or "") == "k48":
+            raise SystemExit("pass the trained K=48 checkpoint; it is loaded and not overwritten")
         raise SystemExit("pass the epoch-40 K=47 checkpoint; it is expanded and not overwritten")
     if args.supervised:
         train_supervised(cfg, args.checkpoint)
@@ -156,10 +159,13 @@ def main():
         return
     if args.adaptive_grpo:
         if not args.checkpoint:
-            raise SystemExit("pass results/sft/current/checkpoint_epoch_0040.pt")
+            raise SystemExit("pass results/sft/checkpoint_epoch_0040.pt")
         from training.adaptive_grpo import train_adaptive
 
-        train_adaptive(cfg, args.checkpoint, None if args.limit_ics <= 0 else args.limit_ics)
+        train_adaptive(
+            cfg, args.checkpoint, None if args.limit_ics <= 0 else args.limit_ics,
+            None if args.ic_epochs <= 0 else args.ic_epochs,
+        )
         return
     raise SystemExit("choose --check, --supervised, --eval, --grpo, or --adaptive-grpo")
 

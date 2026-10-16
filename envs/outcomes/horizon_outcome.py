@@ -293,11 +293,13 @@ def roll_policy(env, model, book, blob, device, cap_steps=None, limit_s=None):
     else:
         from models.airborne_v3 import DT_POLICY
         from envs.observations.observable_obs import ObservableObsState
+        from envs.outcomes.table_drop import restore_state
         from training.recovery_execution import restore_ballistic
 
         if "ref" not in blob:
             raise RuntimeError("ballistic snapshot has no nominal grasp reference")
         restore_ballistic(env.sim, blob)
+        restore_state(env.sim, None)
         env._hist = ObservableObsState(DT_POLICY)
         env._obs_seq = []
         env._prev_seq = []

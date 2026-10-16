@@ -54,7 +54,7 @@ from data_generation.strategies.vertical_recatch_search import _finish, _summary
 from envs.outcomes.horizon_outcome import recovery_failed
 from envs.simulation.capture import restore_capture
 from envs.step_legal import step_legal
-from experiments.sliding.export_inward_training_data import save_pair
+from data_generation.recording.trajectory_recorder import save_pair
 from training.k47_codebook import load_codebook
 from visualization.audit_sliding_mechanism import bilateral_mask, release_regrasp, sample, slip_direction
 from visualization.scan_sliding_slip import status as slip_status
@@ -905,8 +905,11 @@ def expand_horizontal(limit: int) -> int:
                 "t_brake": rolled["metrics"].get("t_vz0"),
             }
             _append(ROOT / "data" / "recatch" / "manifest.jsonl", row)
-            training = ROOT / "data" / ("valid_demonstrations.jsonl" if cell["split"] == "valid" else "supervised_targets.jsonl")
-            _append(training, row)
+            training = ROOT / "data" / ("valid_demonstrations.jsonl" if cell["split"] == "valid" else "supervised_targets_with_horizontal.jsonl")
+            training_row = dict(row)
+            if cell["split"] == "train":
+                training_row["handoff_label"] = "early_handoff"
+            _append(training, training_row)
             identities.add(identity)
             added += 1
             kept = True
