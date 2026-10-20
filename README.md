@@ -27,7 +27,7 @@ Run commands from the repository root.
 | `results/` | New SFT, GRPO, evaluation, and diagnostic outputs |
 | `results/archive/demo_results/` | Historical diagnostics and the K=47 checkpoint used to initialize K=48 |
 | `mujoco_menagerie/` | Vendored robot models. Not project control code |
-| `docs/` | Architecture notes, `docs/FINAL_REFACTOR_CHECK.md`, and the course PDFs in `docs/coursework/` |
+| `docs/` | `MODULE_ORGANIZATION.md` (sole package map), `MIGRATION.md`, `FINAL_REFACTOR_CHECK.md`, and course PDFs in `docs/coursework/` |
 
 `data/`, `results/archive/demo_results/`, and `results/` are gitignored. Training writes under `results/sft/`, `results/grpo/`, and `results/evaluations/`. File moves are listed in `docs/MIGRATION.md`.
 
@@ -223,4 +223,4 @@ The policy is `models/k48_policy.py`: width 64, 2 layers, 4 heads, feed-forward 
 
 One-off searches live under `experiments/`. The old `demo/` scripts are in `experiments/legacy/demo/`. Their previous outputs, reports, and raw traces are in `results/archive/demo_results/`. A stored path that still begins with `results/` is resolved to `results/archive/demo_results/` when that historical file exists, so old manifest provenance is left unchanged.
 
-Older K=47 commands in this file's previous revision used `config/training/k47/unified_k47_horizon.yaml` and wrote under what is now `results/archive/demo_results/diagnostics/raw/unified_k47_horizon/`. Those configs still point at that historical tree. Package roles are in `docs/ARCHITECTURE.md`.
+Older K=47 commands in this file's previous revision used `config/training/k47/unified_k47_horizon.yaml` and wrote under what is now `results/archive/demo_results/diagnostics/raw/unified_k47_horizon/`. Those configs still point at that historical tree. Package roles are in `docs/MODULE_ORGANIZATION.md`.

@@ -1,12 +1,15 @@
 # Module organization
 
-Round 3 grouped code by job. Physics, the 7D action map, the 39D observation, the K48 codebook and residual head, the reward formulas, SFT, GRPO, nominal handoff, `SUCCESS_12S`, and `TABLE_DROP` were not changed. `data/` and saved checkpoints were not rewritten.
+This is the single directory and package map for the repository. Commands run from the repository root. `data/` and `results/` (including `results/archive/demo_results/`) stay on disk and out of Git.
 
-The rollback point before this move is commit `85a117b`.
+Round 3 grouped code by job. Physics, the 7D action map, the 39D observation, the K48 codebook and residual head, the reward formulas, SFT, GRPO, nominal handoff, `SUCCESS_12S`, and `TABLE_DROP` were not changed. `data/` and saved checkpoints were not rewritten. The rollback point before that move is commit `85a117b`.
+
+Formal packages (`controllers/`, `envs/`, `sensors/`, `models/`, `data_generation/`, `training/`, `evaluation/`, `visualization/`) do **not** import `experiments/`. Experiment scripts call formal modules. Cumulative renames are in `docs/MIGRATION.md`; refactor regression notes are in `docs/REFACTOR_AUDIT.md` and `docs/FINAL_REFACTOR_CHECK.md`.
 
 ## 1. Directory tree
 
 ```text
+assets/        scene.xml  scene_ground.xml  scene_ballistic_impact.xml  scene_impact_diag.xml  panda_torque.xml
 controllers/
   nominal.py
   cartesian/   jacobian.py  bias_torque.py  tracking.py  velocity_step.py
@@ -18,12 +21,12 @@ envs/
   ballistic_impact.py
   simulation/  grasp_sim.py  mujoco_ids.py  object_dynamics.py  panda_xml.py
                yaml_config.py  grasp_quality.py  capture.py  support_contacts.py
-               impact_ball.py  ballistic_scene.py  impact_diag_scene.py
-               rule_replay.py  scene_state.py
+               impact_ball.py  ballistic_scene.py  ground_scene.py  ground_sim.py
+               impact_diag_scene.py  rule_replay.py  scene_state.py
   observations/  observable_obs.py  airborne_obs.py  tactile_reward.py  privileged_obs.py
   contacts/    touch.py  frames.py  scene_contacts.py
-  outcomes/    horizon_outcome.py  recovery_success.py  table_drop.py
-               physical_recovery.py  nominal_pose.py
+  outcomes/    horizon_outcome.py  recovery_success.py  table_drop.py  ground_drop.py
+               support_drop.py  drop_thresholds.py  physical_recovery.py  nominal_pose.py
   initialization/  grasp_seat.py
 sensors/       spatial_tactile.py  lateral_offset.py
 models/        k48_policy.py  k48_checkpoint.py  airborne_v3.py
@@ -36,20 +39,24 @@ data_generation/
 training/
   unified_k48.py  train_sft.py  train_grpo.py  dataset.py  grpo_progress.py
   reward_v2.py  grpo_math.py  k48_config.py  k47_codebook.py
-  recovery_episode.py  recovery_execution.py
+  recovery_episode.py  recovery_execution.py  action_vocab_k49.py  adaptive_independent_g.py
 evaluation/    k48_eval.py  audit_pretrain_data.py  audit_recatch_legality.py
                verify_handoff_targets.py  classify_validation_skills.py  skill_traces.py
+               full_objective.py  grasp_configuration.py
 visualization/ render_video.py  video_recorder.py  camera.py  overlays.py  impact_view.py
                compare_policy_nominal.py  compare_strategy_nominal.py
 scripts/       train.py  evaluate.py  generate_data.py  render_video.py
-               generate_k49_*.py  merge_grpo_ic_datasets.py
+               generate_k49_*.py  run_*.py  merge_grpo_ic_datasets.py
+               run_ground_scene_validation.py
 config/        simulation/  controllers/  recovery/  training/k48/  training/k47/  training/legacy/
 experiments/   ball_impact/  handoff/  sliding/  adaptive_g/  recatch/
                recatch/airborne/  recatch/natural_loss/  recatch/legal/  recatch/top_impact/
                recatch/k49/
-               legacy/  legacy/demo/{audit,replay,diagnose,demonstrations}/
-data_generation/validation/  impact_labels.py  recovery_checks.py
-               sliding_mechanism.py  sliding_slip.py
+               legacy/  legacy/tmp/  legacy/demo/{audit,replay,diagnose,demonstrations}/
+results/       sft/  grpo/  evaluations/  diagnostics/  expert_generation/  videos/
+               archive/demo_results/   # gitignored historical demos
+docs/          MODULE_ORGANIZATION.md  MIGRATION.md  GROUND_SCENE_OUTCOMES.md  …
+tests/         test_physics_regression.py  test_table_drop.py  test_ground_drop.py  …
 ```
 
 ## 2. What each subpackage does
@@ -62,19 +69,22 @@ data_generation/validation/  impact_labels.py  recovery_checks.py
 | `envs/simulation/` | Load the Panda, step MuJoCo, resolve body ids, and snapshot a running episode. |
 | `envs/observations/` | The 27D policy observation, the 39D airborne observation, and the tactile reward. |
 | `envs/contacts/` | Touch summaries and per-contact frames. They are different jobs and stay separate. |
-| `envs/outcomes/` | Handoff, the 12 s nominal hold, the table-drop latch, and pose error. |
+| `envs/outcomes/` | Handoff, the 12 s nominal hold, `TABLE_DROP` / `GROUND_DROP`, pose error. |
 | `envs/initialization/` | Build a seated grasp before a disturbance. |
+| `envs/simulation/ground_scene.py` / `ground_sim.py` | `GROUND_SCENE` XML writer and simulator (no elevated table). |
 | `models/historical/` | K33 and K36 networks used to reproduce old checkpoints. |
 | `data_generation/strategies/` | The distinct recovery laws and their search scripts. |
 | `data_generation/oracles/` | Codeword projection (`representability`). Search loops stay in `strategies/`. |
 | `data_generation/validation/` | Impact and sliding-mechanism checks used while building datasets. |
 | `data_generation/maintenance/` | One-shot layout and path repair. `generate.py` does not import it. |
 | `config/training/k48/` | K48 training YAML. Filenames still name the dataset and reward version. |
-| `experiments/sliding/` | Sliding diagnostics, equal-weight SFT ablation eval, hard-IC mining, and K49 slide/return pilots. |
+| `experiments/sliding/` | Sliding diagnostics, equal-weight SFT ablation eval, hard-IC mining, K49 slide/return pilots, and `_tmp_*` one-shots. |
 | `experiments/recatch/` | Horizontal Recatch research, airborne/natural-loss/legal/top-impact studies, and SFT audits. |
-| `experiments/recatch/k49/` | One-shot K49 Recatch / Type2–3 / capture–brake / lost-grasp finalize & probe scripts. |
+| `experiments/recatch/k49/` | Historical K49 Recatch / Type2–3 / capture–brake / lost-grasp `_tmp_*` probes. Maintained generators are in `scripts/`. |
 | `experiments/adaptive_g/` | Adaptive independent-g pilot / smoke / full-run CLIs. |
+| `experiments/legacy/tmp/` | Former top-level `scripts/_tmp_*` / `_continue_*` probes. |
 | `evaluation/` | Closed-loop eval, data audits, grasp-configuration metrics, and validation skill/mechanism classification. |
+| `assets/` | MuJoCo scenes. Elevated table: `scene.xml`. Ground: `scene_ground.xml`. |
 
 ## 3. Important files
 
@@ -83,8 +93,11 @@ data_generation/validation/  impact_labels.py  recovery_checks.py
 | `envs/step_legal.py` | One 20 ms legal recovery step. |
 | `envs/ballistic_impact.py` | Ballistic world, `make_sim`, `world`. |
 | `envs/outcomes/horizon_outcome.py` | Recovery limit, nominal verify, `SUCCESS_12S`. |
-| `envs/outcomes/table_drop.py` | Latched table-support termination. |
-| `envs/outcomes/physical_recovery.py` | Height gate `TABLE_DROP = 0.44` and the physical pack. This is not the latch. |
+| `envs/outcomes/table_drop.py` | Latched elevated-table termination (`TABLE_DROP`). |
+| `envs/outcomes/ground_drop.py` | Latched ground-plane termination (`GROUND_DROP`); armed only in Recovery. |
+| `envs/outcomes/support_drop.py` | Scene-aware facade over table vs ground drop. |
+| `envs/outcomes/physical_recovery.py` | Elevated height gate `TABLE_DROP = 0.44` and the physical pack. This is not the latch. |
+| `envs/simulation/ground_scene.py` | Writes `assets/scene_ground.xml`; defines `GROUND_Z` / `GROUND_DROP_Z`. |
 | `controllers/recovery/action_map.py` | 7D normalized action to velocity and grip torque. |
 | `controllers/recovery/residual_limits.py` | Clip a 7D residual and map the old 4D action. Not the K48 residual head. |
 | `controllers/cartesian/tracking.py` | `TRACK` gains used by the verified catch. |
@@ -190,6 +203,7 @@ The frozen rule-controller source pin hashes `controllers/recovery/rule_based.py
 | Location | What it is |
 |---|---|
 | `experiments/legacy/` | K36 GRPO, the K47 training loop `k47_training.py`, the 39D demo generator `airborne_v3_demos.py`, and older pilots. |
+| `experiments/legacy/tmp/` | Former `scripts/_tmp_*` / `_continue_*` one-off probes. Not on the training path. |
 | `experiments/legacy/demo/audit/` | Old coverage and physics audits. |
 | `experiments/legacy/demo/replay/` | Codebook and hold replays. |
 | `experiments/legacy/demo/diagnose/` | Closed-loop and handoff diagnoses. |
@@ -198,12 +212,14 @@ The frozen rule-controller source pin hashes `controllers/recovery/rule_based.py
 | `experiments/legacy/demo/build_train_manifest.py` | Old manifest join. Not imported by formal packages. |
 | `experiments/legacy/demo/expand_k48_handoff_dataset.py` | Old handoff expansion. Not imported by formal packages. |
 | `experiments/legacy/demo/refactor_repository.py` | The earlier path-rewrite script. Not imported. |
+| `experiments/sliding/_tmp_*`, `experiments/recatch/k49/_tmp_*`, `experiments/ball_impact/_tmp_*` | Historical finalize/probe one-shots in their topic directories. |
 | `experiments/recatch/airborne/` | Airborne and freefall recatch studies. |
 | `experiments/recatch/natural_loss/` | Seated natural-loss studies. |
 | `experiments/recatch/legal/` | `step_legal` recatch searches. |
 | `experiments/recatch/top_impact/` | Top-impact recatch studies. |
 | `models/historical/` | K33 and K36 loaders. K48 training does not run them. |
 | `config/training/k47/` and `config/training/legacy/` | Older training configs. Numeric values were not changed. |
+| `results/archive/demo_results/` | Historical demos and K47 init artifacts (gitignored). |
 
 ## 9. Regression
 
@@ -218,18 +234,36 @@ The run checks determinism by replaying each tape twice, then compares qpos, qve
 - `experiments/ball_impact/privileged_ball_impact_search.py` keeps a one-line `step_legal` delegate. The implementation is `envs/step_legal.py`.
 - `experiments/legacy/demo/build_k48_handoff_policy.py` still has a historical copy of the K48 expansion. Formal training uses `models/k48_checkpoint.py`.
 
-## 11. Post–Round-3 K49 / adaptive-g placement
+## 11. Active research map
 
-- Durable expert generators stay in `scripts/generate_k49_*.py` (and `generate_grasp_recovery_pose_experts_v1.py`).
-- Sliding pilots / K49 return diagnoses: `experiments/sliding/` (maintained `pilot_*.py` / `diagnose_*.py`).
-- K49 Recatch / Type2–3 / lost-grasp maintained generators: `scripts/generate_k49_*.py`.
-- Handoff audits / pose-handoff benchmarks: `experiments/handoff/`.
-- Adaptive independent-g pilots: `experiments/adaptive_g/`.
-- Formal metric / migration audits: `evaluation/` (`full_objective.py`, `grasp_configuration.py`, `audit_grasp_configuration_migration.py`, `audit_mechanism_selection_feasibility.py`).
-- Training modules: `training/action_vocab_k49.py`, `training/adaptive_independent_g.py`; configs under `config/training/k48/*adaptive_g*.yaml`.
+| Need | Location |
+|---|---|
+| Elevated-table scene | `assets/scene.xml` via `envs/simulation/grasp_sim.py` |
+| `GROUND_SCENE` | `envs/simulation/ground_scene.py` → `assets/scene_ground.xml`; sim `ground_sim.py` |
+| `GROUND_DROP` semantics | `envs/outcomes/ground_drop.py`; authoritative notes `docs/GROUND_SCENE_OUTCOMES.md` |
+| Legal 7D step / 39D obs | `envs/step_legal.py`, `controllers/recovery/action_map.py`, `envs/observations/` |
+| Episode / HANDOFF / K49 | `training/recovery_episode.py`, `action_vocab_k49.py`, `models/k48_policy.py` |
+| Plan A sliding pilots | `experiments/sliding/pilot_*.py`, `scripts/generate_k49_sliding_recatch_dataset.py` |
+| Plan B / C generators | `scripts/generate_k49_*.py`, `scripts/run_freefall_*.py`, `run_*ball_impact*`, `run_plan_c_*` |
+| Ground-scene validation | `scripts/run_ground_scene_validation.py`, `tests/test_ground_drop.py` |
+| Adaptive-g | `experiments/adaptive_g/`, `training/adaptive_independent_g.py`, `config/training/k48/*adaptive_g*.yaml` |
+| Handoff audits | `experiments/handoff/` |
+| Formal metrics | `evaluation/full_objective.py`, `grasp_configuration.py` |
 
-## 12. Historical one-offs (under `experiments/`)
+Durable expert generators stay in `scripts/generate_k49_*.py` (and `generate_grasp_recovery_pose_experts_v1.py`). Do not import `_tmp_*` one-offs into the production path.
 
-One-off `_tmp_*` / `_continue_*` probes live under existing experiment trees or `experiments/legacy/tmp/` (former top-level `scripts/_tmp_*`). There is **no** top-level `archive/` directory. The `results/` tree is gitignored and is left alone. See `docs/REPOSITORY_CLEANUP_REPORT.md` and `docs/CLEANUP_LAYOUT_CORRECTION.md`. Do not import `_tmp_*` scripts into the production path.
+## 12. Validated expert evidence (`results/`, gitignored)
 
-Elevated-table `TABLE_DROP` remains available. New recovery research uses `GROUND_SCENE` / `GROUND_DROP` (`docs/GROUND_SCENE_OUTCOMES.md`).
+Do not relabel `SUCCESS_12S` / `CATCH_HANDOFF` / partial capture as full `SUCCESS_NEW`. Do not merge independent-root counts with repeated exact replays.
+
+| Plan | Evidence (on disk) |
+|---|---|
+| A sliding / pivoting / return | `results/expert_generation/sliding_position_correction_v1/`, `return_aware_sliding_k49/`, `k49_slow_return_position_refinement/`, `extended_k49_k50_pose_recovery/`; diagnostics `wrist_tilt_gravity_pivoting/`, `k49_return_axial_slip_mechanism/` |
+| B release–recatch / lost grasp | `results/expert_generation/k49_lost_grasp_recovery/`, `k49_in_recovery_recatch/`, `k49_dynamic_recatch_experts/`, `k49_type3_capture_brake/` |
+| C ball-impact / freefall | `results/expert_generation/k49_ball_impact_dynamic_recovery/`, `real_ball_impact_low_speed_recatch/`, `horizontal_offset_freefall_recatch/`, `lateral_force_*`; diagnostics `freefall_*`, `plan_c_*`, `top_impact_*` |
+
+Keep for each full expert: exact ICs/snapshots, legal action trajectories, controller state, success verification, root identity, replay entry points, and representative videos.
+
+## 13. Cleanup layout note
+
+There is **no** top-level `archive/` directory. Historical code one-offs live under `experiments/` (including `legacy/tmp/`). The `results/` tree is gitignored and is left alone for cleanup purposes (diagnostic trees stay under `results/diagnostics/`). Elevated-table `TABLE_DROP` remains available alongside `GROUND_SCENE` / `GROUND_DROP`.
