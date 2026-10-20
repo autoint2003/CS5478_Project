@@ -2,7 +2,7 @@
 
 Rollback commit: `d3223833647a8dc7107dc7898bec0b7abef55a47`  
 Branch: `cleanup/ground-scene-prep`  
-Critical file hashes: `archive/manifests/ROLLBACK_POINT.json`
+Cleanup notes: `docs/REPOSITORY_CLEANUP_REPORT.md`, `docs/CLEANUP_LAYOUT_CORRECTION.md`
 
 All paths below remain on disk under `results/` (gitignored). None were deleted or rewritten.
 

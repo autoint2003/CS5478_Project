@@ -228,6 +228,8 @@ The run checks determinism by replaying each tape twice, then compares qpos, qve
 - Formal metric / migration audits: `evaluation/` (`full_objective.py`, `grasp_configuration.py`, `audit_grasp_configuration_migration.py`, `audit_mechanism_selection_feasibility.py`).
 - Training modules: `training/action_vocab_k49.py`, `training/adaptive_independent_g.py`; configs under `config/training/k48/*adaptive_g*.yaml`.
 
-## 12. Historical archive (Phase I cleanup)
+## 12. Historical one-offs (under `experiments/`)
 
-One-off `_tmp_*` / `_continue_*` probes and superseded diagnostic trees moved under `archive/` (see `docs/REPOSITORY_CLEANUP_REPORT.md`, `archive/manifests/`). Do not import archive scripts into the production path. Elevated-table `TABLE_DROP` remains the default until Phase II activates `GROUND_SCENE`.
+One-off `_tmp_*` / `_continue_*` probes live under existing experiment trees or `experiments/legacy/tmp/` (former top-level `scripts/_tmp_*`). There is **no** top-level `archive/` directory. The `results/` tree is gitignored and is left alone. See `docs/REPOSITORY_CLEANUP_REPORT.md` and `docs/CLEANUP_LAYOUT_CORRECTION.md`. Do not import `_tmp_*` scripts into the production path.
+
+Elevated-table `TABLE_DROP` remains available. New recovery research uses `GROUND_SCENE` / `GROUND_DROP` (`docs/GROUND_SCENE_OUTCOMES.md`).
