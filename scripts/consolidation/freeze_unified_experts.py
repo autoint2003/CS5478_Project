@@ -41,7 +41,6 @@ REPORT = ROOT / "results" / "consolidation" / "GOLDEN_REGRESSION.md"
 DT = 0.02
 
 PLAN_C_SRC = ROOT / "results" / "diagnostics" / "ground_plan_c_final_success" / "raw"
-PLAN_C_FALLBACK = ROOT / "archive" / "golden_experts" / "ground_plan_c_final_success" / "raw"
 PLAN_C_ROOTS = ["gbi_010", "gbi_022"]
 
 
@@ -67,11 +66,12 @@ def sha256_bytes(b: bytes) -> str:
 
 
 def load_plan_c_expert(root_id: str) -> dict:
-    for base in (PLAN_C_SRC, PLAN_C_FALLBACK):
-        p = base / f"{root_id}__SUCCESS_NEW_expert.pkl"
-        if p.exists():
-            return pickle.loads(p.read_bytes()), p
-    raise FileNotFoundError(root_id)
+    p = PLAN_C_SRC / f"{root_id}__SUCCESS_NEW_expert.pkl"
+    if not p.exists():
+        raise FileNotFoundError(
+            f"missing Plan C expert at {p} (results/ must remain in place; no archive fallback)"
+        )
+    return pickle.loads(p.read_bytes()), p
 
 
 def _obs(sim, hist) -> np.ndarray:

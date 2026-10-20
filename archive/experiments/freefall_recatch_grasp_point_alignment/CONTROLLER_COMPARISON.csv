@@ -1,9 +1,0 @@
-variant,first_bil,first_L,first_R,first_housing,housing,jaw_entry,correct_axial_at_bil,max_sustained_bil_steps,stable_lift,SUCCESS_NEW,CATCH_HANDOFF_SUCCESS,SN_mean_theta,SN_mean_pos,n_actions,fail_class,ic_id
-A,6,6,6,,0,0,0,1,0,0,0,64.7994707240526,148.66148286165816,12,B_relative_motion_too_high,perp_off01_r15
-B,5,5,5,2,1,0,0,2,0,0,0,85.31919861767979,215.81987489442238,14,B_relative_motion_too_high,perp_off01_r15
-C,9,9,9,7,1,1,0,11,1,0,0,89.38030933378468,23.62626996877028,109,D_cylinder_position_error,perp_off01_r15
-D,6,6,6,,0,0,0,2,0,0,0,47.253589215532294,101.75050620740011,11,B_relative_motion_too_high,perp_off01_r15
-E,7,6,7,2,1,1,0,46,1,0,1,18.290758408385223,13.419049334704557,53,E_cylinder_orientation_error,perp_off01_r15
-F,7,6,7,2,1,1,0,46,1,0,1,18.59810461095449,13.013993244092346,53,E_cylinder_orientation_error,perp_off01_r15
-corr_O_E,8,8,8,2,1,1,0,2,0,0,0,6.045314122917791,29.483196537171818,11,B_relative_motion_too_high,perp_off01_r15
-corr_O_F,8,8,8,2,1,1,0,2,0,0,0,6.738933660674867,30.73322991347125,11,B_relative_motion_too_high,perp_off01_r15

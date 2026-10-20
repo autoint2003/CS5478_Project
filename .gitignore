@@ -37,11 +37,6 @@ data/
 demo_results/
 results/
 
-# Heavy golden binary copies (checksums live in archive/archive_manifest.json)
-archive/golden_experts/**/*.pkl
-archive/golden_experts/**/*.mp4
-archive/golden_experts/**/videos/
-
 # Training / evaluation runtime artifacts (local only)
 tb_logs/
 tensorboard/

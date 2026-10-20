@@ -1,0 +1,6 @@
+﻿git_branch: archive/pre-consolidation-20261021
+git_tag: archive/pre-consolidation-20261021-src
+source_branch_at_checkpoint: cleanup/ground-scene-prep
+source_commit: 7db29b325202d04e7a2b774b79ea1178a368fc64
+main_commit_at_checkpoint: d322383
+note: Git ref names use the "archive/" prefix; there is no filesystem archive/ directory. Historical code lives under experiments/; results/ is left in place.

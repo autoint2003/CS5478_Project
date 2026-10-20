@@ -1,3 +1,0 @@
-check,status,note
-plan_a_elevated_replay,deferred_to_expert_artifacts,Use results/expert_generation/sliding_* with elevated scene
-ground_scene_sliding_equivalent,not_claimed,Requires matched bilateral recatch state; see FAILURE_ANALYSIS

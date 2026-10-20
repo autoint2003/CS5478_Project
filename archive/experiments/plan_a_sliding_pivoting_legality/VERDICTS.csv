@@ -1,5 +1,0 @@
-expert_id,scene,action_legality,genuine_axial_sliding,genuine_contact_mediated_pivoting,contact_preservation,exact_replay,full_SUCCESS_NEW,GROUND_SCENE_transfer,dp_axial_mm,d_axis_err_deg,co_motion,bilateral_gap_s,notes,replay_triple_ok
-hard_910263,elevated_table,PASS,FAIL,FAIL,FAIL,PASS,PASS,FAIL,-5.294122968771984,18.219599333607412,False,0.039999999999995595,bilateral_gap_s=0.040,PASS
-hrv1_920031,elevated_table,PASS,PASS,PASS,PASS,PASS,PASS,FAIL,-7.478715012855864,7.994195708668488,False,0.019999999999997797,ok,PASS
-hard_910101,elevated_table,PASS,FAIL,FAIL,FAIL,PASS,PASS,FAIL,-11.803285966006234,11.427141666835588,False,0.039999999999995595,bilateral_gap_s=0.040,PASS
-hrv1_920031_return_aware,elevated_table,PASS,PASS,PASS,PASS,PASS,PASS,FAIL,-6.658263439342686,8.632265435017203,False,0.019999999999997797,ok,PASS

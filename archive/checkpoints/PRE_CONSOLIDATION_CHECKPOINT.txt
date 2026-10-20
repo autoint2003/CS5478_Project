@@ -1,7 +1,0 @@
-﻿archive_branch: archive/pre-consolidation-20261021
-archive_tag: archive/pre-consolidation-20261021-src
-source_branch: cleanup/ground-scene-prep
-source_commit: 7db29b3
-main_commit_at_checkpoint: d322383
-recorded_utc: 2026-10-20T16:30:00Z
-note: Uncommitted Plan C WIP was present at checkpoint; preserved via stash then restored. Do not delete results/ (gitignored).

@@ -1,4 +1,0 @@
-controller,step,geom,geom_id,body,site_class,pos,normal_force,note
-orig_P,2,geom_66,66,hand,hand_housing,"[0.48740843224966107, -0.049084238009601815, 0.6211462262153444]",0.36634668811272414,"hand mesh geom_66 is hand-body collision geometry (housing), not fingertip"
-orig_P,2,geom_66,66,hand,hand_housing,"[0.4873055479510341, -0.04908109581865104, 0.621147769435616]",0.5991308230062362,"hand mesh geom_66 is hand-body collision geometry (housing), not fingertip"
-orig_P,2,geom_66,66,hand,hand_housing,"[0.4875112844044051, -0.04908734258718418, 0.6211440931361425]",0.1557808542493903,"hand mesh geom_66 is hand-body collision geometry (housing), not fingertip"

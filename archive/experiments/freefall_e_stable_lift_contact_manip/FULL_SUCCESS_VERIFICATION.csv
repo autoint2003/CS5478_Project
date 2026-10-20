@@ -1,3 +1,0 @@
-ic_id,branch,recipe,SN_12s,replay_ok,theta,pos,provenance
-distal_off01_h8,baseline_E,E_continuation,1,3,9.327745654538589,11.443562250286648,privileged_E_continuation
-distal_off01_h8,direct,snap_within_tol,0,0,9.357254531211359,12.455249667355341,privileged_direct_handoff

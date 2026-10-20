@@ -1,7 +1,0 @@
-ic_id,baseline_SN_search,baseline_CH,fail,theta,pos,SN_12s,replay_ok,provenance
-distal_off01_h8,1,1,other,9.327981161761961,11.105108455511454,1,3,frozen_E_continuation_preserved
-perp_off01_h0,0,1,E_cylinder_orientation_error,18.290758408385223,13.419049334704557,,,
-perp_off01_h2,0,0,H_nominal_continuation_drop_or_escape,10.25229388969373,14.534071486571834,,,
-distal_off01_h4,0,1,E_cylinder_orientation_error,21.806691040900148,7.834921683471495,,,
-perp_off01_h1,0,0,E_cylinder_orientation_error,88.96151684302153,5.820699019574297,,,
-perp_off01_h7_hz,0,0,E_cylinder_orientation_error,81.93046014760418,15.280346981243314,,,

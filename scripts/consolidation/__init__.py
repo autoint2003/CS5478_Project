@@ -1,1 +1,1 @@
-"""Repository consolidation utilities (archive, freeze, K49 audit)."""
+"""Repository consolidation utilities (freeze experts, K49 audit)."""

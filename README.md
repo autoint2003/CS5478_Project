@@ -23,7 +23,7 @@ python -u scripts/replay_golden_experts.py
 python -u scripts/audit_k49.py
 ```
 
-Tracked dataset manifests: `datasets/unified_experts/`. Heavy tapes: `data/unified_experts/` (gitignored). Archive checkpoint: tag `archive/pre-consolidation-20261021-src`.
+Tracked dataset manifests: `datasets/unified_experts/`. Heavy tapes: `data/unified_experts/` (gitignored). Source checkpoint: git tag `archive/pre-consolidation-20261021-src`. Historical code → `experiments/`; leave `results/` untouched (no top-level `archive/` directory).
 
 ## Directory layout
 
@@ -41,8 +41,7 @@ Run commands from the repository root.
 | `training/` | `train_sft.py`, `train_grpo.py`, `action_vocab_k49.py`, `unified_k48.py`, … |
 | `evaluation/` | Closed-loop eval, audits, SUCCESS_NEW helpers |
 | `visualization/` | Camera, captions, MP4 encoding, tape replay |
-| `experiments/` | Historical / diagnostic experiments (not formal runtime deps) |
-| `archive/` | Checkpoint notes, golden copies, experiment index |
+| `experiments/` | Historical / superseded experimental code (only code archive) |
 | `datasets/` | Tracked unified expert manifests |
 | `scripts/` | Entry points (`build_unified_dataset`, `replay_golden_experts`, `audit_k49`, `train`, `evaluate`, Plan C runners) |
 | `tests/` | Regression tests (incl. Plan C golden replay) |

@@ -6,24 +6,25 @@ Canonical copy of `results/consolidation/FINAL_REPORT.md` (that path is gitignor
 
 - Branch: `cleanup/ground-scene-prep`
 - HEAD at checkpoint: `7db29b3`
-- Archival branch/tag: `archive/pre-consolidation-20261021` / `archive/pre-consolidation-20261021-src`
+- Git archival branch/tag: `archive/pre-consolidation-20261021` / `archive/pre-consolidation-20261021-src` (git refs only)
 - Main at checkpoint: `d322383`
 
 ## 2–3. Integration
 
 Completed work from `cleanup/ground-scene-prep` (including Plan C ground recovery) was fast-forwarded onto `main`.
 
-- Final `main` commit: `a54fe9dcb3dc2c3e6176247964b464b6b59cd773`
-- Archival tag still points at pre-cleanup source tip: `7db29b325202d04e7a2b774b79ea1178a368fc64`
+- Consolidation commit: `a54fe9dcb3dc2c3e6176247964b464b6b59cd773`
+- Git tag still points at pre-cleanup source tip: `7db29b325202d04e7a2b774b79ea1178a368fc64`
 - No remote push performed.
+- Layout correction: removed redundant top-level `archive/`; historical code → `experiments/`; `results/` left in place.
 
-## 4. Archived experiments
+## 4. Historical experiments / results
 
-See `docs/ARCHIVE_MANIFEST.md`. Golden Plan C binaries: `archive/golden_experts/` (pkl/mp4 local-only) + originals under `results/diagnostics/`.
+See `docs/ARCHIVE_MANIFEST.md`. Golden Plan C evidence remains at original `results/diagnostics/ground_*` paths (untouched). Obsolete experimental **code** belongs under `experiments/`.
 
 ## 5–6. Active tree
 
-Retain `controllers/ envs/ models/ data_generation/ training/ evaluation/ visualization/ scripts/ config/ experiments/ tests/ datasets/ archive/`.
+Retain `controllers/ envs/ models/ data_generation/ training/ evaluation/ visualization/ scripts/ config/ experiments/ tests/ datasets/`.
 
 Plan C: `data_generation/strategies/ground_*.py`, `scripts/run_ground_*.py`.
 Dataset/K49: `scripts/build_unified_dataset.py`, `scripts/replay_golden_experts.py`, `scripts/audit_k49.py`.

@@ -1,5 +1,0 @@
-expert_id,scene,verdict,n_tokens,n_decoded,all_in_bounds,issues,controller_target_mismatch_m,uses_only_step_legal,handoff_is_terminal,no_qpos_teleport_detected
-hard_910263,elevated_table,PASS,144,144,1,,0.017218410171861296,1,1,1
-hrv1_920031,elevated_table,PASS,161,161,1,,0.016808755712358965,1,1,1
-hard_910101,elevated_table,PASS,29,29,1,,0.017044377399235547,1,1,1
-hrv1_920031_return_aware,elevated_table,PASS,70,70,1,,0.016808755712358965,1,1,1

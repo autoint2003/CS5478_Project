@@ -37,4 +37,4 @@ python -u scripts/train.py                             # SFT/GRPO — do not lau
 python -u scripts/evaluate.py
 ```
 
-Historical one-off probes live under `experiments/` and `archive/experiments/`.
+Historical one-off probes live under `experiments/` only. Results stay under `results/` (untouched).

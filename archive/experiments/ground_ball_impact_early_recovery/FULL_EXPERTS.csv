@@ -1,6 +1,0 @@
-root_id,branch,mechanism,continuous_60,continuous_150,SUCCESS_NEW,max_consec_bil,saw_full_detach,n_actions,open_steps,match,gain,close_delay,brake,slip_s
-gbi_002,A,FAILED_OR_TRANSIENT,0,0,0,0.0,1,14,0,0.7,2.0,0,0.9,
-gbi_010,A,FAILED_OR_TRANSIENT,0,0,0,0.04,1,15,0,1.1,5.0,0,0.0,
-gbi_014,A,FAILED_OR_TRANSIENT,0,0,0,0.0,1,13,0,0.7,3.5,0,0.6,
-gbi_022,A,FAILED_OR_TRANSIENT,0,0,0,0.04,1,15,0,1.1,1.0,0,0.0,
-grad_grad_s7.5_lateral_a0.022_t0.0_o0.0,A,POST_IMPACT_GRASP_PRESERVATION,1,1,0,0.8800000000000004,0,182,0,0.9,1.0,0,0.0,0.12400000000000011
