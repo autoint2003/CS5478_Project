@@ -1,0 +1,9 @@
+id,split,family,azimuth_deg,speed_mps,z_off_m,nominal,stage,kind,peak_n,nL,nR
+p_az35_v8_z0.000_p0,valid,az35,35.0,8.0,0.0,DROP_AFTER_HANDOFF,LOST_GRASP,,87.78,0,8
+p_az45_v8_z0.000_p0,valid,,,,,SUCCESS_12S,TRIVIAL,,,,
+p_az40_v7_z0.000_p0,train,,,,,SUCCESS_12S,TRIVIAL,,,,
+p_az40_v9_z0.000_p0,train,az40,40.0,9.0,0.0,DROP_AFTER_HANDOFF,table,,90.35,0,7
+p_az40_v8_z0.005_p0,train,,,,,SUCCESS_12S,TRIVIAL,,,,
+p_az40_v8_z0.010_p0,train,,,,,SUCCESS_12S,TRIVIAL,,,,
+p_az40_v10_z0.000_p0,train,az40,40.0,10.0,0.0,DROP_AFTER_HANDOFF,hold,,99.05,0,5
+p_az140_v8_z0.000_p0,valid,,,,,SUCCESS_12S,TRIVIAL,,,,

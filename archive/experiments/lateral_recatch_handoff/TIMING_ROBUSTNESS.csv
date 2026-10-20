@@ -1,0 +1,13 @@
+ic_id,variation,CATCH_HANDOFF_SUCCESS,SUCCESS_NEW,fail_class,held_s
+distal_off01_r8,post_timing_-2,1,0,E_cylinder_orientation_error,1.9999999999997797
+distal_off01_r8,post_timing_-1,1,0,E_cylinder_orientation_error,1.999999999999785
+distal_off01_r8,post_timing_1,1,0,E_cylinder_orientation_error,1.9999999999998028
+distal_off01_r8,post_timing_2,1,0,E_cylinder_orientation_error,1.9999999999998117
+distal_off01_r8,full_timing_-2,0,0,B_relative_motion_too_high,0.0019999999999997797
+distal_off01_r8,full_timing_2,0,0,B_relative_motion_too_high,0.0019999999999997797
+perp_off01_r15,post_timing_-2,1,0,other,1.999999999999794
+perp_off01_r15,post_timing_-1,1,0,other,1.9999999999998028
+perp_off01_r15,post_timing_1,0,0,H_nominal_continuation_drop_or_escape,0.0019999999999997797
+perp_off01_r15,post_timing_2,0,0,H_nominal_continuation_drop_or_escape,0.0019999999999997797
+perp_off01_r15,full_timing_-2,0,0,B_relative_motion_too_high,0.0019999999999997797
+perp_off01_r15,full_timing_2,0,0,H_nominal_continuation_drop_or_escape,0.0019999999999997797

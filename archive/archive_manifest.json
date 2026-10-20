@@ -1,0 +1,2329 @@
+[
+  {
+    "original_path": "results/diagnostics/ground_plan_c_final_success",
+    "archive_path": "archive/golden_experts/ground_plan_c_final_success",
+    "experiment_description": "Plan C final SUCCESS_NEW experts gbi_010 / gbi_022",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 504020,
+    "checksums": {
+      "golden_experts/ground_plan_c_final_success/CONTACT_MIGRATION.csv": {
+        "sha256": "9aa344d8d667c44d08a4c8afc4a3d90eb1c5567322b544effe2c5a0fee4059df",
+        "bytes": 8307
+      },
+      "golden_experts/ground_plan_c_final_success/EXACT_REPLAY.csv": {
+        "sha256": "3f2cb999347abe8b5d0797c5cf73002e4159ce79042470c7be480705b05c42f3",
+        "bytes": 427
+      },
+      "golden_experts/ground_plan_c_final_success/FINAL_TAIL_SEARCH.csv": {
+        "sha256": "504f7def79c5abccdab1203614a1c5832ba21dad7e5510394db799135163d66e",
+        "bytes": 6737
+      },
+      "golden_experts/ground_plan_c_final_success/FULL_EXPERTS.csv": {
+        "sha256": "c5fabea26c063ff223b55bffbafbbc17094503da121fa4de2a5b4fc5bb16a213",
+        "bytes": 385
+      },
+      "golden_experts/ground_plan_c_final_success/HANDOFF_FAILURE_AUDIT.csv": {
+        "sha256": "d8207fa8e2e278e7f483c467d2dec2eff31142ba3e456fe174e48667c4301cbc",
+        "bytes": 697
+      },
+      "golden_experts/ground_plan_c_final_success/IN_HAND_CORRECTION.csv": {
+        "sha256": "35c97cc8fed8ae8c41d747c25ab8c0ab29f8de7d6019f836090fe3601742e40e",
+        "bytes": 6083
+      },
+      "golden_experts/ground_plan_c_final_success/POSITION_ERROR_DECOMPOSITION.csv": {
+        "sha256": "d2a063f96c342328bb5041de1dd2d11de81884b57db33c299801b00fff2798e7",
+        "bytes": 2031
+      },
+      "golden_experts/ground_plan_c_final_success/raw/budget.json": {
+        "sha256": "7203454c6421a359aa0a032c70d57698399b41b1fca7bb19fa33a7da685d21ca",
+        "bytes": 352
+      },
+      "golden_experts/ground_plan_c_final_success/raw/gbi_010__elevated_error.json": {
+        "sha256": "3fabedd4b37fa025925b8d53511d8c5683b340f7d1b4f717ebd3e62f0f3eb6c6",
+        "bytes": 999
+      },
+      "golden_experts/ground_plan_c_final_success/raw/gbi_010__elevated_snap.pkl": {
+        "sha256": "f90f5ea0076eb96ca563dacee9cef836c471fa6e5acbb4001578b6eeb2f56066",
+        "bytes": 16681
+      },
+      "golden_experts/ground_plan_c_final_success/raw/gbi_010__handoff_B_immediate_handoff.json": {
+        "sha256": "adee7bf8f8d8270e458d9b4f8043a023d739645149086eb9c2475739bba034b4",
+        "bytes": 6953
+      },
+      "golden_experts/ground_plan_c_final_success/raw/gbi_010__SUCCESS_NEW_expert.pkl": {
+        "sha256": "c0f2705cdabdc56bfb6b973f6292fa05cf80b0dd49d5ea525c86497b5b68132b",
+        "bytes": 30435
+      },
+      "golden_experts/ground_plan_c_final_success/raw/gbi_014__elevated_error.json": {
+        "sha256": "af0de5031289f42b42260a94ba8b454dce84def0f8af2df2401e5e865e15fc1d",
+        "bytes": 1000
+      },
+      "golden_experts/ground_plan_c_final_success/raw/gbi_014__elevated_snap.pkl": {
+        "sha256": "bca360b86026251db8195ee78a61a2033698cb9ec4f344dce43be148a4853236",
+        "bytes": 18080
+      },
+      "golden_experts/ground_plan_c_final_success/raw/gbi_014__handoff_B_immediate_handoff.json": {
+        "sha256": "6b7a5b8a263f7983bf53d93e39faa54eb174a466ec5f33fa9b55845d766efbae",
+        "bytes": 5239
+      },
+      "golden_experts/ground_plan_c_final_success/raw/gbi_014__handoff_C_stabilize_then_handoff.json": {
+        "sha256": "fb1d568f5b7bb3f5782b2a921a08b39d24c7be3ec9af95b80d6cfda9227f2e4b",
+        "bytes": 5252
+      },
+      "golden_experts/ground_plan_c_final_success/raw/gbi_022__elevated_error.json": {
+        "sha256": "7a39daa575ef15d4a028d302a95c8540b4ff1e200d74f4eb55f09507dc6a65b3",
+        "bytes": 1007
+      },
+      "golden_experts/ground_plan_c_final_success/raw/gbi_022__elevated_snap.pkl": {
+        "sha256": "258842ff17a991906379d249883c93673ed79a67ece46e5d8b84fa23044ea10f",
+        "bytes": 17969
+      },
+      "golden_experts/ground_plan_c_final_success/raw/gbi_022__handoff_B_immediate_handoff.json": {
+        "sha256": "df80d6b1640c4a72a31fb40d6ed6cf99c5529c5277652bf8c754736ce29546d5",
+        "bytes": 6936
+      },
+      "golden_experts/ground_plan_c_final_success/raw/gbi_022__SUCCESS_NEW_expert.pkl": {
+        "sha256": "992a4840a198c6a1461dd4875e18557515f2e7502e0bdcfce7ebc1f689e8be08",
+        "bytes": 33011
+      },
+      "golden_experts/ground_plan_c_final_success/REPORT.md": {
+        "sha256": "7c28a528d821196848786b9a1ebc797a567932c6effc53627440c68e0e5198ab",
+        "bytes": 2952
+      },
+      "golden_experts/ground_plan_c_final_success/SUCCESS_NEW_VALIDATION.csv": {
+        "sha256": "a68c37ed46cd39cba1c717edf9a54de71a1cf9637b689e73a98065e1cd5364dc",
+        "bytes": 211
+      },
+      "golden_experts/ground_plan_c_final_success/videos/gbi_010_SUCCESS_NEW.mp4": {
+        "sha256": "4269cc44b40b068fc84224f39e48ac67b108881740598377419e3d83469fc606",
+        "bytes": 332276
+      }
+    },
+    "reproducible": true,
+    "contains_verified_expert": true,
+    "verified_experts": [
+      "gbi_010",
+      "gbi_022"
+    ],
+    "replay_deps": [
+      "envs/simulation/ground_sim.py",
+      "envs/step_legal.py",
+      "data_generation/strategies/ground_*.py",
+      "scripts/run_ground_plan_c_final_success.py"
+    ],
+    "status": "COPIED_VERIFIED",
+    "in_situ_original_preserved": true
+  },
+  {
+    "original_path": "results/diagnostics/ground_dynamic_catch_oracle",
+    "archive_path": "archive/golden_experts/ground_dynamic_catch_oracle",
+    "experiment_description": "Plan C dynamic airborne catch tapes (prefix for final experts)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 618031,
+    "checksums": {
+      "golden_experts/ground_dynamic_catch_oracle/ACTUATOR_RESPONSE.csv": {
+        "sha256": "e0391580ffdf89264290d532ac94ac69150539803cab171169393f8ed45778cb",
+        "bytes": 5512
+      },
+      "golden_experts/ground_dynamic_catch_oracle/BRAKING_SEARCH.csv": {
+        "sha256": "0941a7ee4de0cc1772e95690d1d075f3919298a5eccde04eb09a812f1b58a74d",
+        "bytes": 18777
+      },
+      "golden_experts/ground_dynamic_catch_oracle/CAPTURE_STABILITY.csv": {
+        "sha256": "34a9a224730bd734d6d2e8a347cda7f9bb369da266077c21df1d94bc1362fc9a",
+        "bytes": 83648
+      },
+      "golden_experts/ground_dynamic_catch_oracle/CLOSING_SEARCH.csv": {
+        "sha256": "34a9a224730bd734d6d2e8a347cda7f9bb369da266077c21df1d94bc1362fc9a",
+        "bytes": 83648
+      },
+      "golden_experts/ground_dynamic_catch_oracle/CONTACT_RELATIVE_VELOCITY.csv": {
+        "sha256": "d013f59807b6dea1238898fd2531d72c6233458ff002971f75658466640d996a",
+        "bytes": 14993
+      },
+      "golden_experts/ground_dynamic_catch_oracle/EXACT_REPLAY.csv": {
+        "sha256": "8fb85cea818c02d700d9ccd205957384a1982a939e403e3c5958104ffd7d3151",
+        "bytes": 977
+      },
+      "golden_experts/ground_dynamic_catch_oracle/FULL_EXPERTS.csv": {
+        "sha256": "c6eacc8b1fd15362e692f87f63c1bc055fbb131763d211745e2023f3adbedd84",
+        "bytes": 1333
+      },
+      "golden_experts/ground_dynamic_catch_oracle/INTERCEPTION_FEASIBILITY.csv": {
+        "sha256": "4cf0f30b03f6921ad1bf3adca532179c70c2b4f3bb58e70e8b4cd4ecfb8d7523",
+        "bytes": 32790
+      },
+      "golden_experts/ground_dynamic_catch_oracle/JAW_ENTRY.csv": {
+        "sha256": "3f0e00fca40ad51f9a8184ffd30726f9741565244c0b6af70b64cfc466791e6a",
+        "bytes": 22200
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/budget.json": {
+        "sha256": "6a3f3fa7082f892f5cd3af454d4b769d91db09565baeee236f53e82347149c60",
+        "bytes": 73
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_002__actuator.json": {
+        "sha256": "234ccb8105704c3bb6c464d5cb05c1c8338a84eaf5caaa48d03e36d98c7941a6",
+        "bytes": 32202
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_002__catch_expert.pkl": {
+        "sha256": "fd17be24b84b6c08fc4b3911e1604b3cbfc1981017d8bce2fa8b5b4299de4c81",
+        "bytes": 11497
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_002__events.json": {
+        "sha256": "3136b269eefb48ecc9dad7b6fa7cd84963ec2234567d8d810a6b7be98b9336cc",
+        "bytes": 1109
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_002__future_meta.json": {
+        "sha256": "7c95cb61ece67128cb033c3ba44813df34311138fb76cf27d5407e7fa2bfc745",
+        "bytes": 144
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_010__actuator.json": {
+        "sha256": "00fd390b1e06f839784f37e950fa2b1c9a2e0bd1f4d3ab088d8d12e2a4578182",
+        "bytes": 32186
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_010__catch_expert.pkl": {
+        "sha256": "fc5d3ee0758c45a06e407a422cda2ee7f2022a8489fec7d8689a558c750215d9",
+        "bytes": 6598
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_010__events.json": {
+        "sha256": "4d1dd54cbb0e88d334c93d73e472d41e5573ff2f998ab25cfac0258ff106feac",
+        "bytes": 1101
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_010__future_meta.json": {
+        "sha256": "83e176093e3b789cbb01e7fd64b4a7d6e20de4288b8038faab6ff58f66291f40",
+        "bytes": 143
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_014__actuator.json": {
+        "sha256": "7bcd933ff8fac9acd49b1b48ce1e03d0f3981e33764e1bf5e2058606f2c017ef",
+        "bytes": 31364
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_014__catch_expert.pkl": {
+        "sha256": "3ed3c6945542f6c6094633912d3e373f67d20d04cd8638f59688ef54859e5d60",
+        "bytes": 11497
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_014__events.json": {
+        "sha256": "71766501a318123139203fbe72c715be3311c113d22b29612e3591e02723c773",
+        "bytes": 1106
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_014__future_meta.json": {
+        "sha256": "910dc151cec7dcfe01e4f05091120b2f1c0be4d6c6ec78060d3dafef6f144e65",
+        "bytes": 144
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_022__actuator.json": {
+        "sha256": "e570f787d69e2ee3c6e6ba8b4eb7f878755ede913925fb1baeba64e6c47fc9e4",
+        "bytes": 33070
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_022__catch_expert.pkl": {
+        "sha256": "10290f6c230ecfe81c6e2ebc34f18311c4bc6318d39245c9de37d9a26a6adddd",
+        "bytes": 6598
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_022__events.json": {
+        "sha256": "9129efafe670a27572a10bd62970fac2c1b8298532425f81e119d47d1057904a",
+        "bytes": 1104
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/gbi_022__future_meta.json": {
+        "sha256": "4ff66a40bd628c7853e26fd5c0b72ca1baa23b81d60be3bce88d12599c2a9759",
+        "bytes": 144
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/grad_grad_s7.5_lateral_a0.022_t0.0_o0.0__actuator.json": {
+        "sha256": "6a2b43c8a2082b5950f8ee7a39a71b3dfd21b9a742dc752a57672d34d8595e3d",
+        "bytes": 33062
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/grad_grad_s7.5_lateral_a0.022_t0.0_o0.0__catch_expert.pkl": {
+        "sha256": "3bfdc905457fce0379f645b783297a29164642b999d33742abcd02b32195dbf5",
+        "bytes": 4330
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/grad_grad_s7.5_lateral_a0.022_t0.0_o0.0__events.json": {
+        "sha256": "ea0fea53dec86b44434c130ee6b5b32794334bbc4b182df53a893d3e4bca0af2",
+        "bytes": 619
+      },
+      "golden_experts/ground_dynamic_catch_oracle/raw/grad_grad_s7.5_lateral_a0.022_t0.0_o0.0__future_meta.json": {
+        "sha256": "1c32dec12f76d83e074a55c3b9a808e92b30848d0109d36c4b427a926d947d24",
+        "bytes": 144
+      },
+      "golden_experts/ground_dynamic_catch_oracle/REPORT.md": {
+        "sha256": "aae96b3db96b170acaecd48720d3f20f7db8c89c31fc9274fac72700812da382",
+        "bytes": 5682
+      },
+      "golden_experts/ground_dynamic_catch_oracle/videos/gbi_002_dynamic_catch_example.mp4": {
+        "sha256": "c50e3290983070537dfef9053174134777ea1144fffd3b8edd29365241293104",
+        "bytes": 140236
+      }
+    },
+    "reproducible": true,
+    "contains_verified_expert": true,
+    "verified_experts": [
+      "gbi_010",
+      "gbi_022"
+    ],
+    "replay_deps": [
+      "envs/simulation/ground_sim.py",
+      "envs/step_legal.py",
+      "data_generation/strategies/ground_*.py",
+      "scripts/run_ground_plan_c_final_success.py"
+    ],
+    "status": "COPIED_VERIFIED",
+    "in_situ_original_preserved": true
+  },
+  {
+    "original_path": "results/diagnostics/ground_postcatch_endgrasp_recovery",
+    "archive_path": "archive/golden_experts/ground_postcatch_endgrasp_recovery",
+    "experiment_description": "Plan C brake/slow-lift end-grasp recovery tapes",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 599949,
+    "checksums": {
+      "golden_experts/ground_postcatch_endgrasp_recovery/BRAKE_SNAPSHOT_AUDIT.csv": {
+        "sha256": "1099414374031c185cdfe6e298c232ba5084a0ab4da762a77233169d4e599779",
+        "bytes": 394
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/EXACT_REPLAY.csv": {
+        "sha256": "59ac16858d5d0c0eee5ba238246f244d6936f2206ea2782e5fe25ba345778bc8",
+        "bytes": 619
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/FULL_EXPERTS.csv": {
+        "sha256": "e8a82f160aef4716b7c8600a8a7efa0bf67305bbb761b75733a4aaad86411c80",
+        "bytes": 608
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/GRASP_GEOMETRY.csv": {
+        "sha256": "42e77f74e35f8d8c9ec444eaf992362fca407d3f4ded882d0bdbca64652c5c24",
+        "bytes": 2778
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/GRAVITY_SLIDING.csv": {
+        "sha256": "3ad39f725198aac5bc5d26333fde7be48b5cbb47e13dd5aad257d518a4ab37f8",
+        "bytes": 37324
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/HANDOFF_VALIDATION.csv": {
+        "sha256": "7868ea799b42c0486c6ba3fc86b45efc955f3de63ad32e29a462e85ce9b6666e",
+        "bytes": 1142
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/POSE_RECOVERY.csv": {
+        "sha256": "3b0108a65fd7f58a6f8847d4ac29e33ae1f22cae073829ef8ed47018161f8509",
+        "bytes": 2346
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/raw/budget.json": {
+        "sha256": "47ef23a8f125395a505c77a9f5f614185808d65da597785dc7646bb7e6767e5f",
+        "bytes": 262
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/raw/gbi_002__brake_audit.json": {
+        "sha256": "fed113cc956c6554fa28580afcfc0c3625f118e9a775b9978876795bb243bd4f",
+        "bytes": 1553
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/raw/gbi_002__brake_snap.pkl": {
+        "sha256": "d959464b69a8d6c8cddc8ed2e88dc59786bf86bfb4765a6d94947c7917df4427",
+        "bytes": 6983
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/raw/gbi_002__endgrasp_expert.pkl": {
+        "sha256": "0e73e86eb6e4f3df8a05a625f469d9ba101ae33f7144bc9e084b51bb9b76a2ab",
+        "bytes": 14538
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/raw/gbi_010__brake_audit.json": {
+        "sha256": "c0cabc3f85847c3b141d390bb20a22db53641c08b204a2e14d52d6949664202d",
+        "bytes": 1554
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/raw/gbi_010__brake_snap.pkl": {
+        "sha256": "b0e3a613ce4e8cb18a47b9ca588c9f655f292b5983b06c00d9330f0f26cfc1f6",
+        "bytes": 6983
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/raw/gbi_010__endgrasp_expert.pkl": {
+        "sha256": "d8026de95d82135b27ca59d6239ddb96dda8f5f679f754257bdab9febeb6a0da",
+        "bytes": 14623
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/raw/gbi_014__brake_audit.json": {
+        "sha256": "2feb513c9e027a666e4145a685cbc129f832166423510b6de1034812abd5425c",
+        "bytes": 1545
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/raw/gbi_014__brake_snap.pkl": {
+        "sha256": "6a91c95f8263b2c7495f11eb554330a7ac4e37bec843991005ecf282f79583e3",
+        "bytes": 6982
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/raw/gbi_014__endgrasp_expert.pkl": {
+        "sha256": "82994cbefd267dbf62e73b1d20de7a57ad15a229c54be3051e794e7b2419cd5f",
+        "bytes": 16022
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/raw/gbi_022__brake_audit.json": {
+        "sha256": "241b24124075bcbcf38fddbbd1e948cbc71c4ae85b0389f6d0c4d60da849163a",
+        "bytes": 1557
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/raw/gbi_022__brake_snap.pkl": {
+        "sha256": "3bf316f2df4a32b68263d572b16ae1ddf3957ec02a431af64fe9527707679043",
+        "bytes": 6984
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/raw/gbi_022__endgrasp_expert.pkl": {
+        "sha256": "ddcd026e326e5f6b43b4115d35a1efdc8484ea3116fa3eeaf7c6138adefe79be",
+        "bytes": 15911
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/REPORT.md": {
+        "sha256": "eaa9f5905bfae3a8462d52210d01c55f0210a8175f6d0f1605fe174493d9a098",
+        "bytes": 4464
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/SEQUENCE_COMPARISON.csv": {
+        "sha256": "856668575f146a0455143bfb47da1396b256ba7fb9565f2a4b73e39df9f9c032",
+        "bytes": 4553
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/SLOW_LIFT.csv": {
+        "sha256": "0bd5006befe6de16c7da65d04ef980e71b7ab2b26684b29a4261dcea6d5c1654",
+        "bytes": 7008
+      },
+      "golden_experts/ground_postcatch_endgrasp_recovery/videos/gbi_002_slow_lift_example.mp4": {
+        "sha256": "afbb16397ab9fa43abeba30324cf179119a43a7d2ee6d89e076e482bfade377f",
+        "bytes": 443216
+      }
+    },
+    "reproducible": true,
+    "contains_verified_expert": true,
+    "verified_experts": [
+      "gbi_010",
+      "gbi_022"
+    ],
+    "replay_deps": [
+      "envs/simulation/ground_sim.py",
+      "envs/step_legal.py",
+      "data_generation/strategies/ground_*.py",
+      "scripts/run_ground_plan_c_final_success.py"
+    ],
+    "status": "COPIED_VERIFIED",
+    "in_situ_original_preserved": true
+  },
+  {
+    "original_path": "results/diagnostics/active_recatch_generalization_discretization",
+    "archive_path": "archive/experiments/active_recatch_generalization_discretization",
+    "experiment_description": "Diagnostics folder 'active_recatch_generalization_discretization' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 28124108,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "a46ded37142c508b2c62f8e309b4ca39072cb223f15b0f9411016a28ac4d3dc8",
+        "bytes": 5222
+      },
+      "CANDIDATE_TOKEN_MAPPING.csv": {
+        "sha256": "74bcfe12dab4cdcc74b97ebca59e82172cda7521962e36485d310ca7d6a36c92",
+        "bytes": 2549
+      },
+      "CONTINUOUS_ACTION_ANALYSIS.csv": {
+        "sha256": "b5504c2d0f2b79c7f8b6129ee1ad24a64a7fd0e1c396d406f4580e09defb1e67",
+        "bytes": 17777
+      },
+      "DISCRETE_ABLATION.csv": {
+        "sha256": "1cb4a8644b684ea6f2e5f4bf42530ca22ffaa8d2be7bf1ac79916eb7e25a42a4",
+        "bytes": 4514
+      },
+      "FULL_SUCCESS_VERIFICATION.csv": {
+        "sha256": "c10acfe3d577c7e18ead12a972572fbd07acb9266d9c23e4f2d2e20b1c7b963a",
+        "bytes": 2192
+      },
+      "FULL_TRAJECTORY_AUDIT.csv": {
+        "sha256": "23e346ffa8171e9d64719cf2226546dc23727f2f82b83c75face3056010b82a2",
+        "bytes": 34914
+      },
+      "INDEPENDENT_ROOT_MANIFEST.csv": {
+        "sha256": "8ce6335cb4bd5ea2f23d6de5d864ef7afbdca60305f324ecc85e58457526a975",
+        "bytes": 2402
+      },
+      "LIFT_TIMING_ABLATION.csv": {
+        "sha256": "f7978ef05fa31dd652fa6c4a251fb130232509da3e591a2c1b91ec77e5bb9745",
+        "bytes": 1822
+      },
+      "ORIENTATION_CORRECTION.csv": {
+        "sha256": "347b0d6d25e9adff3026a2ee1cce282b498a7ed623e5b976c451bf9d5e4ca75d",
+        "bytes": 2960
+      },
+      "ROBUSTNESS_RESULTS.csv": {
+        "sha256": "8aefb58cded0be6c808dbda47d7ba4ac1835df9becd668f50d95ed6d01637770",
+        "bytes": 1615
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/airborne_recatch_search",
+    "archive_path": "archive/experiments/airborne_recatch_search",
+    "experiment_description": "Diagnostics folder 'airborne_recatch_search' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 15539945,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "e93000c8b6a0f204412a72794b54a3f8781bac223fdc2068394db252854bef18",
+        "bytes": 9957
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/ball_impact_handoff_causal_audit",
+    "archive_path": "archive/experiments/ball_impact_handoff_causal_audit",
+    "experiment_description": "Diagnostics folder 'ball_impact_handoff_causal_audit' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 282854855,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "4ed5333deb36231a59ec6e9fa58a928809f263d7c91cc82d20fc0b9481996ca6",
+        "bytes": 6038
+      },
+      "HANDOFF_TIME_SCAN.csv": {
+        "sha256": "62618359c95bc1ef608a29b2a621fa1274d8ecb72b0a7a0593ec88e6812a4c63",
+        "bytes": 2354
+      },
+      "MATCHED_CONTROL_COMPARISON.csv": {
+        "sha256": "7b8bcb133bb1135fa6202f9f0faa5baa8ad87050ae3f4302f9e0f74dc7f69bc9",
+        "bytes": 1284
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/ball_impact_recoverability",
+    "archive_path": "archive/experiments/ball_impact_recoverability",
+    "experiment_description": "Diagnostics folder 'ball_impact_recoverability' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 18533405,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "1351bf49a82a4322b98e161454383fa5d0b5580ff1eb7b5f3f2745409b6a0884",
+        "bytes": 4109
+      },
+      "NOMINAL_FAILURE_BOUNDARY.csv": {
+        "sha256": "cbdabbbe63b19894c143c19d7b076240a2487175bba6b7cc0d566717e70a91de",
+        "bytes": 3276
+      },
+      "ORACLE_SEARCH_RESULTS.csv": {
+        "sha256": "b68c90235c79fb8377791fe799545e20d17fed86852e59d3d389fcecd9241fb6",
+        "bytes": 1645
+      },
+      "PERTURBATION.csv": {
+        "sha256": "5d772439f823fe5f88692139c3a4b96695fea8900437a340fafcbdf88e89bbe2",
+        "bytes": 604
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/checkpoint3_skill_audit",
+    "archive_path": "archive/experiments/checkpoint3_skill_audit",
+    "experiment_description": "Diagnostics folder 'checkpoint3_skill_audit' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 778938,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "7645077a3b1b55a484fbb1816b2bb920e72fd012bf3180cb92c75203cd077ab9",
+        "bytes": 10517
+      },
+      "k48r_valid_00009__checkpoint3_trace.csv": {
+        "sha256": "3572632c3ae60fba057b39741ad257e1bc63f9876600c1c2d10582ae1277f0c9",
+        "bytes": 392768
+      },
+      "k48r_valid_00009__sliding_expert_trace.csv": {
+        "sha256": "ac3e418f9be0f94db74432d750bd57e777f73285ba430abe2254a086b39e6676",
+        "bytes": 76330
+      },
+      "k48r_valid_00009__vertical_oracle_replay_trace.csv": {
+        "sha256": "39701a0a9571722d04e091192c0ba3cc087d82a5fa24d0c3e4fa19bd69899e3c",
+        "bytes": 11756
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/contact_aware_recatch_search",
+    "archive_path": "archive/experiments/contact_aware_recatch_search",
+    "experiment_description": "Diagnostics folder 'contact_aware_recatch_search' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 5672786,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "c4c6859eef4911085f1456dc0cf9d2e10a6a5dd1cbef77a48bbf7b712d4494e3",
+        "bytes": 8984
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/contact_geometry_table_window",
+    "archive_path": "archive/experiments/contact_geometry_table_window",
+    "experiment_description": "Diagnostics folder 'contact_geometry_table_window' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 9160296,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "8838750260b333d7a4abda0ef40fcd833522b3e0b110effcdd4449a3c2488c00",
+        "bytes": 5399
+      },
+      "CONTACT_GEOMETRY_AUDIT.csv": {
+        "sha256": "bf57a487b7e97dd091042317ca91105f076070542a043bff998cc21f1a27f5e5",
+        "bytes": 9674
+      },
+      "EARLY_ONSET_ABLATION.csv": {
+        "sha256": "60041fda5a152cfc22ed4e0cc70ba171e9b092836ec891861513589018051fd7",
+        "bytes": 2981
+      },
+      "EJECTION_EVENT_ANALYSIS.csv": {
+        "sha256": "e9eb0072c902ff1393acaf0ccfe1329aff670ee4b090a297342442b187f65db6",
+        "bytes": 9737
+      },
+      "FULL_SUCCESS_VERIFICATION.csv": {
+        "sha256": "5be2e53dd67ef4f61f89771e61b3ff3b80d6672a53788038e7c92d9c6c156b9b",
+        "bytes": 168
+      },
+      "GRIP_ALIGNMENT_ABLATION.csv": {
+        "sha256": "2bfcaab12a8781be1ad4479559739dcd5ed36351b48809791d5d956331c61bcd",
+        "bytes": 10617
+      },
+      "GRIP_FORCE_TIMING_ABLATION.csv": {
+        "sha256": "4cb1a5e85327ce558242a58024151e5ead21423f2f4c1116b65a881a14f137c6",
+        "bytes": 186694
+      },
+      "HAND_OBJECT_IMPULSE_ANALYSIS.csv": {
+        "sha256": "a3d1c89a983872e355e2d596356bcd0df01f534bb6fe620e7b70eecf699c78e9",
+        "bytes": 7342
+      },
+      "RECOVERY_WINDOW_ANALYSIS.csv": {
+        "sha256": "629aa6a8692ad253e5e9310cbda42ad1544d7004814e0896c62fe020633848e2",
+        "bytes": 5628
+      },
+      "TABLE_CONTACT_TIMELINE.csv": {
+        "sha256": "534a3040755c2047e8581e032535415cf1c10f2bc96890bcaa33e59270198013",
+        "bytes": 6850
+      },
+      "TABLE_COUNTERFACTUAL.csv": {
+        "sha256": "4f604b31cdf839fd70734d44140aeb0ee31a854a670331c6fd31fd0d5ca93f54",
+        "bytes": 4659
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/data_expansion",
+    "archive_path": "archive/experiments/data_expansion",
+    "experiment_description": "Diagnostics folder 'data_expansion' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 275614,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history."
+  },
+  {
+    "original_path": "results/diagnostics/dataset_expansion",
+    "archive_path": "archive/experiments/dataset_expansion",
+    "experiment_description": "Diagnostics folder 'dataset_expansion' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 15161,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history."
+  },
+  {
+    "original_path": "results/diagnostics/free_fall_cylinder_catching",
+    "archive_path": "archive/experiments/free_fall_cylinder_catching",
+    "experiment_description": "Diagnostics folder 'free_fall_cylinder_catching' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 17890073,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "e235270a29b32c239cdbfd370897e06ac8eeb2c2887237dfc0a21a0579538df2",
+        "bytes": 4032
+      },
+      "BASELINE_COMPARISON.csv": {
+        "sha256": "fc9f1b8a5da12049cde116663af3e2d5a8e0e7223720b81434988052d4c45bcf",
+        "bytes": 112275
+      },
+      "CATCH_SUCCESS_VERIFICATION.csv": {
+        "sha256": "ac22f8b728c39de3917fa1a3808b4fd07d0f877d3b0380e1b4d5aa53cde9cf83",
+        "bytes": 263
+      },
+      "CONTACT_GEOMETRY.csv": {
+        "sha256": "2a33092131ed384a4a75217e13db3740c381501bb41d9251d7f2490fb55af24c",
+        "bytes": 413667
+      },
+      "REACHABILITY_AND_TIMING.csv": {
+        "sha256": "53b5639058cbecd64fd20a556479fba16cf93d3ba49a1aedb9520dbd5dc533d1",
+        "bytes": 1883
+      },
+      "RELEASE_IC_MANIFEST.csv": {
+        "sha256": "f9c18880a3e117d2a579f022ef5cf6b1d36bf3ddcd147720aa6b73660df865dc",
+        "bytes": 8622
+      },
+      "ROBUSTNESS_RESULTS.csv": {
+        "sha256": "dac000fa75c87773ec518038f160d58f71e7ec13afcf42200be36c6dcd83409e",
+        "bytes": 909
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/freefall_capture",
+    "archive_path": "archive/experiments/freefall_capture",
+    "experiment_description": "Diagnostics folder 'freefall_capture' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 8115512,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history."
+  },
+  {
+    "original_path": "results/diagnostics/freefall_e_cpp_unload_isolation",
+    "archive_path": "archive/experiments/freefall_e_cpp_unload_isolation",
+    "experiment_description": "Diagnostics folder 'freefall_e_cpp_unload_isolation' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 1260330,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "150b8bb59809119e514040eaf27523b966e8fd6cc17430386f1976c0a4357a15",
+        "bytes": 6796
+      },
+      "AXIAL_SLIDE_PROBE.csv": {
+        "sha256": "0d379cafe1987c68867d79f7a6d0776252be626d191aa830ff6cb0b0fd5f1f61",
+        "bytes": 1537
+      },
+      "MATCHED_COMPARISON.csv": {
+        "sha256": "299acd5b4933f248ba2690aaa8fff774e6d8479ed1d43756b5a046b3b868b1a2",
+        "bytes": 14325
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/freefall_e_postcapture_stabilize_slide",
+    "archive_path": "archive/experiments/freefall_e_postcapture_stabilize_slide",
+    "experiment_description": "Diagnostics folder 'freefall_e_postcapture_stabilize_slide' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 1204992,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "6321caad72e261da560d27000d8b8bb147a60f234415575f237e6b62dc9e76b5",
+        "bytes": 2289
+      },
+      "BASELINE_E.csv": {
+        "sha256": "d18ec68e6baf83d0f3e260fc01ecf8e11cd1f3a64ccb37c7c1a10cf319d60a69",
+        "bytes": 635
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/freefall_e_stable_lift_contact_manip",
+    "archive_path": "archive/experiments/freefall_e_stable_lift_contact_manip",
+    "experiment_description": "Diagnostics folder 'freefall_e_stable_lift_contact_manip' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 97992934,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "8a2a966bdf1a744d8a0edb3bc1320ae12c9164dad8b41b2bc40ec7d1368a92fc",
+        "bytes": 4824
+      },
+      "FULL_SUCCESS_VERIFICATION.csv": {
+        "sha256": "c5e771607a1795502c8f6dd8ae78afeda445ff0eda2b341c48f0cad518d7f79e",
+        "bytes": 276
+      },
+      "PER_IC_COMPARISON.csv": {
+        "sha256": "c8b5cac681d90afed37b7e000fd722472d1a076cce18335d454f89e571bca5fe",
+        "bytes": 3242
+      },
+      "PHASE_CONTACT_TRACES.csv": {
+        "sha256": "d1f1b1c84a6bc376d6777e4906bac108254726b5054aa12a7ed44572b1fcba8e",
+        "bytes": 237598
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/freefall_recatch_collision_aware_feedback",
+    "archive_path": "archive/experiments/freefall_recatch_collision_aware_feedback",
+    "experiment_description": "Diagnostics folder 'freefall_recatch_collision_aware_feedback' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 6559975,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "035fc75da7079fa5c4af4781eb3884804b21ac213327269c5191a26ea03ae979",
+        "bytes": 5207
+      },
+      "ACTION_RESPONSE_AUDIT.csv": {
+        "sha256": "4738e8f73e07e78dff3f1f38ea7ac50c0bbe8992847e1609f4a81e764a74d8f8",
+        "bytes": 1506
+      },
+      "CONTROLLER_COMPARISON.csv": {
+        "sha256": "ad44e2a6dc5e7cbe63343a2041017264b15a236cc50abd73f9ab451f09d29d41",
+        "bytes": 1019
+      },
+      "FIRST_CONTACT_GEOMETRY.csv": {
+        "sha256": "656f6066206d107ef48d682e9534c674116728ece57faf61d9ab4c8620a7c444",
+        "bytes": 1958
+      },
+      "FULL_RECOVERY_VERIFICATION.csv": {
+        "sha256": "8c4a919debad1229b7a5e6f6168b62291d25e320f99099b1efdaa40f0af5642b",
+        "bytes": 18
+      },
+      "HAND_COLLISION_AUDIT.csv": {
+        "sha256": "373db44e3fe2ef8100957bcb3a3a8617c1b0cd4d5947640fa9baeb0138630452",
+        "bytes": 670
+      },
+      "HELDOUT_GENERALIZATION.csv": {
+        "sha256": "d414e11adc694ea36f96ffe2d9d53ecdb7ff344055134ec6e3dcd8d8c98129c5",
+        "bytes": 3376
+      },
+      "INTERCEPTION_PREDICTIONS.csv": {
+        "sha256": "c072ab87a395c7b72f66977a1540270a8b6393fcbee612d8b4015a38478f64ca",
+        "bytes": 1767
+      },
+      "JAW_ENTRY_GEOMETRY.csv": {
+        "sha256": "02176c56134d0131b72be034dd86610ff8a3e477be595f12784a475852878a0f",
+        "bytes": 134
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/freefall_recatch_grasp_point_alignment",
+    "archive_path": "archive/experiments/freefall_recatch_grasp_point_alignment",
+    "experiment_description": "Diagnostics folder 'freefall_recatch_grasp_point_alignment' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 293789940,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "dc47fc3529022149284dd7b666c3d8684094c7aeb419331bc79c05634dc80aa0",
+        "bytes": 5993
+      },
+      "ABLATION_RESULTS.csv": {
+        "sha256": "c9800d016e5f35ea72837aca0497503ab4294b9a191a609cf282c0cf79ebe5b5",
+        "bytes": 787
+      },
+      "AXIAL_CONTACT_GEOMETRY.csv": {
+        "sha256": "4be273ccf04b634a4807e285ffa8b49e38f7f0f84425138d0745d6fd731ae51a",
+        "bytes": 58175
+      },
+      "CAPTURE_STABILITY.csv": {
+        "sha256": "9683ea2f33cfab853327943a8f94d4f3b5c94d3e628c6f8a7f4bb50026715704",
+        "bytes": 313
+      },
+      "CLOSURE_TIMING.csv": {
+        "sha256": "2d381cb805949acb2c82db17035fde3df7be60627cbb657a7987178bfffbd8cf",
+        "bytes": 1810
+      },
+      "CONTACT_FORCE_TRACES.csv": {
+        "sha256": "a728638eded92f768539004f71e621a6872a38bebe8152a6a26acf1534bce931",
+        "bytes": 305812
+      },
+      "CONTROLLER_COMPARISON.csv": {
+        "sha256": "5677d63ef33d33895aa5070c923aa415ab785695186d38689a6db406128f9ac3",
+        "bytes": 1085
+      },
+      "FULL_SUCCESS_VERIFICATION.csv": {
+        "sha256": "01328153fb7ea95e847e29f980f1a303842c8433236010068e88954990676baa",
+        "bytes": 225
+      },
+      "HELDOUT_GENERALIZATION.csv": {
+        "sha256": "228fa6be3cf8eb369acf374c28996db4e1dee6cb6cdce223d144985ffdc9ffc2",
+        "bytes": 8241
+      },
+      "MATCHED_TRAJECTORY_AUDIT.csv": {
+        "sha256": "75a3e44e217e1fd51f51f1eb25d42d553eaac90b759cd9682ad68905706dd095",
+        "bytes": 892
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/freefall_recatch_pose_feedback",
+    "archive_path": "archive/experiments/freefall_recatch_pose_feedback",
+    "experiment_description": "Diagnostics folder 'freefall_recatch_pose_feedback' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 293551365,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "b1660cbe343b9308c2190f5d5099f71ce2920f4f56e9a44cf48e7a1d1bdb8c96",
+        "bytes": 6348
+      },
+      "DISTAL_POSE_ERROR_TIMELINE.csv": {
+        "sha256": "81bf8ef31225a5411f3814e07fe1f4884427697421ab2e7357fae673fd368a2f",
+        "bytes": 12826
+      },
+      "EXPERT_CANDIDATES.csv": {
+        "sha256": "2c099fef381ce997988b72b1136f623b830874ac3e922e648ed4419ba13d0300",
+        "bytes": 183
+      },
+      "FEEDBACK_CONTROLLER_COMPARISON.csv": {
+        "sha256": "812bdc495a8b155bfd51c431e76239ffe136d2c47cefe53b088d997879c02ca9",
+        "bytes": 2049
+      },
+      "HANDOFF_VERIFICATION.csv": {
+        "sha256": "06dbff275cee3d86effde4b98acc6882611df72af747ff33fbe7f665947ba484",
+        "bytes": 198
+      },
+      "HELDOUT_GENERALIZATION.csv": {
+        "sha256": "1ed55e617b28c18657bdd790ee0cd83f6609e1ae69643724c6a0b6e16ca4a865",
+        "bytes": 2515
+      },
+      "POST_CAPTURE_CORRECTION.csv": {
+        "sha256": "d4051e770b86db3f8594636720f285f1fba998624feba8e71df0291f47427c83",
+        "bytes": 33021
+      },
+      "REFERENCE_REPLAY.csv": {
+        "sha256": "1049ec36ec169ceee430a01d9929cba5368707473686a5acb7c3da1d63b6d5b3",
+        "bytes": 771
+      },
+      "TIMING_ROBUSTNESS.csv": {
+        "sha256": "a6d591741f01766da604b5b14455ac1c6b0ae89b5848b004415b5703fda859f0",
+        "bytes": 943
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/grasp_configuration_migration",
+    "archive_path": "archive/experiments/grasp_configuration_migration",
+    "experiment_description": "Diagnostics folder 'grasp_configuration_migration' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 285155,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "EXISTING_22IC_REEVALUATION.csv": {
+        "sha256": "eba6103c196d16c3da72ba4cf2f8276c051d373855bcd0fd10891e106be2645d",
+        "bytes": 6533
+      },
+      "PIVOTING_PILOT.csv": {
+        "sha256": "ad31bdcba26c02dbb272b143ef2576dde18853a1605b84c347ff9c0995e47c3a",
+        "bytes": 15603
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/gravity_assisted_pivoting_feasibility",
+    "archive_path": "archive/experiments/gravity_assisted_pivoting_feasibility",
+    "experiment_description": "Diagnostics folder 'gravity_assisted_pivoting_feasibility' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 2122450,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "2604f88cfdb29191ccf3e72b93f3ab1cba03a633cb9a02fe57d4ef4919237fbe",
+        "bytes": 5636
+      },
+      "CANDIDATE_IC_AUDIT.csv": {
+        "sha256": "f00c8aae38a0b73780f3736f9cfda1a17d4e20083ccfa55ca00206f133c6aa52",
+        "bytes": 2472
+      },
+      "LEGAL_SEARCH_SUMMARY.csv": {
+        "sha256": "a586ad9e746be728f3c6872a63be99782fe7f74bc059c35bed3585b0190b9b20",
+        "bytes": 171978
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/ground_ball_impact_capture_refinement",
+    "archive_path": "archive/experiments/ground_ball_impact_capture_refinement",
+    "experiment_description": "Diagnostics folder 'ground_ball_impact_capture_refinement' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 61179,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "ce0cd14ce2023578dbea4b17099d5640eae14344c01c21dee958916b64a5d83e",
+        "bytes": 3777
+      },
+      "CAPTURE_STABILITY.csv": {
+        "sha256": "e8512b3e171614b796a8b8f70858f5b71003be446bd9819979280d6b39777a66",
+        "bytes": 6019
+      },
+      "CLOSING_TIMING_SEARCH.csv": {
+        "sha256": "e8512b3e171614b796a8b8f70858f5b71003be446bd9819979280d6b39777a66",
+        "bytes": 6019
+      },
+      "CONTACT_BRANCH_SEARCH.csv": {
+        "sha256": "8072319116bf02c415fd64ba75b71380c88eddf3e3e6855f98491502331bb680",
+        "bytes": 18193
+      },
+      "EXACT_REPLAY.csv": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "FIRST_CONTACT_TRACES.csv": {
+        "sha256": "46df3611d5758282f23be42d713aebb4d9a7a8e90c702695e08f954cd940f814",
+        "bytes": 5776
+      },
+      "FULL_EXPERTS.csv": {
+        "sha256": "ed0dd665c5ea972c4089141f72b9e555c9e3bf98b2b0a84fcc753d82cb942c9f",
+        "bytes": 200
+      },
+      "ROOT_CONTACT_DIAGNOSIS.csv": {
+        "sha256": "39fbac369d5bc3be59c032cd0fcb602d0256687f8a390e8b2f8247366afbccf4",
+        "bytes": 1203
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/ground_ball_impact_early_recovery",
+    "archive_path": "archive/experiments/ground_ball_impact_early_recovery",
+    "experiment_description": "Diagnostics folder 'ground_ball_impact_early_recovery' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 267906,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "9fcd376331737071bca3a027d680f131a0bfd80bb028854e4c3f47f95fbe4629",
+        "bytes": 5527
+      },
+      "CAPTURE_CONTINUITY.csv": {
+        "sha256": "d5af0b8eaca8655dac8289e0d0b9e062f56f99839e06590b033da46afe900503",
+        "bytes": 39490
+      },
+      "EARLY_ACTION_SEARCH.csv": {
+        "sha256": "d5af0b8eaca8655dac8289e0d0b9e062f56f99839e06590b033da46afe900503",
+        "bytes": 39490
+      },
+      "EARLY_BRANCH_SNAPSHOTS.csv": {
+        "sha256": "0bc3ef093d3ab674fd4a9e64b2062a5e142cd76e2c5a23e80a1db04c5c358f16",
+        "bytes": 5151
+      },
+      "EXACT_REPLAY.csv": {
+        "sha256": "b57162f8ec1108e70df61e0c28d9ccb2b7b33199f9046c5178ac2f835d40f2d7",
+        "bytes": 437
+      },
+      "FULL_EXPERTS.csv": {
+        "sha256": "e74be2bf4a728407aaf6fe0832fae6d6582d5b359f271425f3944828209a08d2",
+        "bytes": 550
+      },
+      "IMPACT_TO_LOSS_TIMELINE.csv": {
+        "sha256": "05953feb5c0941cec937d3c5f2ee33b795bbaddbfa8ca2dc98f81945a9f021a2",
+        "bytes": 82254
+      },
+      "JAW_ENTRY_FEASIBILITY.csv": {
+        "sha256": "a9d6d8f589284e75ed93026502db535eda6b60f34a41ee04d9ff9e2131006568",
+        "bytes": 5580
+      },
+      "OPENING_RESPONSE.csv": {
+        "sha256": "c9b65eda845bc5639bafcce5f85cf934bd794295179ef5e7de684cab061ef2ac",
+        "bytes": 1440
+      },
+      "RECOVERY_MECHANISM_CLASSIFICATION.csv": {
+        "sha256": "9103d12f2967a50f0eef9d58456daad38d9819dca5b510ae559ca0e81af76726",
+        "bytes": 13205
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/ground_ball_impact_oracle_interception",
+    "archive_path": "archive/experiments/ground_ball_impact_oracle_interception",
+    "experiment_description": "Diagnostics folder 'ground_ball_impact_oracle_interception' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 596387,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "217bd192938c29d7e0b245ed673940fb7b4bd473b440b8c6a744ceb51254e373",
+        "bytes": 3398
+      },
+      "CONTACT_AND_CAPTURE.csv": {
+        "sha256": "3cb7e9f09e08c4c67f729f791ac6f1d8c1cfa0aa3ec010e14ac4598926cf7da5",
+        "bytes": 7096
+      },
+      "FULL_EXPERTS.csv": {
+        "sha256": "a19bf63fb0636260a663155b2e38d0f164c74f833cec16f3107ccf1125dfcd61",
+        "bytes": 213
+      },
+      "GRASP_LOSS_EVENTS.csv": {
+        "sha256": "44bcf5db15fdb3657643c1d69d05b5b3a31ea4de19020450c686fe7cd7ac4cf3",
+        "bytes": 600
+      },
+      "IMPACT_ROOTS.csv": {
+        "sha256": "1b6a24f324c37e2f900e1faf618a3cb15b77b524445d82062316b192a52824b0",
+        "bytes": 4385
+      },
+      "INTERCEPTION_CANDIDATES.csv": {
+        "sha256": "8ae8c4e6b4f98d421796189511d7100c2728ee0f458e6d774ee6d2addeeb78d9",
+        "bytes": 48837
+      },
+      "NO_INTERVENTION_FUTURES.csv": {
+        "sha256": "525d52f75d6897f91707044a4bce13ebb14790430abaeb5ca569472f50449db5",
+        "bytes": 753
+      },
+      "REACHABILITY.csv": {
+        "sha256": "a64cfb351422bcf93513d101c7f2d0a48b4a7aec9f6a985d8bedd153843a99de",
+        "bytes": 20805
+      },
+      "SEARCH_FUNNEL.csv": {
+        "sha256": "3758d42db59cda066f21341ac365480aa8e484a11a664222369c8ec3488e1e20",
+        "bytes": 339
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/ground_scene_validation",
+    "archive_path": "archive/experiments/ground_scene_validation",
+    "experiment_description": "Diagnostics folder 'ground_scene_validation' (active_keep)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 14648,
+    "reproducible": true,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "active_keep",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "d1e7bb03df6e6024653f9815ac5c5c38b53125de84bf2e7e9df81551359042d4",
+        "bytes": 947
+      },
+      "BALL_IMPACT_ROOTS.csv": {
+        "sha256": "91bba77151062a288a56733c70fea40eaf8b23e5ac5cf2ed9f96be37ee722a9e",
+        "bytes": 3735
+      },
+      "DETACHMENT_DYNAMICS.csv": {
+        "sha256": "c7096607926abbe9ce440483fb4fb726d8eac1047a45bea28c70c8c2f8fd7be8",
+        "bytes": 2695
+      },
+      "END_GRASP_VALIDATION.csv": {
+        "sha256": "cab4110784c0d3ad48935dd6cbe070d879ab3d939b4accb9e260999033d1357b",
+        "bytes": 345
+      },
+      "GROUND_DROP_TESTS.csv": {
+        "sha256": "eb820a5d0d5e1d9c68507432a526e1e3066842f772d0a662cf2ab68b15edf16b",
+        "bytes": 207
+      },
+      "NOMINAL_REGRESSION.csv": {
+        "sha256": "a2004c386a136b5f3e470e1c09ea201a341e139df749df16dbf116de15f360ad",
+        "bytes": 230
+      },
+      "PLAN_C_FEASIBILITY.csv": {
+        "sha256": "f62ee0dcf9b563f1e591e2d5a0ef786f3e0e1b9d8e7a9916310702cd64ea19ca",
+        "bytes": 206
+      },
+      "REACHABILITY.csv": {
+        "sha256": "c0a81058cca76ee43f4d8dcdef601ab6a2c9e20d2f3ac04218d7f5bee0324b98",
+        "bytes": 1808
+      },
+      "SLIDING_REGRESSION.csv": {
+        "sha256": "452ee0641c0bd70723c086420fdcde054b6cd851d894f5eff8594af568517417",
+        "bytes": 240
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/grpo_adaptive_hybrid",
+    "archive_path": "archive/experiments/grpo_adaptive_hybrid",
+    "experiment_description": "Diagnostics folder 'grpo_adaptive_hybrid' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 5690,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history."
+  },
+  {
+    "original_path": "results/diagnostics/grpo_v2_regression",
+    "archive_path": "archive/experiments/grpo_v2_regression",
+    "experiment_description": "Diagnostics folder 'grpo_v2_regression' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 3151489,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "c5cfb349a0e37acaf9a2eb0d292a2244d63bd6f13cd617c09c74702f59791be0",
+        "bytes": 9719
+      },
+      "epoch_transition.csv": {
+        "sha256": "65867f72c9e9e94d00b6dd7790168dffc84b416c4a61ae09540789002dfebac9",
+        "bytes": 12142
+      },
+      "group_bucket_summary.csv": {
+        "sha256": "a8b403f4804dc6f4acccd6038a7e8e4a6faeddd0c5489dc68f3fccbdacb3bd3b",
+        "bytes": 3165
+      },
+      "group_success_statistics.csv": {
+        "sha256": "6244d06484ec7a263f779060536b91b7ba3170f87f8bddba13a96f559abbe9cd",
+        "bytes": 131188
+      },
+      "per_ic_comparison.csv": {
+        "sha256": "74aea4aa00da7db976cbace5244853ab11aee3c7e9c0a67cc07aec4cb3438002",
+        "bytes": 4144
+      },
+      "reward_advantage_audit.csv": {
+        "sha256": "1773aa197e6596ec2c339d64c4723d35b4e6db68d9a62ef4a2453bde01d5affc",
+        "bytes": 1000226
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/handoff_40ms_advantage_audit",
+    "archive_path": "archive/experiments/handoff_40ms_advantage_audit",
+    "experiment_description": "Diagnostics folder 'handoff_40ms_advantage_audit' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 4057122,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "3886cf1beff2fc5dc592c20e3dfa3b72722ce93698ea6e8f0daf0851d55eb8b4",
+        "bytes": 5709
+      },
+      "all_success_group_detail.csv": {
+        "sha256": "0f5cb625c4953a9719d639e277c2e95af91a5dd538be723604f1c9f3b681226f",
+        "bytes": 7555
+      },
+      "causal_classification.csv": {
+        "sha256": "95f1737584ab9c92142c2a4d38d83fb5c55760ed24f67783d593c35c25a16f4c",
+        "bytes": 293
+      },
+      "group_success_strata.csv": {
+        "sha256": "d1db6aeec70ad1b550ced8585676ee194808697fdfab9e5d5e2479d36197e421",
+        "bytes": 109851
+      },
+      "lambda_advantage_sensitivity.csv": {
+        "sha256": "732d94b348343bc5be2e952dc0d585458eba109a06a2bc503b51611e672f1c60",
+        "bytes": 85169
+      },
+      "reproduction_checks.csv": {
+        "sha256": "41baaf4a95205b94412781c7700ab61fdde7f61f1f3d3854fd9ece4aa3ab01a8",
+        "bytes": 1112
+      },
+      "seven_ic_counterfactual.csv": {
+        "sha256": "df1b8afb00aadf9337c85b6bac0a75e600bfe3637c9dd9f05dc388f20ba03971",
+        "bytes": 4289
+      },
+      "seven_ic_physical_state.csv": {
+        "sha256": "6db4e9dd2d9935a22bcdac4c32e1a73f50a029588c7cfe59f91fbce56e29234e",
+        "bytes": 13611
+      },
+      "seven_ic_timing.csv": {
+        "sha256": "d03be858ef0c0c7265993c92b1d511c53e3f8a1a9082f70bba37d7185fb6d19e",
+        "bytes": 2265
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/hard_ic_mining",
+    "archive_path": "archive/experiments/hard_ic_mining",
+    "experiment_description": "Diagnostics folder 'hard_ic_mining' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 3146319,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "cf4678b0930a0eebd18b5a2397c06c012f7714ffcbe9859cd24d98d463990f22",
+        "bytes": 5005
+      },
+      "baseline_comparison.csv": {
+        "sha256": "9736f86963f4f799d8e27ca03339578346f7fbfa02db5e3130d646df3929cf2b",
+        "bytes": 482
+      },
+      "recoverability_search.csv": {
+        "sha256": "3f6158445a07ae5a066bd498828bd9d1df2311eb2149bd8ee807fbdb6519b710",
+        "bytes": 53633
+      },
+      "screening_results.csv": {
+        "sha256": "d9ae5d463a7219cd951e1d6804b50759496f403d239dcf8e131b02cc622d006a",
+        "bytes": 122050
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/historical_recatch_recovery",
+    "archive_path": "archive/experiments/historical_recatch_recovery",
+    "experiment_description": "Diagnostics folder 'historical_recatch_recovery' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 14000,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "48362cc854fa2270b988c4afc182f5fbd27c20b09dba049245b6bd790c2e56eb",
+        "bytes": 9622
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/horizontal_recatch_root_cause",
+    "archive_path": "archive/experiments/horizontal_recatch_root_cause",
+    "experiment_description": "Diagnostics folder 'horizontal_recatch_root_cause' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 2800027,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history."
+  },
+  {
+    "original_path": "results/diagnostics/horizontal_recatch_sampling",
+    "archive_path": "archive/experiments/horizontal_recatch_sampling",
+    "experiment_description": "Diagnostics folder 'horizontal_recatch_sampling' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 1064649,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history."
+  },
+  {
+    "original_path": "results/diagnostics/k48_counterfactual_credit",
+    "archive_path": "archive/experiments/k48_counterfactual_credit",
+    "experiment_description": "Diagnostics folder 'k48_counterfactual_credit' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 4864438,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history."
+  },
+  {
+    "original_path": "results/diagnostics/k48_prefix_branching",
+    "archive_path": "archive/experiments/k48_prefix_branching",
+    "experiment_description": "Diagnostics folder 'k48_prefix_branching' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 1109628,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history."
+  },
+  {
+    "original_path": "results/diagnostics/k48_prefix_branching_seed42",
+    "archive_path": "archive/experiments/k48_prefix_branching_seed42",
+    "experiment_description": "Diagnostics folder 'k48_prefix_branching_seed42' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 4099459,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history."
+  },
+  {
+    "original_path": "results/diagnostics/k49_action_authority_ablation",
+    "archive_path": "archive/experiments/k49_action_authority_ablation",
+    "experiment_description": "Diagnostics folder 'k49_action_authority_ablation' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 1348017,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "6d9868116d0cf53e6b02b7bbdbfcc8d76b2cb2b463b2e71d3dd422749f555cab",
+        "bytes": 4307
+      },
+      "CANDIDATE_TOKEN_EXTENSIONS.csv": {
+        "sha256": "89ffb5c58681abb50bdde80d1b69215e92458565f2268ab6fb45a9eda8450edf",
+        "bytes": 2598
+      },
+      "CAPTURE_BRAKE_METRICS.csv": {
+        "sha256": "be4d0beb4ffbd687720bdf5367907c3f1b454fb0a3fa41d311df086f78f2f207",
+        "bytes": 102608
+      },
+      "CONTINUOUS_ACTION_RESULTS.csv": {
+        "sha256": "3be594322feb526b922aa6fb938adb6d509863d027da0288c6dc6e2c890892ee",
+        "bytes": 37602
+      },
+      "FULL_SUCCESS_VERIFICATION.csv": {
+        "sha256": "80ff06f39d204517d9342df6f441580db0420291c978e4fa9b309df8301e7d95",
+        "bytes": 803
+      },
+      "K49_BASELINE.csv": {
+        "sha256": "2463c1082da1bf4e7b859b13c4fb1be19c16d8e6b84f2bf20517dca6efe39dd1",
+        "bytes": 77828
+      },
+      "MATCHED_IC_MANIFEST.csv": {
+        "sha256": "ecaa0384f669361e8417de759f5b53a43272ba9e9987cc64233b7b5e93ed6cbf",
+        "bytes": 2323
+      },
+      "POSE_CORRECTION_METRICS.csv": {
+        "sha256": "06bde6ee1ecf9ccfb975b8bda111e5d1691818a1a863d0883170d3922f9859b1",
+        "bytes": 22917
+      },
+      "TOKEN_ABLATION_RESULTS.csv": {
+        "sha256": "37253d5b04bf55ddcbc5d01c20c6048167017fbe3f260e4eca1cc3c0d79b1646",
+        "bytes": 239889
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/k49_return_axial_slip_mechanism",
+    "archive_path": "archive/experiments/k49_return_axial_slip_mechanism",
+    "experiment_description": "Diagnostics folder 'k49_return_axial_slip_mechanism' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 7414877,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "ddfee421ccb8b490a368aadcd3819d48550e52202417b992253b0422e51ccb64",
+        "bytes": 3612
+      },
+      "COUNTERFACTUAL_COMPARISON.csv": {
+        "sha256": "9094c61221f2dec059fe55f92601029a973197e4edd9b691e0936d1bcd4dcfa2",
+        "bytes": 3279
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/k49_slow_reverse_token48",
+    "archive_path": "archive/experiments/k49_slow_reverse_token48",
+    "experiment_description": "Diagnostics folder 'k49_slow_reverse_token48' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 76474,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "7cd2cb0c1080f943ad1db21ff1f4b78115ada6208d94e93fbf6907c1bf26b664",
+        "bytes": 2846
+      },
+      "FULL_RECOVERY_RESULTS.csv": {
+        "sha256": "2cb2bdb1ba9175fce73d39a78b03d7963273ae8ed342cda2a5e28d6d81cb41bf",
+        "bytes": 2023
+      },
+      "TOKEN48_SPEED_COMPARISON.csv": {
+        "sha256": "4d90d068aabcb75869a204d9a73b8c7408603b58b82d87063ac27fe81e6e2b4b",
+        "bytes": 2148
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/large_tilt_eccentric_grasp_mining",
+    "archive_path": "archive/experiments/large_tilt_eccentric_grasp_mining",
+    "experiment_description": "Diagnostics folder 'large_tilt_eccentric_grasp_mining' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 54908233,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "38f8a28978c6dd9a5f29800a22bd5c0cf98875b7ef4ba6096c6cc4b5117253f1",
+        "bytes": 7751
+      },
+      "ACTIVE_CORRECTION_RESULTS.csv": {
+        "sha256": "55fe55a6caa3ca59dd3c2066cbd951831baf6b8f92f16f17f74d3427892b770e",
+        "bytes": 2922
+      },
+      "IC_GENERATION_AUDIT.csv": {
+        "sha256": "11348e83f5fb434cf95374ecc76af0bab8971e36f65973963bf3ff6682a7fdad",
+        "bytes": 7025
+      },
+      "SHORT_HANDOFF_FILTER.csv": {
+        "sha256": "5573674477740661acfaf4786cf35d08aff752afa0b42b2660c5cd390c5fc222",
+        "bytes": 5327
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/lateral_force_mechanism_audit",
+    "archive_path": "archive/experiments/lateral_force_mechanism_audit",
+    "experiment_description": "Diagnostics folder 'lateral_force_mechanism_audit' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 13234282,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "92fc0d8ce2fbec0207a1718bb056e95286c32c2c965978c457bfbeaae87b570e",
+        "bytes": 5104
+      },
+      "CONTACT_TIMELINES.csv": {
+        "sha256": "077c3a6bb724a13535c1f42d897c30854e1b48bb4b6bb8cec6e0955cb760900e",
+        "bytes": 490106
+      },
+      "DETACHMENT_EVENTS.csv": {
+        "sha256": "a7cbc37e9811e4ae27dc795a9de692cd041f9ed90b5c26287bd0b5075c51103c",
+        "bytes": 237
+      },
+      "EXPERT_RECLASSIFICATION.csv": {
+        "sha256": "1f698988d99462a13d51f29ccf30c1ed1708c0a374ece573ef0ba79cb7dd866f",
+        "bytes": 1870
+      },
+      "POSE_CORRECTION_MECHANISMS.csv": {
+        "sha256": "d50630d2ef052bcb69d511332ba8dddb170986c1d2c21f536928176b087129de",
+        "bytes": 2840
+      },
+      "RECAPTURE_EVENTS.csv": {
+        "sha256": "89f237b628330866c17b93a3645f3f0a06c8c6cd763f97043bcc6ca5a1d609fe",
+        "bytes": 58
+      },
+      "RELATIVE_POSE_TRACES.csv": {
+        "sha256": "43abb34ed6876f8c4ca545c5943d5973a6678d621157c38883dd17d42980f5e5",
+        "bytes": 1737960
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/lateral_offset_falling_recatch",
+    "archive_path": "archive/experiments/lateral_offset_falling_recatch",
+    "experiment_description": "Diagnostics folder 'lateral_offset_falling_recatch' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 10116499,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "df9245aa0471c85a4ce0ba0446b6dc8fa56518aae5ec082431d105c5c06810c8",
+        "bytes": 7330
+      },
+      "CATCH_SUCCESS_VERIFICATION.csv": {
+        "sha256": "fa78115951a5826d71d089439b3c50807dd99c3c77b7dd96c2dbf53a52d7a378",
+        "bytes": 5162
+      },
+      "CONTACT_GEOMETRY.csv": {
+        "sha256": "47db6fed919319ffc152c5006d04318b9e2fa48ab21758557d5ba00119486509",
+        "bytes": 158069
+      },
+      "HANDOFF_RESULTS.csv": {
+        "sha256": "09c2f9594d8d87d9698949e71629875f8f149ffaa17966feabaeaf67ea9620b8",
+        "bytes": 1361
+      },
+      "INTERCEPTION_TIMELINE.csv": {
+        "sha256": "b75f3f998e9f656336376e85abe30919109cbeb75a0ef018c1734720250b9f97",
+        "bytes": 102332
+      },
+      "OFFSET_SWEEP.csv": {
+        "sha256": "cee3f26a8bcd79f4ef5811d54eb544abf03214c66cf6a4ef9f0945d7ed0ea48f",
+        "bytes": 7926
+      },
+      "OVERCHASE_TRANSFER.csv": {
+        "sha256": "9bacb933ce327d5f09e180961d02e6f70783495fac4fd9e2c622213155d62a55",
+        "bytes": 178601
+      },
+      "ROBUSTNESS_RESULTS.csv": {
+        "sha256": "c0d1264bdd6ac07b1484960bca450178b4c6c4057efc9a92321018146bc3b076",
+        "bytes": 16433
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/lateral_recatch_handoff",
+    "archive_path": "archive/experiments/lateral_recatch_handoff",
+    "experiment_description": "Diagnostics folder 'lateral_recatch_handoff' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 14256330,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "6c275cd0af6dedd3105806fa676473e35a44a4a3a61e516850567727b83e9274",
+        "bytes": 5046
+      },
+      "CATCH_STATE_AUDIT.csv": {
+        "sha256": "1d4de6d74e1d5448e325b157e5e88cac1014871d94b203c5c2ceedba5a03c3e8",
+        "bytes": 6837
+      },
+      "CONTROLLER_TARGET_AUDIT.csv": {
+        "sha256": "fdbffb420725387a13ebbf76bf2fa1d3ecbd98dbb0ed7a2aab4a56b86637c24d",
+        "bytes": 1394
+      },
+      "FULL_TRAJECTORY_VERIFICATION.csv": {
+        "sha256": "96a70eb8b443cc56fa32455e0dfb839bf071d4938dd01cab680c5519bd9bedda",
+        "bytes": 652
+      },
+      "HANDOFF_FAILURES.csv": {
+        "sha256": "f366f1433786a2b7ab7ab4d314d88fbf43ded960ebe656998682f4afb0ccea24",
+        "bytes": 26721
+      },
+      "STABILIZATION_SEARCH.csv": {
+        "sha256": "9aec053b447c7749891742f55f26c3ad52a41401355365e18bdfcef0ced88e7a",
+        "bytes": 16612
+      },
+      "TIMING_ROBUSTNESS.csv": {
+        "sha256": "854c490039f7505648f46f93e50d4ec3966b73bb34135bad2b31ffb537c1c405",
+        "bytes": 1056
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/legal_recatch_transfer",
+    "archive_path": "archive/experiments/legal_recatch_transfer",
+    "experiment_description": "Diagnostics folder 'legal_recatch_transfer' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 20544567,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "ab1769cb76975ea9567ccf4f2cb67821a1f3ea0da1f0bb3a27318938d3c0199a",
+        "bytes": 5899
+      },
+      "SEARCH_RESULTS.csv": {
+        "sha256": "7d221161795d9062beebf961b69ce9767033e59fd8212c2f6eb9b148d19a98ca",
+        "bytes": 5339
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/mechanism_selection_feasibility",
+    "archive_path": "archive/experiments/mechanism_selection_feasibility",
+    "experiment_description": "Diagnostics folder 'mechanism_selection_feasibility' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 272407,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "72cbb1cc3f1820da385c6aaacd5a08f816f1cf31a26cb6fc4dcfa86a1b38601d",
+        "bytes": 3915
+      },
+      "grpo_only_substep_classification.csv": {
+        "sha256": "50e2e43d0a24e5853ace66a08959aae8476a0abc499eac91d213c67253abe8db",
+        "bytes": 3350
+      },
+      "IC_MANIFEST.csv": {
+        "sha256": "c7d1fac7474cd598f3ebbd2f9ad0f13e6e1427aa7be59246147c6a95b4da6ee1",
+        "bytes": 17369
+      },
+      "obs_response_probe.csv": {
+        "sha256": "4641c82d66f02f462e5e4a76f1d88f3b8b74954ed6a608a94e2a6dc15a239ef5",
+        "bytes": 1108
+      },
+      "PAIRED_EVALUATION.csv": {
+        "sha256": "6dc53094e25d2b2a4f4bf9c29cf25b54be4dc313db1eb5b44d09ee6cbb110b29",
+        "bytes": 9247
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/nontrivial_recovery_ic_mining",
+    "archive_path": "archive/experiments/nontrivial_recovery_ic_mining",
+    "experiment_description": "Diagnostics folder 'nontrivial_recovery_ic_mining' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 576988,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "d745b2aaf1481e51ac41bd470c7166f2bebe767c4a5b9544455297e108825dc2",
+        "bytes": 7949
+      },
+      "ACTIVE_RECOVERY_SEARCH.csv": {
+        "sha256": "3ebda045cd4abb8ef89dd3333b41445bdb2de3a4054aa66dea36b56ff42ba21c",
+        "bytes": 2109
+      },
+      "IC_MANIFEST.csv": {
+        "sha256": "af9d366de6cbfe77e0ee3d50638014a940d8c6836f79241d7e2f9877b0f07c53",
+        "bytes": 3138
+      },
+      "MECHANISM_COMPETITION.csv": {
+        "sha256": "499a16c8051ec693f364d1d07a87fac8ee0c8b9de2e1361ad99b4885bd3d520e",
+        "bytes": 3846
+      },
+      "PREFIX_HANDOFF_AUDIT.csv": {
+        "sha256": "e47822c5c8575b836cb017ca938c6efff2cd02b3715090562703af0fa258c3e0",
+        "bytes": 2312
+      },
+      "SHORT_HANDOFF_BASELINE.csv": {
+        "sha256": "e05a25c641d882ddf00fd239bcb88291bd098213e80645279546f7ee8f46665f",
+        "bytes": 431952
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/open_overchase_recatch_dataset",
+    "archive_path": "archive/experiments/open_overchase_recatch_dataset",
+    "experiment_description": "Diagnostics folder 'open_overchase_recatch_dataset' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 4867,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "c8a472b3c6b075656899dfc6141c8c987ebeb084895a33ac3f3a81f92e9e2775",
+        "bytes": 4467
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/plan_a_ground_scene_divergence",
+    "archive_path": "archive/experiments/plan_a_ground_scene_divergence",
+    "experiment_description": "Diagnostics folder 'plan_a_ground_scene_divergence' (active_keep)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 221794,
+    "reproducible": true,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "active_keep",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "c683eb535e810246bb70a724e8676e122590efe1ca14f6073dfee19b5f4430d7",
+        "bytes": 4978
+      },
+      "CONTACT_COMPARISON.csv": {
+        "sha256": "13d1f84b4b25732b8368a8542dd71f7adeb2463862d5667d0c42cf6a0ed13b3e",
+        "bytes": 4336
+      },
+      "MECHANISM_METRICS.csv": {
+        "sha256": "de4b1c3516f1856856fcb3a28feca6983a2d208fbff22279545f76c3b5600ad2",
+        "bytes": 1295
+      },
+      "PAIRED_STEP_TRACE.csv": {
+        "sha256": "f6842da89fabb16cd1a79595b7c673f82fdf2da4cd7ac26797cb7cb40388b381",
+        "bytes": 95649
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/plan_a_sliding_pivoting_legality",
+    "archive_path": "archive/experiments/plan_a_sliding_pivoting_legality",
+    "experiment_description": "Diagnostics folder 'plan_a_sliding_pivoting_legality' (active_keep)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 1620728,
+    "reproducible": true,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "active_keep",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "66829ecdb93325868f024a75a5e60e4ddf46fd9b69c68b688ee972ca62d9edda",
+        "bytes": 2983
+      },
+      "ACTION_LEGALITY.csv": {
+        "sha256": "9652d501fa4ec1650d1b028ad48099e4a391f6110e9d1da20a9437a8d171a35b",
+        "bytes": 454
+      },
+      "CONTACT_TRACES.csv": {
+        "sha256": "637326396c2eae76c0135c6a43330751f8e66c3e97ff9e5712efdcf9a368e8c0",
+        "bytes": 417
+      },
+      "EXACT_REPLAY.csv": {
+        "sha256": "8bfcf5654dc8b5c9229ad22d83875297e16b5dbca1696d9506ba92bbc3bed4db",
+        "bytes": 1932
+      },
+      "EXPERT_INVENTORY.csv": {
+        "sha256": "8aa19b4193325df9426e6ff20eededf46771fbd9a2c551845bc4ba7f92033bd8",
+        "bytes": 1379
+      },
+      "GROUND_SCENE_REGRESSION.csv": {
+        "sha256": "b2d2eaacc990a40ac138142e166ffac4ee705414510db0fe686ebe55e37290bd",
+        "bytes": 1472
+      },
+      "NEGATIVE_CONTROLS.csv": {
+        "sha256": "aaa788393236972cc8b2801111a35d63d104ea72b65eec92490f8ba9ca35a419",
+        "bytes": 1161
+      },
+      "PIVOTING_KINEMATICS.csv": {
+        "sha256": "9663f3b242290125cf80fa62b2c02b023d47d8acd9400782d5950347ff4741cc",
+        "bytes": 494
+      },
+      "SLIDING_KINEMATICS.csv": {
+        "sha256": "692e46a63a9a227ed5c2eb0d0f28d0313409017e20a5a6b250ea4c8eda229a4b",
+        "bytes": 857
+      },
+      "VERDICTS.csv": {
+        "sha256": "9b870995588d9101defecbf975f247ab9c8ba5f2989ec747a1ac4cd2660dc5fe",
+        "bytes": 832
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/plan_c_horizontal_downward_end_recatch",
+    "archive_path": "archive/experiments/plan_c_horizontal_downward_end_recatch",
+    "experiment_description": "Diagnostics folder 'plan_c_horizontal_downward_end_recatch' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 2926064,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "f8432eaf94d279a62f7f98b733c7ef67a0c5d797271916c9b1838b1faa459198",
+        "bytes": 5571
+      },
+      "IC_MANIFEST.csv": {
+        "sha256": "bba95b4e5bec27cd2331069cc5cc1a18e9cabf21abfc6c3c6dd0e4265aff2fc1",
+        "bytes": 4674
+      },
+      "MATCHED_ABC_COMPARISON.csv": {
+        "sha256": "788e02183ca4bdd4b140ec9aa96415107da47e94e56d7d77ecf745dc0cd52422",
+        "bytes": 3012
+      },
+      "PLAN_C_OUTCOMES.csv": {
+        "sha256": "a33ac4b3296932129c7e36ec4e4200d2473287317d3143494e4901ef15f15fab",
+        "bytes": 755
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/recatch_braking_optimization",
+    "archive_path": "archive/experiments/recatch_braking_optimization",
+    "experiment_description": "Diagnostics folder 'recatch_braking_optimization' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 11294419,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "24d019914038aa30f76b54a72a081275900fb2fe96c36758ca10c41814fe180d",
+        "bytes": 4320
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/recatch_interface_comparison",
+    "archive_path": "archive/experiments/recatch_interface_comparison",
+    "experiment_description": "Diagnostics folder 'recatch_interface_comparison' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 9662493,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "c4f57d198f19cd0399c4809e331be7fa6f2ccd02ebb85209e32efc978358aa17",
+        "bytes": 6072
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/recatch_legality_audit",
+    "archive_path": "archive/experiments/recatch_legality_audit",
+    "experiment_description": "Diagnostics folder 'recatch_legality_audit' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 442508,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "ac28b5e71260f9175ad9dddab39eb0c9a98cc3fa0faa23b1e57e47d13a8b2b8d",
+        "bytes": 27503
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/recovery_ic_expansion",
+    "archive_path": "archive/experiments/recovery_ic_expansion",
+    "experiment_description": "Diagnostics folder 'recovery_ic_expansion' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 123865,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "71d971c4db909b1c51f98523dd8d6c0b9cf37699fd5024d8c13adca81e8be1df",
+        "bytes": 4178
+      },
+      "IC_MANIFEST.csv": {
+        "sha256": "a8e4da5acc69dab6f15e4c7406d9d4be3a349a360e3c5497a5ed943cab932cf9",
+        "bytes": 5098
+      },
+      "SEARCH_RESULTS.csv": {
+        "sha256": "de4ec60201508fbd0219be0036375767c2773da0ba5e5ef82d1fe56bf675888b",
+        "bytes": 6784
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/return_to_nominal_pose_before_handoff",
+    "archive_path": "archive/experiments/return_to_nominal_pose_before_handoff",
+    "experiment_description": "Diagnostics folder 'return_to_nominal_pose_before_handoff' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 16530743,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "4caccdcbe25e8e541c09f531bb2d5ad12463311adcbedf485c3bdca58a93b452",
+        "bytes": 3473
+      },
+      "PAIRED_RESULTS.csv": {
+        "sha256": "93f370f521b6975c1b058d7113dc1d800e24013974eff47e281d00bdfae5e5e6",
+        "bytes": 1036
+      },
+      "STAGE_METRICS.csv": {
+        "sha256": "d5b3fb365742cea959741c7208e9a5e43d6f75638551f63ef572bec6d773ce5d",
+        "bytes": 132808
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/reward_time_handoff_audit",
+    "archive_path": "archive/experiments/reward_time_handoff_audit",
+    "experiment_description": "Diagnostics folder 'reward_time_handoff_audit' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 771518,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "774b9b52089f27884fb829598be83804b111c1d6d042e92c5299cc21aba8b2cc",
+        "bytes": 9045
+      },
+      "grpo_only_attribution.csv": {
+        "sha256": "ddbc1a6f662b03010fd1ccaf8a87d8f57c528229a394053aba6656b72485bb3f",
+        "bytes": 3549
+      },
+      "handoff_counterfactual.csv": {
+        "sha256": "27fdaf58f70752c35f667df10c9e47ee35c40df5c9868c62a77942bc368429cb",
+        "bytes": 15416
+      },
+      "mechanism_duration_comparison.csv": {
+        "sha256": "36c5aac55aeaf7750c09ffb405370b3208d6b0ed4e2ac284aa93a54d67673902",
+        "bytes": 2388
+      },
+      "reward_breakdown.csv": {
+        "sha256": "b40720f1cf946005a032b81f83592515dce7771c3e7a6041cb2ddd465336def6",
+        "bytes": 88657
+      },
+      "reward_ranking_audit.csv": {
+        "sha256": "08c133676691e7b5667b365a873f20e3f1a16f5ab22b2ae977fe9e18a2a73337",
+        "bytes": 3652
+      },
+      "time_coefficient_sensitivity.csv": {
+        "sha256": "6b03c0d07063aa79ebc35c29f40c8f73cb9eea4c6f731f8bc032ff38729bac30",
+        "bytes": 8822
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/sft_sliding_equal_weight",
+    "archive_path": "archive/experiments/sft_sliding_equal_weight",
+    "experiment_description": "Diagnostics folder 'sft_sliding_equal_weight' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 14053123,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "99e691533678dd00cc14b26c8393cd7f425ed9d2d1042b6e492247d23ca930b7",
+        "bytes": 8319
+      },
+      "effective_weights_before_after.csv": {
+        "sha256": "7881867c4dbb26c7f2b8b7e26fb4ac89f3f81e403079b8f3269ee6530ac0ba59",
+        "bytes": 378
+      },
+      "matched_rollout_comparison.csv": {
+        "sha256": "222d88a566febc4d25ce8fb90fdc66e6d619f8b7e5fa9be8ac9fb8d7639f31fb",
+        "bytes": 3794
+      },
+      "mechanism_comparison.csv": {
+        "sha256": "11cdb2d9f2f367fdaaeb41a79929d32ee725584cb84bb4f7f37717c5c2bdcbc3",
+        "bytes": 2431
+      },
+      "per_ic_evaluation.csv": {
+        "sha256": "e7d6a2b64b30013daa7bffc036de320a27a94c20c45298d29fc32828c82369ca",
+        "bytes": 13683
+      },
+      "teacher_forcing_comparison.csv": {
+        "sha256": "268e0b70804a94d071a8c14609df01eb4cbd838e7312e844431dc53596535db8",
+        "bytes": 1458383
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/sft_sliding_root_cause",
+    "archive_path": "archive/experiments/sft_sliding_root_cause",
+    "experiment_description": "Diagnostics folder 'sft_sliding_root_cause' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 1916449,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "67a876e0d41b1168939ca8dc8cc9a1764b662ba1bc738c428f13a1ec52b6af79",
+        "bytes": 9654
+      },
+      "dataset_audit.csv": {
+        "sha256": "b3a9065891ff6a560f6ac03e5bb3288b8294128f747be5eb1215b5d1c1868532",
+        "bytes": 75767
+      },
+      "expert_mechanism_audit.csv": {
+        "sha256": "153ed80ce02effd25b3957dabd4df888d34463529e9f1d182e7ec57b11e73724",
+        "bytes": 4249
+      },
+      "matched_rollout_comparison.csv": {
+        "sha256": "3b7d02bc51821a46f344a48684607613ea7cf9ffe3da45ea1d2dda7c8301b1f1",
+        "bytes": 9224
+      },
+      "overlap_conflicts.csv": {
+        "sha256": "ed09ef4daad5f1a578923a31efa00934e258b8371b831ee401047a8b1d6c1eab",
+        "bytes": 8040
+      },
+      "teacher_forcing_per_token.csv": {
+        "sha256": "02cf86a9601cfc6020c6e7e03b6506751441bbacc51d628c1330792257e91249",
+        "bytes": 1580258
+      },
+      "teacher_forcing_valid_focus.csv": {
+        "sha256": "1feb7be366af564ce06c729d9a91961be2a7ed42b92ae3e7c69acaab81a3f075",
+        "bytes": 78538
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/sliding_mechanism_audit",
+    "archive_path": "archive/experiments/sliding_mechanism_audit",
+    "experiment_description": "Diagnostics folder 'sliding_mechanism_audit' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 500652,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history."
+  },
+  {
+    "original_path": "results/diagnostics/table_drop_fix",
+    "archive_path": "archive/experiments/table_drop_fix",
+    "experiment_description": "Diagnostics folder 'table_drop_fix' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 13921,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "fa65c3802a1760f76e6b1ffc021bcbbb1d8d47b3de04f4a0c7b89503620de6c5",
+        "bytes": 9139
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/top_impact_open_overchase_recatch",
+    "archive_path": "archive/experiments/top_impact_open_overchase_recatch",
+    "experiment_description": "Diagnostics folder 'top_impact_open_overchase_recatch' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 5492666,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "f2934aa57e21bf162b91b0aa150da1ffc93dda9e4ede0cdb3edff2f3e4bc7f84",
+        "bytes": 3352
+      },
+      "EVENT_TIMELINES.csv": {
+        "sha256": "d826a14d54fa1e4285054551ec4a92510b23bd07be031b0633bdc78ba525942d",
+        "bytes": 180
+      },
+      "FOUR_PHASE_SEARCH.csv": {
+        "sha256": "af9175785d75721cf7704f65102803e33e7c477dfb83cf290f40b89eb25fbca0",
+        "bytes": 2248
+      },
+      "IC_MANIFEST.csv": {
+        "sha256": "41cedc9da2f16ded4a437f743e04b76f04055def1c9d9acdb9a9d628213bb450",
+        "bytes": 5205
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/top_impact_progressive_recatch",
+    "archive_path": "archive/experiments/top_impact_progressive_recatch",
+    "experiment_description": "Diagnostics folder 'top_impact_progressive_recatch' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 0,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history."
+  },
+  {
+    "original_path": "results/diagnostics/top_impact_recatch_geometry_fix",
+    "archive_path": "archive/experiments/top_impact_recatch_geometry_fix",
+    "experiment_description": "Diagnostics folder 'top_impact_recatch_geometry_fix' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 5146724,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "78341baa93f0631b4e3519602f4d19d0ed063166275900fe2c4a924573a5f5cb",
+        "bytes": 3202
+      },
+      "BRAKE_LIFT_RESULTS.csv": {
+        "sha256": "10902975992887b175fc2b9c1572a8d4c5a948b75cfee6ec50603ac690a69b32",
+        "bytes": 2346
+      },
+      "CLOSE_TIMING_FORCE_SWEEP.csv": {
+        "sha256": "8d1a6638283c75b8a642b46e436633ba310054dde99698b07b442224730fe73f",
+        "bytes": 5171
+      },
+      "EVENT_TIMELINE.csv": {
+        "sha256": "d6f84906674fced18811b8bdef4e796e83b6175a08ae4ab71c5c40e11a2a60c7",
+        "bytes": 150
+      },
+      "OVERCHASE_DEPTH_SWEEP.csv": {
+        "sha256": "ca05ea3f55b2213034b98a1a2558db4ac9c31db92fa5451ff127d6ed9c5edb29",
+        "bytes": 2839
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/validation_skill_classification",
+    "archive_path": "archive/experiments/validation_skill_classification",
+    "experiment_description": "Diagnostics folder 'validation_skill_classification' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 13327569,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "9c5f84e975c887a5d8ad82839bfeea64f363e8e44895998adde1012aee3a01c7",
+        "bytes": 11904
+      },
+      "mechanism_transition.csv": {
+        "sha256": "23a82c4768e248cccce5a33cff6a3c3dbeea7496b3ff549803b11916eae81718",
+        "bytes": 197
+      },
+      "per_ic_comparison.csv": {
+        "sha256": "7d0b73fd7e28f161deaa0bd5b2a27063139e519dcd5756fda6ce9052204a54c9",
+        "bytes": 2514
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/velocity_matched_soft_catch",
+    "archive_path": "archive/experiments/velocity_matched_soft_catch",
+    "experiment_description": "Diagnostics folder 'velocity_matched_soft_catch' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 3082386,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "1a79a72fb670b4a7ecd4fc8ec408ce528f9c78bf15829b9801e90d61b9f70f4a",
+        "bytes": 4647
+      },
+      "CAPTURE_STABILIZATION.csv": {
+        "sha256": "15b8c7441c96dd5814c8b54a39c0a4879354c650c75164a7e06f2fafa80538b9",
+        "bytes": 214567
+      },
+      "CONTACT_POINT_VELOCITY_AUDIT.csv": {
+        "sha256": "a6851780fd1bde91b955986f4eaf8f4225dd9a5492aab637cafdf227c3d0a4dc",
+        "bytes": 15245
+      },
+      "CONTROLLER_TRACKING.csv": {
+        "sha256": "12dc38926b795fa77196b6d2ab5312b3632a3d2d3f5a876df51fd669a16a30a7",
+        "bytes": 1406
+      },
+      "FULL_SUCCESS_VERIFICATION.csv": {
+        "sha256": "d38830b7915460079326bfee4f768ba82b5dfa0552890a0411b2115d9bb9a324",
+        "bytes": 51953
+      },
+      "FULL_SUCCESS_VERIFICATION_UNIQUE.csv": {
+        "sha256": "d0851b5a052e30d2a104d3e778cf63b5e7dec18efdf7e7f730c586e5cc58f93d",
+        "bytes": 400
+      },
+      "GRIP_TIMING_SEARCH.csv": {
+        "sha256": "a1bdfc750fc0ec78f98224e2f5aefe98af9d3f56167cc19a24b90e42ce8f2665",
+        "bytes": 70930
+      },
+      "INTERCEPTION_GEOMETRY.csv": {
+        "sha256": "0e68484ea58f3b22598c67a0f79ed3466b173403514e7787c6079c61762f06ba",
+        "bytes": 7839
+      },
+      "MATCHED_CONTROL_ABLATIONS.csv": {
+        "sha256": "d1000d7bf5a166f231a950ae904d32db7de44c44567f7ed1968e0013554ad03a",
+        "bytes": 439710
+      },
+      "VELOCITY_MATCHING_SEARCH.csv": {
+        "sha256": "49adceb5d94f31053897de991ed581395fa9d0f3d038c59adeac320b79c7c5fa",
+        "bytes": 87665
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/vertical_recatch",
+    "archive_path": "archive/experiments/vertical_recatch",
+    "experiment_description": "Diagnostics folder 'vertical_recatch' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 575422,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "5cfc40c04323fea82f4e172d95cc26105dcfe188c7647c5072b0a486a5ddfcf2",
+        "bytes": 6550
+      }
+    }
+  },
+  {
+    "original_path": "results/diagnostics/wrist_tilt_gravity_pivoting",
+    "archive_path": "archive/experiments/wrist_tilt_gravity_pivoting",
+    "experiment_description": "Diagnostics folder 'wrist_tilt_gravity_pivoting' (historical)",
+    "git_commit": "7db29b325202d04e7a2b774b79ea1178a368fc64",
+    "file_size_bytes": 2120562,
+    "reproducible": false,
+    "contains_verified_expert": false,
+    "status": "IN_SITU_INDEXED",
+    "kind": "historical",
+    "note": "Originals preserved under results/diagnostics (gitignored). Binary artifacts not duplicated into git history.",
+    "checksums": {
+      "REPORT.md": {
+        "sha256": "96ee8a7ed84a01d06de959837b814d2684ae32194f7ae1bbcd4658842e4f2b41",
+        "bytes": 5634
+      },
+      "EXPERIMENT_TABLE.csv": {
+        "sha256": "4b602b7cb336fd602d9622af1d322df82386533dd666c79e815598a6b4010c8c",
+        "bytes": 71198
+      },
+      "IC_AUDIT.csv": {
+        "sha256": "73b94cd6a8e61ce41485c673d2fc0f25239dc494fc8fe60a3d05a1214f594843",
+        "bytes": 1469
+      }
+    }
+  }
+]

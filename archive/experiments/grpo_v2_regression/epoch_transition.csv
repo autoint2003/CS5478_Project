@@ -1,0 +1,139 @@
+epoch_label,epoch_index,ic_id,source,success,reason,mechanism,handoff
+SFT,0,inward_extra_250043,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.279999999999751
+SFT,0,inward_extra_250051,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.539999999999722
+SFT,0,inward_extra_250131,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,5.73999999999959
+SFT,0,k48r_valid_00004,heuristic,1,SUCCESS_12S,Hybrid,4.019999999999779
+SFT,0,k48r_valid_00009,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.2999999999997485
+SFT,0,k48r_valid_00036,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,5.7799999999995855
+SFT,0,k48r_valid_00168,heuristic,1,SUCCESS_12S,Release-Recatch,3.6799999999998163
+SFT,0,s7_p25_a+0.000_e0.000,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+SFT,0,s7_p25_a+0.000_e0.008,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+SFT,0,s7_p25_a+0.012_e0.000,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+SFT,0,s7_p25_a+0.012_e0.008,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+SFT,0,s7_p25_a-0.012_e0.000,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+SFT,0,s7_p25_a-0.012_e0.008,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+SFT,0,slide_quota_400058,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.579999999999718
+SFT,0,slide_quota_400463,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,5.859999999999577
+SFT,0,slide_quota_400496,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.519999999999724
+SFT,0,slide_quota_400656,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.219999999999757
+SFT,0,hard_910024,hard,0,LOST_GRASP,Contact-Preserving Adjustment,4.55999999999972
+SFT,0,hard_910120,hard,1,SUCCESS_12S,Contact-Preserving Adjustment,5.539999999999612
+SFT,0,hard_910242,hard,0,LOST_GRASP,Other/Unclear,3.9799999999997833
+SFT,0,hard_910277,hard,1,SUCCESS_12S,Hybrid,4.0999999999997705
+SFT,0,hard_910344,hard,0,DROP_AFTER_HANDOFF,Contact-Preserving Adjustment,4.459999999999731
+SFT,0,hard_910074,hard,1,SUCCESS_12S,Contact-Preserving Adjustment,4.419999999999735
+E1,1,inward_extra_250043,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.279999999999751
+E1,1,inward_extra_250051,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.539999999999722
+E1,1,inward_extra_250131,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.459999999999731
+E1,1,k48r_valid_00004,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.819999999999691
+E1,1,k48r_valid_00009,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.2999999999997485
+E1,1,k48r_valid_00036,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.499999999999726
+E1,1,k48r_valid_00168,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.479999999999729
+E1,1,s7_p25_a+0.000_e0.000,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+E1,1,s7_p25_a+0.000_e0.008,heuristic,0,DROP_AFTER_HANDOFF,Hybrid,7.199999999999429
+E1,1,s7_p25_a+0.012_e0.000,heuristic,1,SUCCESS_12S,Release-Recatch,7.199999999999429
+E1,1,s7_p25_a+0.012_e0.008,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+E1,1,s7_p25_a-0.012_e0.000,heuristic,1,SUCCESS_12S,Release-Recatch,7.199999999999429
+E1,1,s7_p25_a-0.012_e0.008,heuristic,1,SUCCESS_12S,Release-Recatch,7.199999999999429
+E1,1,slide_quota_400058,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.579999999999718
+E1,1,slide_quota_400463,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.579999999999718
+E1,1,slide_quota_400496,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.519999999999724
+E1,1,slide_quota_400656,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.219999999999757
+E1,1,hard_910024,hard,0,LOST_GRASP,Contact-Preserving Adjustment,4.55999999999972
+E1,1,hard_910120,hard,1,SUCCESS_12S,Contact-Preserving Adjustment,4.259999999999753
+E1,1,hard_910242,hard,1,SUCCESS_12S,Contact-Preserving Adjustment,4.779999999999696
+E1,1,hard_910277,hard,0,TABLE_DROP,Other/Unclear,4.359999999999742
+E1,1,hard_910344,hard,0,DROP_AFTER_HANDOFF,Contact-Preserving Adjustment,4.459999999999731
+E1,1,hard_910074,hard,1,SUCCESS_12S,Contact-Preserving Adjustment,4.419999999999735
+E2,2,inward_extra_250043,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.279999999999751
+E2,2,inward_extra_250051,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.539999999999722
+E2,2,inward_extra_250131,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.459999999999731
+E2,2,k48r_valid_00004,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.819999999999691
+E2,2,k48r_valid_00009,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.2999999999997485
+E2,2,k48r_valid_00036,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.499999999999726
+E2,2,k48r_valid_00168,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.479999999999729
+E2,2,s7_p25_a+0.000_e0.000,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+E2,2,s7_p25_a+0.000_e0.008,heuristic,0,DROP_AFTER_HANDOFF,Hybrid,7.199999999999429
+E2,2,s7_p25_a+0.012_e0.000,heuristic,1,SUCCESS_12S,Release-Recatch,7.199999999999429
+E2,2,s7_p25_a+0.012_e0.008,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+E2,2,s7_p25_a-0.012_e0.000,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+E2,2,s7_p25_a-0.012_e0.008,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+E2,2,slide_quota_400058,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.579999999999718
+E2,2,slide_quota_400463,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.579999999999718
+E2,2,slide_quota_400496,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.519999999999724
+E2,2,slide_quota_400656,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.219999999999757
+E2,2,hard_910024,hard,0,LOST_GRASP,Contact-Preserving Adjustment,4.55999999999972
+E2,2,hard_910120,hard,1,SUCCESS_12S,Contact-Preserving Adjustment,4.259999999999753
+E2,2,hard_910242,hard,1,SUCCESS_12S,Contact-Preserving Adjustment,4.779999999999696
+E2,2,hard_910277,hard,0,TABLE_DROP,Other/Unclear,4.3999999999997375
+E2,2,hard_910344,hard,0,DROP_AFTER_HANDOFF,Contact-Preserving Adjustment,4.459999999999731
+E2,2,hard_910074,hard,1,SUCCESS_12S,Contact-Preserving Adjustment,4.419999999999735
+E3,3,inward_extra_250043,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.279999999999751
+E3,3,inward_extra_250051,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.539999999999722
+E3,3,inward_extra_250131,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.459999999999731
+E3,3,k48r_valid_00004,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.819999999999691
+E3,3,k48r_valid_00009,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.2999999999997485
+E3,3,k48r_valid_00036,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.499999999999726
+E3,3,k48r_valid_00168,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.479999999999729
+E3,3,s7_p25_a+0.000_e0.000,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+E3,3,s7_p25_a+0.000_e0.008,heuristic,0,DROP_AFTER_HANDOFF,Hybrid,7.199999999999429
+E3,3,s7_p25_a+0.012_e0.000,heuristic,1,SUCCESS_12S,Release-Recatch,7.199999999999429
+E3,3,s7_p25_a+0.012_e0.008,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+E3,3,s7_p25_a-0.012_e0.000,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+E3,3,s7_p25_a-0.012_e0.008,heuristic,1,SUCCESS_12S,Hybrid,7.199999999999429
+E3,3,slide_quota_400058,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.579999999999718
+E3,3,slide_quota_400463,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.579999999999718
+E3,3,slide_quota_400496,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.519999999999724
+E3,3,slide_quota_400656,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.219999999999757
+E3,3,hard_910024,hard,0,LOST_GRASP,Contact-Preserving Adjustment,4.55999999999972
+E3,3,hard_910120,hard,1,SUCCESS_12S,Contact-Preserving Adjustment,4.259999999999753
+E3,3,hard_910242,hard,0,DROP_AFTER_HANDOFF,Other/Unclear,4.459999999999731
+E3,3,hard_910277,hard,1,SUCCESS_12S,Hybrid,4.0999999999997705
+E3,3,hard_910344,hard,0,DROP_AFTER_HANDOFF,Contact-Preserving Adjustment,4.459999999999731
+E3,3,hard_910074,hard,1,SUCCESS_12S,Contact-Preserving Adjustment,4.419999999999735
+E4,4,inward_extra_250043,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.279999999999751
+E4,4,inward_extra_250051,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.539999999999722
+E4,4,inward_extra_250131,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.459999999999731
+E4,4,k48r_valid_00004,heuristic,1,SUCCESS_12S,Other/Unclear,3.319999999999856
+E4,4,k48r_valid_00009,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.2999999999997485
+E4,4,k48r_valid_00036,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.499999999999726
+E4,4,k48r_valid_00168,heuristic,1,SUCCESS_12S,Other/Unclear,2.9799999999998934
+E4,4,s7_p25_a+0.000_e0.000,heuristic,0,LOST_GRASP,Hybrid,7.199999999999429
+E4,4,s7_p25_a+0.000_e0.008,heuristic,0,DROP_AFTER_HANDOFF,Hybrid,7.199999999999429
+E4,4,s7_p25_a+0.012_e0.000,heuristic,1,SUCCESS_12S,Hybrid,6.419999999999515
+E4,4,s7_p25_a+0.012_e0.008,heuristic,1,SUCCESS_12S,Hybrid,6.299999999999528
+E4,4,s7_p25_a-0.012_e0.000,heuristic,1,SUCCESS_12S,Hybrid,5.91999999999957
+E4,4,s7_p25_a-0.012_e0.008,heuristic,1,SUCCESS_12S,Hybrid,6.419999999999515
+E4,4,slide_quota_400058,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.579999999999718
+E4,4,slide_quota_400463,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.579999999999718
+E4,4,slide_quota_400496,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.519999999999724
+E4,4,slide_quota_400656,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.219999999999757
+E4,4,hard_910024,hard,0,LOST_GRASP,Contact-Preserving Adjustment,4.55999999999972
+E4,4,hard_910120,hard,1,SUCCESS_12S,Contact-Preserving Adjustment,4.259999999999753
+E4,4,hard_910242,hard,1,SUCCESS_12S,Other/Unclear,3.2799999999998604
+E4,4,hard_910277,hard,1,SUCCESS_12S,Hybrid,4.0999999999997705
+E4,4,hard_910344,hard,0,DROP_AFTER_HANDOFF,Contact-Preserving Adjustment,4.459999999999731
+E4,4,hard_910074,hard,1,SUCCESS_12S,Contact-Preserving Adjustment,4.419999999999735
+E5,5,inward_extra_250043,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.279999999999751
+E5,5,inward_extra_250051,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.539999999999722
+E5,5,inward_extra_250131,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.459999999999731
+E5,5,k48r_valid_00004,heuristic,1,SUCCESS_12S,Other/Unclear,3.319999999999856
+E5,5,k48r_valid_00009,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.2999999999997485
+E5,5,k48r_valid_00036,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.499999999999726
+E5,5,k48r_valid_00168,heuristic,1,SUCCESS_12S,Other/Unclear,2.9799999999998934
+E5,5,s7_p25_a+0.000_e0.000,heuristic,1,SUCCESS_12S,Hybrid,6.419999999999515
+E5,5,s7_p25_a+0.000_e0.008,heuristic,0,DROP_AFTER_HANDOFF,Hybrid,6.419999999999515
+E5,5,s7_p25_a+0.012_e0.000,heuristic,1,SUCCESS_12S,Hybrid,6.299999999999528
+E5,5,s7_p25_a+0.012_e0.008,heuristic,1,SUCCESS_12S,Hybrid,5.91999999999957
+E5,5,s7_p25_a-0.012_e0.000,heuristic,1,SUCCESS_12S,Hybrid,5.91999999999957
+E5,5,s7_p25_a-0.012_e0.008,heuristic,1,SUCCESS_12S,Hybrid,6.419999999999515
+E5,5,slide_quota_400058,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.579999999999718
+E5,5,slide_quota_400463,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.579999999999718
+E5,5,slide_quota_400496,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.519999999999724
+E5,5,slide_quota_400656,heuristic,1,SUCCESS_12S,Contact-Preserving Adjustment,4.219999999999757
+E5,5,hard_910024,hard,0,LOST_GRASP,Contact-Preserving Adjustment,4.55999999999972
+E5,5,hard_910120,hard,1,SUCCESS_12S,Contact-Preserving Adjustment,4.259999999999753
+E5,5,hard_910242,hard,1,SUCCESS_12S,Other/Unclear,3.2799999999998604
+E5,5,hard_910277,hard,1,SUCCESS_12S,Other/Unclear,3.399999999999847
+E5,5,hard_910344,hard,0,DROP_AFTER_HANDOFF,Contact-Preserving Adjustment,4.459999999999731
+E5,5,hard_910074,hard,1,SUCCESS_12S,Contact-Preserving Adjustment,4.419999999999735

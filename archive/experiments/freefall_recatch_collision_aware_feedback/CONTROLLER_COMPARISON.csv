@@ -1,0 +1,7 @@
+ic_id,controller,horiz_err_reduction_8,first_contact_step,first_contact_bodies,housing_collision,first_housing_step,first_housing_geoms,first_finger_step,jaw_entry,first_bil_step,SUCCESS_NEW,CATCH_HANDOFF_SUCCESS,SN_mean_theta,SN_mean_pos
+perp_off01_r15,orig_P,0.0029907915161798554,2,"[""hand""]",1,2,"[""geom_66""]",,0,,0,0,26.188512614637222,437.27287061883453
+perp_off01_r15,orig_O,-0.06766751291951555,10,"[""world""]",0,,[],,0,,0,0,83.4106070528499,137.93656618542136
+perp_off01_r15,corr_O_nopred,0.0276945565905639,6,"[""hand"", ""left_finger""]",1,6,"[""geom_66""]",6,0,,0,0,82.89831648742279,78.29805887161365
+perp_off01_r15,corr_O,0.026399945575962543,6,"[""left_finger""]",0,,[],6,0,,0,0,88.08697810916799,117.21152114348891
+perp_off01_r15,corr_P_nopred,0.03863391839973833,6,"[""left_finger"", ""right_finger""]",0,,[],6,1,6,0,0,87.14030442197631,34.66105063288215
+perp_off01_r15,corr_P,0.038533316333726066,6,"[""left_finger"", ""right_finger""]",0,,[],6,1,6,0,0,86.60503430320824,34.31600317502102

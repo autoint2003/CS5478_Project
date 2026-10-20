@@ -1,0 +1,7 @@
+variant,first_bil,correct_axial,max_sustained,stable_lift,SN,fail
+A,6,0,1,0,0,B_relative_motion_too_high
+B,5,0,2,0,0,B_relative_motion_too_high
+C,9,0,11,1,0,D_cylinder_position_error
+D,6,0,2,0,0,B_relative_motion_too_high
+E,7,0,46,1,0,E_cylinder_orientation_error
+F,7,0,46,1,0,E_cylinder_orientation_error

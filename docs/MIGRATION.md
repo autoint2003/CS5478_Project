@@ -161,3 +161,61 @@ Shared implementations moved out of experiment scripts. The experiment files imp
 - Top-level `demo_results/` renamed to `results/archive/demo_results/` after a SHA-256 inventory. The inventory is `results/archive/demo_results_sha256.txt`.
 
 Formal packages do not import `experiments/`. Details and the regression record are in `docs/REFACTOR_AUDIT.md`.
+
+## K49 expert / adaptive-g cleanup (post Round 3)
+
+- `scripts/_tmp_organize_new_files.py` -> `data_generation/maintenance/organize_k49_new_files.py`
+
+- `scripts/audit_grasp_configuration_migration.py` -> `evaluation/audit_grasp_configuration_migration.py`
+- `scripts/audit_mechanism_selection_feasibility.py` -> `evaluation/audit_mechanism_selection_feasibility.py`
+- `scripts/audit_handoff_40ms_advantage.py` -> `experiments/handoff/audit_handoff_40ms_advantage.py`
+- `scripts/audit_reward_time_handoff.py` -> `experiments/handoff/audit_reward_time_handoff.py`
+- `scripts/benchmark_return_to_nominal_pose_before_handoff.py` -> `experiments/handoff/benchmark_return_to_nominal_pose_before_handoff.py`
+- `scripts/benchmark_pose_correction_counterfactual.py` -> `experiments/handoff/benchmark_pose_correction_counterfactual.py`
+- `scripts/diagnose_grpo_v2_regression.py` -> `experiments/handoff/diagnose_grpo_v2_regression.py`
+- `scripts/pilot_sliding_position_correction_v1.py` -> `experiments/sliding/pilot_sliding_position_correction_v1.py`
+- `scripts/pilot_return_aware_sliding_k49.py` -> `experiments/sliding/pilot_return_aware_sliding_k49.py`
+- `scripts/pilot_k49_slow_return_position_refinement.py` -> `experiments/sliding/pilot_k49_slow_return_position_refinement.py`
+- `scripts/pilot_extended_k49_pose_recovery.py` -> `experiments/sliding/pilot_extended_k49_pose_recovery.py`
+- `scripts/pilot_large_tilt_eccentric_grasp_mining.py` -> `experiments/sliding/pilot_large_tilt_eccentric_grasp_mining.py`
+- `scripts/pilot_gravity_assisted_pivoting.py` -> `experiments/sliding/pilot_gravity_assisted_pivoting.py`
+- `scripts/pilot_wrist_tilt_gravity_pivoting.py` -> `experiments/sliding/pilot_wrist_tilt_gravity_pivoting.py`
+- `scripts/pilot_nontrivial_recovery_ic_mining.py` -> `experiments/sliding/pilot_nontrivial_recovery_ic_mining.py`
+- `scripts/diagnose_k49_return_axial_slip.py` -> `experiments/sliding/diagnose_k49_return_axial_slip.py`
+- `scripts/diagnose_k49_slow_reverse_token48.py` -> `experiments/sliding/diagnose_k49_slow_reverse_token48.py`
+- `scripts/build_hard_recovery_benchmark.py` -> `experiments/sliding/build_hard_recovery_benchmark.py`
+- `scripts/_tmp_axial_overcomp_a2.py` -> `experiments/sliding/_tmp_axial_overcomp_a2.py`
+- `scripts/_tmp_axial_slip_extra_cf.py` -> `experiments/sliding/_tmp_axial_slip_extra_cf.py`
+- `scripts/_tmp_mid_interleaved_return.py` -> `experiments/sliding/_tmp_mid_interleaved_return.py`
+- `scripts/_tmp_partial_return_search.py` -> `experiments/sliding/_tmp_partial_return_search.py`
+- `scripts/_tmp_write_slow_refine_report.py` -> `experiments/sliding/_tmp_write_slow_refine_report.py`
+- `scripts/_tmp_list_slide_recatch_ics.py` -> `experiments/sliding/_tmp_list_slide_recatch_ics.py`
+- `scripts/_tmp_finalize_sliding_recatch_dataset.py` -> `experiments/sliding/_tmp_finalize_sliding_recatch_dataset.py`
+- `scripts/_tmp_second_pass_near_threshold.py` -> `experiments/sliding/_tmp_second_pass_near_threshold.py`
+- `scripts/_tmp_pass3_recatch.py` -> `experiments/sliding/_tmp_pass3_recatch.py`
+- `scripts/_tmp_pass4_mine_unilateral_snapshots.py` -> `experiments/sliding/_tmp_pass4_mine_unilateral_snapshots.py`
+- `scripts/_tmp_list_short_handoff_ics.py` -> `experiments/sliding/_tmp_list_short_handoff_ics.py`
+- `scripts/_tmp_verify_large_tilt_cpp.py` -> `experiments/sliding/_tmp_verify_large_tilt_cpp.py`
+- `scripts/_tmp_finalize_in_recovery_recatch.py` -> `experiments/recatch/k49/_tmp_finalize_in_recovery_recatch.py`
+- `scripts/_tmp_verify_inrec_contact.py` -> `experiments/recatch/k49/_tmp_verify_inrec_contact.py`
+- `scripts/_tmp_finalize_dynamic_recatch.py` -> `experiments/recatch/k49/_tmp_finalize_dynamic_recatch.py`
+- `scripts/_tmp_probe_type2_hard.py` -> `experiments/recatch/k49/_tmp_probe_type2_hard.py`
+- `scripts/_tmp_finalize_horiz_endcatch.py` -> `experiments/recatch/k49/_tmp_finalize_horiz_endcatch.py`
+- `scripts/_tmp_mine_horizontal_ics.py` -> `experiments/recatch/k49/_tmp_mine_horizontal_ics.py`
+- `scripts/_tmp_probe_horiz_gen.py` -> `experiments/recatch/k49/_tmp_probe_horiz_gen.py`
+- `scripts/_tmp_analyze_horiz_results.py` -> `experiments/recatch/k49/_tmp_analyze_horiz_results.py`
+- `scripts/_tmp_finalize_capture_brake.py` -> `experiments/recatch/k49/_tmp_finalize_capture_brake.py`
+- `scripts/_tmp_verify_capture_brake.py` -> `experiments/recatch/k49/_tmp_verify_capture_brake.py`
+- `scripts/_tmp_probe_brake_318.py` -> `experiments/recatch/k49/_tmp_probe_brake_318.py`
+- `scripts/_tmp_strong_rot_capture.py` -> `experiments/recatch/k49/_tmp_strong_rot_capture.py`
+- `scripts/_tmp_lost_grasp_pass2.py` -> `experiments/recatch/k49/_tmp_lost_grasp_pass2.py`
+- `scripts/_tmp_verify_lost_grasp.py` -> `experiments/recatch/k49/_tmp_verify_lost_grasp.py`
+- `scripts/_tmp_fix_lost_q.py` -> `experiments/recatch/k49/_tmp_fix_lost_q.py`
+- `scripts/_tmp_finalize_ball_impact_report.py` -> `experiments/ball_impact/_tmp_finalize_ball_impact_report.py`
+- `scripts/_tmp_verify_ball_impact_experts.py` -> `experiments/ball_impact/_tmp_verify_ball_impact_experts.py`
+- `scripts/pilot_adaptive_g.py` -> `experiments/adaptive_g/pilot_adaptive_g.py`
+- `scripts/run_adaptive_g_full.py` -> `experiments/adaptive_g/run_adaptive_g_full.py`
+- `scripts/smoke_adaptive_g.py` -> `experiments/adaptive_g/smoke_adaptive_g.py`
+- `scripts/verify_adaptive_g_schedule.py` -> `experiments/adaptive_g/verify_adaptive_g_schedule.py`
+- `scripts/eval_adaptive_g_baseline.py` -> `experiments/adaptive_g/eval_adaptive_g_baseline.py`
+- `scripts/_tmp_organize_new_files.py` -> `data_generation/maintenance/organize_k49_new_files.py`

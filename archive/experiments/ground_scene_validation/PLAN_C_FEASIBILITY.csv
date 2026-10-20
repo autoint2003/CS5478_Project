@@ -1,0 +1,5 @@
+speed,offset,approach,root_i,detached,recatch,reason
+1.5,0.0,top,0,0,0,no_detach_or_drop
+1.5,0.012,top,1,0,0,no_detach_or_drop
+2.5,0.0,top,2,0,0,no_detach_or_drop
+2.5,0.012,top,3,0,0,no_detach_or_drop

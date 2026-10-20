@@ -1,0 +1,13 @@
+ic_id,slide_ok,slide_strategy,slide_elapsed,vert_ok,vert_strategy,vert_elapsed,competition_tag,rollouts,physics_s,wall_s,note
+hrv1_920047,False,,,True,later_close,0.8799999999999035,RECATCH_FAVORABLE,3,17.599999999999824,15.40026719999878,active_also_run_on_selected_level1
+hrv1_920064,True,inward_reseat,1.5399999999998308,True,later_close,0.8799999999999035,BOTH_VERIFIED,3,27.139999999999652,15.121008099995379,active_also_run_on_selected_level1
+hrv1_920099,True,inward_reseat,1.5399999999998308,False,,,SLIDING_FAVORABLE,4,15.17999999999965,6.61993000000075,active_also_run_on_selected_level1
+hrv1_920131,True,inward_reseat,1.5399999999998308,False,,,SLIDING_FAVORABLE,4,15.159999999999652,7.265840100000787,active_also_run_on_selected_level1
+hard_910101,True,inward_reseat,1.219999999999866,False,,,SLIDING_FAVORABLE,4,14.919999999999678,6.13022379999893,active_also_run_on_selected_level1
+hard_910305,True,inward_reseat,1.219999999999866,False,,,SLIDING_FAVORABLE,4,14.839999999999687,10.527708599998732,active_also_run_on_selected_level1
+hrv1_920031,True,inward_reseat,1.219999999999866,True,follow_early,0.7399999999999185,BOTH_VERIFIED,2,25.959999999999784,12.75652710000577,active_also_run_on_selected_level1
+hrv1_920116,True,inward_reseat,1.219999999999866,True,follow_early,0.7199999999999207,BOTH_VERIFIED,2,25.939999999999785,14.278707899997244,active_also_run_on_selected_level1
+hrv1_920151,True,inward_reseat,1.219999999999866,True,later_close,0.8399999999999079,BOTH_VERIFIED,3,26.779999999999696,13.859308899998723,active_also_run_on_selected_level1
+hard_910112,True,inward_reseat,1.5399999999998308,True,follow_early,0.7599999999999163,BOTH_VERIFIED,2,26.29999999999975,14.109298300005321,active_also_run_on_selected_level1
+hard_910172,True,inward_reseat,1.5399999999998308,True,later_close,0.8799999999999035,BOTH_VERIFIED,3,27.159999999999652,14.178692800000135,active_also_run_on_selected_level1
+hard_910220,True,controlled_slide,1.5599999999998286,True,later_close,0.8999999999999013,BOTH_VERIFIED,3,27.199999999999648,17.491662500004168,active_also_run_on_selected_level1

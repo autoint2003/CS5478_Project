@@ -1,0 +1,24 @@
+ic_id,source,categories,sft_success,grpo_success,transition,sft_mechanism,grpo_mechanism,sft_reason,grpo_reason,sft_handoff,grpo_handoff
+inward_extra_250043,heuristic,gravity_assisted_in_hand_sliding,1,1,both_ok,Contact-Preserving Adjustment,Contact-Preserving Adjustment,SUCCESS_12S,SUCCESS_12S,4.279999999999751,4.279999999999751
+inward_extra_250051,heuristic,gravity_assisted_in_hand_sliding,1,1,both_ok,Contact-Preserving Adjustment,Contact-Preserving Adjustment,SUCCESS_12S,SUCCESS_12S,4.539999999999722,4.539999999999722
+inward_extra_250131,heuristic,gravity_assisted_in_hand_sliding,1,1,both_ok,Contact-Preserving Adjustment,Contact-Preserving Adjustment,SUCCESS_12S,SUCCESS_12S,5.73999999999959,4.459999999999731
+k48r_valid_00004,heuristic,gravity_assisted_in_hand_sliding|vertical_recatch,1,1,both_ok,Hybrid,Other/Unclear,SUCCESS_12S,SUCCESS_12S,4.019999999999779,3.319999999999856
+k48r_valid_00009,heuristic,gravity_assisted_in_hand_sliding,1,1,both_ok,Contact-Preserving Adjustment,Contact-Preserving Adjustment,SUCCESS_12S,SUCCESS_12S,4.2999999999997485,4.2999999999997485
+k48r_valid_00036,heuristic,gravity_assisted_in_hand_sliding|vertical_recatch,1,1,both_ok,Contact-Preserving Adjustment,Contact-Preserving Adjustment,SUCCESS_12S,SUCCESS_12S,5.7799999999995855,4.499999999999726
+k48r_valid_00168,heuristic,gravity_assisted_in_hand_sliding|vertical_recatch,1,1,both_ok,Release-Recatch,Other/Unclear,SUCCESS_12S,SUCCESS_12S,3.6799999999998163,2.9799999999998934
+s7_p25_a+0.000_e0.000,heuristic,horizontal_recatch,1,1,both_ok,Hybrid,Hybrid,SUCCESS_12S,SUCCESS_12S,7.199999999999429,6.419999999999515
+s7_p25_a+0.000_e0.008,heuristic,horizontal_recatch,1,0,SFT_ok_GRPO_fail,Hybrid,Hybrid,SUCCESS_12S,DROP_AFTER_HANDOFF,7.199999999999429,6.419999999999515
+s7_p25_a+0.012_e0.000,heuristic,horizontal_recatch,1,1,both_ok,Hybrid,Hybrid,SUCCESS_12S,SUCCESS_12S,7.199999999999429,6.299999999999528
+s7_p25_a+0.012_e0.008,heuristic,horizontal_recatch,1,1,both_ok,Hybrid,Hybrid,SUCCESS_12S,SUCCESS_12S,7.199999999999429,5.91999999999957
+s7_p25_a-0.012_e0.000,heuristic,horizontal_recatch,1,1,both_ok,Hybrid,Hybrid,SUCCESS_12S,SUCCESS_12S,7.199999999999429,5.91999999999957
+s7_p25_a-0.012_e0.008,heuristic,horizontal_recatch,1,1,both_ok,Hybrid,Hybrid,SUCCESS_12S,SUCCESS_12S,7.199999999999429,6.419999999999515
+slide_quota_400058,heuristic,gravity_assisted_in_hand_sliding,1,1,both_ok,Contact-Preserving Adjustment,Contact-Preserving Adjustment,SUCCESS_12S,SUCCESS_12S,4.579999999999718,4.579999999999718
+slide_quota_400463,heuristic,gravity_assisted_in_hand_sliding|vertical_recatch,1,1,both_ok,Contact-Preserving Adjustment,Contact-Preserving Adjustment,SUCCESS_12S,SUCCESS_12S,5.859999999999577,4.579999999999718
+slide_quota_400496,heuristic,gravity_assisted_in_hand_sliding,1,1,both_ok,Contact-Preserving Adjustment,Contact-Preserving Adjustment,SUCCESS_12S,SUCCESS_12S,4.519999999999724,4.519999999999724
+slide_quota_400656,heuristic,gravity_assisted_in_hand_sliding|vertical_recatch,1,1,both_ok,Contact-Preserving Adjustment,Contact-Preserving Adjustment,SUCCESS_12S,SUCCESS_12S,4.219999999999757,4.219999999999757
+hard_910024,hard,vertical_recatch,0,0,both_fail,Contact-Preserving Adjustment,Contact-Preserving Adjustment,LOST_GRASP,LOST_GRASP,4.55999999999972,4.55999999999972
+hard_910120,hard,gravity_assisted_in_hand_sliding,1,1,both_ok,Contact-Preserving Adjustment,Contact-Preserving Adjustment,SUCCESS_12S,SUCCESS_12S,5.539999999999612,4.259999999999753
+hard_910242,hard,gravity_assisted_in_hand_sliding,0,1,SFT_fail_GRPO_ok,Other/Unclear,Other/Unclear,LOST_GRASP,SUCCESS_12S,3.9799999999997833,3.2799999999998604
+hard_910277,hard,vertical_recatch,1,1,both_ok,Hybrid,Other/Unclear,SUCCESS_12S,SUCCESS_12S,4.0999999999997705,3.399999999999847
+hard_910344,hard,vertical_recatch,0,0,both_fail,Contact-Preserving Adjustment,Contact-Preserving Adjustment,DROP_AFTER_HANDOFF,DROP_AFTER_HANDOFF,4.459999999999731,4.459999999999731
+hard_910074,hard,gravity_assisted_in_hand_sliding,1,1,both_ok,Contact-Preserving Adjustment,Contact-Preserving Adjustment,SUCCESS_12S,SUCCESS_12S,4.419999999999735,4.419999999999735

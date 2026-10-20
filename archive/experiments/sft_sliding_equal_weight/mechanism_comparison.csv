@@ -1,0 +1,18 @@
+id,data_labels,original_result,original_success,original_mechanism,original_first_token,equal_result,equal_success,equal_mechanism,equal_first_token
+inward_extra_250043,"[""gravity_assisted_in_hand_sliding""]",TABLE_DROP,False,Other/Unclear,36,SUCCESS_12S,True,Contact-Preserving Adjustment,10
+inward_extra_250051,"[""gravity_assisted_in_hand_sliding""]",LOST_GRASP,False,Hybrid,36,SUCCESS_12S,True,Contact-Preserving Adjustment,10
+inward_extra_250131,"[""gravity_assisted_in_hand_sliding""]",DROP_AFTER_HANDOFF,False,Hybrid,36,SUCCESS_12S,True,Contact-Preserving Adjustment,4
+k48r_valid_00004,"[""gravity_assisted_in_hand_sliding"", ""vertical_recatch""]",DROP_AFTER_HANDOFF,False,Release-Recatch,36,SUCCESS_12S,True,Hybrid,36
+k48r_valid_00009,"[""gravity_assisted_in_hand_sliding""]",LOST_GRASP,False,Hybrid,36,SUCCESS_12S,True,Contact-Preserving Adjustment,10
+k48r_valid_00036,"[""gravity_assisted_in_hand_sliding"", ""vertical_recatch""]",SUCCESS_12S,True,Release-Recatch,36,SUCCESS_12S,True,Contact-Preserving Adjustment,4
+k48r_valid_00168,"[""gravity_assisted_in_hand_sliding"", ""vertical_recatch""]",LOST_GRASP,False,Hybrid,36,SUCCESS_12S,True,Release-Recatch,36
+s7_p25_a+0.000_e0.000,"[""horizontal_recatch""]",SUCCESS_12S,True,Hybrid,34,SUCCESS_12S,True,Hybrid,34
+s7_p25_a+0.000_e0.008,"[""horizontal_recatch""]",SUCCESS_12S,True,Hybrid,34,SUCCESS_12S,True,Hybrid,34
+s7_p25_a+0.012_e0.000,"[""horizontal_recatch""]",SUCCESS_12S,True,Hybrid,34,SUCCESS_12S,True,Hybrid,34
+s7_p25_a+0.012_e0.008,"[""horizontal_recatch""]",SUCCESS_12S,True,Release-Recatch,34,SUCCESS_12S,True,Hybrid,34
+s7_p25_a-0.012_e0.000,"[""horizontal_recatch""]",SUCCESS_12S,True,Hybrid,34,SUCCESS_12S,True,Hybrid,34
+s7_p25_a-0.012_e0.008,"[""horizontal_recatch""]",SUCCESS_12S,True,Hybrid,34,SUCCESS_12S,True,Hybrid,34
+slide_quota_400058,"[""gravity_assisted_in_hand_sliding""]",TABLE_DROP,False,Other/Unclear,36,SUCCESS_12S,True,Contact-Preserving Adjustment,10
+slide_quota_400463,"[""gravity_assisted_in_hand_sliding"", ""vertical_recatch""]",LOST_GRASP,False,Hybrid,36,SUCCESS_12S,True,Contact-Preserving Adjustment,4
+slide_quota_400496,"[""gravity_assisted_in_hand_sliding""]",DROP_AFTER_HANDOFF,False,Release-Recatch,36,SUCCESS_12S,True,Contact-Preserving Adjustment,10
+slide_quota_400656,"[""gravity_assisted_in_hand_sliding"", ""vertical_recatch""]",SUCCESS_12S,True,Hybrid,36,SUCCESS_12S,True,Contact-Preserving Adjustment,10

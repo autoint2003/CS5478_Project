@@ -1,0 +1,46 @@
+# Minimal unified Transformer training configuration (DO NOT launch yet).
+# Rebuild dataset first: python -u scripts/build_unified_dataset.py
+# K49 audit: python -u scripts/audit_k49.py
+# Golden replay: python -u scripts/replay_golden_experts.py
+
+schema_version: unified_experts_v1
+dataset:
+  tracked_index: datasets/unified_experts/index.json
+  tracked_splits: datasets/unified_experts/splits.json
+  tracked_manifest: datasets/unified_experts/manifest.jsonl
+  heavy_records: data/unified_experts/records/
+  legacy_supervised: data/supervised_targets_with_horizontal.jsonl
+
+observation:
+  dim: 39
+  version: obs_gt_airborne_39
+  privileged_runtime: false
+
+action:
+  interface: legal_7d
+  control_period_s: 0.02
+  vocab: K49
+  config_id: K49_tok48_wy0p25
+  handoff_token: 47
+  token_48: secure_slow_reverse_wrist
+  remapping_allowed: false
+
+success:
+  metric: SUCCESS_NEW
+  also_track: SUCCESS_12S
+
+plans:
+  A: continuous_contact_sliding_pivot  # legacy elevated + Plan A mechanisms
+  B: legal_release_recatch             # legacy elevated
+  C: ground_ball_impact_full_detach_recatch
+  runtime_policy: single_transformer   # not three controllers
+
+training:
+  status: not_started
+  sft: false
+  grpo: false
+  notes: >
+    Plan C has only two SUCCESS_NEW roots (gbi_010, gbi_022); both are regression
+    fixtures. Do not treat them as a held-out generalization estimate.
+    Direct K49 nearest-neighbor quantization of Plan C continuous experts fails
+    physical replay early (see results/consolidation/K49_REPRESENTABILITY.md).

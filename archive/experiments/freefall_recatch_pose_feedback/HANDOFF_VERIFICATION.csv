@@ -1,0 +1,2 @@
+method,cut,SUCCESS_NEW,CATCH_HANDOFF_SUCCESS,SN_mean_theta,SN_mean_pos,held_s,fail_class
+early_wrist_best,10,1,0,0.7928900014565611,2.0798196970521934,12.00000000000099,B_relative_motion_too_high

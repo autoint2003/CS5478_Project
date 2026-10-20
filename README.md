@@ -1,8 +1,29 @@
-# CS5478 K48 grasp recovery
+# CS5478 grasp recovery (Plans A / B / C)
 
-A MuJoCo Panda recovers a cylinder after a ball impact. Recovery is a legal 47-token motion codebook plus a bounded residual. Token 47 is HANDOFF: it ends recovery, consumes no physics step, and does not decode a residual. The recovery clock stops at 4 seconds. After handoff, the unchanged nominal controller lifts and must hold the grasp for 12 seconds. That `SUCCESS_12S` outcome is the only recovery success. A 3 mm geometric improvement is not a success gate.
+A MuJoCo Panda recovers a cylinder after disturbance. Legal recovery uses a **7D** action interface at **20 ms**, **39D** runtime observations, and the frozen **K49** vocabulary (IDs 0–48; **HANDOFF = 47**; token **48** = slow reverse wrist). After HANDOFF the unchanged nominal controller continues; task success is **SUCCESS_NEW** (with **SUCCESS_12S** tracked). **GROUND_SCENE** adds irreversible **GROUND_DROP**.
 
-The audited training set is the supervised and GRPO entry. `scripts/train.py` and `scripts/evaluate.py` call `training/unified_k48.py`. That file dispatches to `training/train_sft.py` and `training/train_grpo.py`. Formal modules do not import `experiments/`.
+Plans A/B/C are offline expert families for a **single** Transformer policy (not three runtime controllers). Plan C has two verified continuous-action SUCCESS_NEW experts (`gbi_010`, `gbi_022`) on GROUND_SCENE.
+
+**Do not start SFT/GRPO until the K49 Plan C representability gap is addressed** (see `results/consolidation/K49_REPRESENTABILITY.md` / `docs/FINAL_CONSOLIDATION_REPORT.md`).
+
+| Doc | Purpose |
+|---|---|
+| `ARCHITECTURE.md` | Minimal dependency map and entry points |
+| `ARCHIVE_MANIFEST.md` | Historical experiment archive index |
+| `REPRODUCIBILITY.md` | Golden replay and checkpoint recovery |
+| `DATASET_SCHEMA.md` | Unified expert schema `unified_experts_v1` |
+| `docs/FINAL_CONSOLIDATION_REPORT.md` | Consolidation summary |
+| `config/training/unified_plan_abc.yaml` | Minimal training config (not launched) |
+
+### Consolidation commands
+
+```powershell
+python -u scripts/build_unified_dataset.py
+python -u scripts/replay_golden_experts.py
+python -u scripts/audit_k49.py
+```
+
+Tracked dataset manifests: `datasets/unified_experts/`. Heavy tapes: `data/unified_experts/` (gitignored). Archive checkpoint: tag `archive/pre-consolidation-20261021-src`.
 
 ## Directory layout
 
@@ -11,25 +32,26 @@ Run commands from the repository root.
 | Path | Role |
 |---|---|
 | `assets/` | MuJoCo XML, including `scene_ballistic_impact.xml` |
-| `config/` | `simulation/`, `controllers/`, `recovery/`, `training/k48/` (active recovery v3), `training/k47/`, `training/legacy/` |
+| `config/` | `simulation/`, `controllers/`, `recovery/`, `training/` (incl. `unified_plan_abc.yaml`) |
 | `controllers/` | `nominal.py`, `cartesian/`, `gripper/`, `recovery/action_map.py` |
-| `envs/` | `step_legal.py`, `ballistic_impact.py`, `simulation/`, `observations/`, `contacts/`, `outcomes/`, `initialization/` |
+| `envs/` | `step_legal.py`, `ballistic_impact.py`, `simulation/` (incl. `ground_sim.py`), `observations/`, `contacts/`, `outcomes/`, `initialization/` |
 | `sensors/` | Finger-pad tactile array and the hand-x offset estimate `lateral_offset.py` |
-| `models/` | K48 policy and checkpoint. `airborne_v3.py` is the 39-D policy and `step_v3`. `historical/` is K33/K36 |
-| `data_generation/` | Official generators, `strategies/`, `oracles/`, `initial_conditions/`, `recording/`, `validation/`, `maintenance/` |
-| `training/` | `train_sft.py`, `train_grpo.py`, `dataset.py`, `grpo_progress.py`, `k47_codebook.py`, `reward_v2.py`, `unified_k48.py` |
-| `evaluation/` | Closed-loop K48 eval, data audit, recatch legality, handoff-target check |
-| `visualization/` | Camera, captions, MP4 encoding, tape replay, and policy-vs-nominal videos |
-| `experiments/` | `ball_impact/`, `sliding/`, `recatch/{airborne,natural_loss,legal,top_impact}/`, `handoff/`, `legacy/` |
-| `scripts/` | Thin entry points. Package roles are in `docs/MODULE_ORGANIZATION.md`. |
-| `tests/` | Regression tests. `tests/fixtures/physics_state_baseline.npz` is the later-change state baseline |
-| `data/` | Manifests, demonstrations, and `data/snapshots/` |
-| `results/` | New SFT, GRPO, evaluation, and diagnostic outputs |
-| `results/archive/demo_results/` | Historical diagnostics and the K=47 checkpoint used to initialize K=48 |
-| `mujoco_menagerie/` | Vendored robot models. Not project control code |
-| `docs/` | `MODULE_ORGANIZATION.md` (sole package map), `MIGRATION.md`, `FINAL_REFACTOR_CHECK.md`, and course PDFs in `docs/coursework/` |
+| `models/` | Policy modules. `airborne_v3.py` is the 39-D policy and `step_v3`. `historical/` is K33/K36 |
+| `data_generation/` | Generators and `strategies/` (incl. Plan C `ground_*.py`) |
+| `training/` | `train_sft.py`, `train_grpo.py`, `action_vocab_k49.py`, `unified_k48.py`, … |
+| `evaluation/` | Closed-loop eval, audits, SUCCESS_NEW helpers |
+| `visualization/` | Camera, captions, MP4 encoding, tape replay |
+| `experiments/` | Historical / diagnostic experiments (not formal runtime deps) |
+| `archive/` | Checkpoint notes, golden copies, experiment index |
+| `datasets/` | Tracked unified expert manifests |
+| `scripts/` | Entry points (`build_unified_dataset`, `replay_golden_experts`, `audit_k49`, `train`, `evaluate`, Plan C runners) |
+| `tests/` | Regression tests (incl. Plan C golden replay) |
+| `data/` | Local manifests, demonstrations, snapshots (gitignored) |
+| `results/` | Local SFT/GRPO/diagnostics (gitignored) |
+| `mujoco_menagerie/` | Vendored robot models |
+| `docs/` | Package map, migration log, consolidation report, coursework PDFs |
 
-`data/`, `results/archive/demo_results/`, and `results/` are gitignored. Training writes under `results/sft/`, `results/grpo/`, and `results/evaluations/`. File moves are listed in `docs/MIGRATION.md`.
+`data/` and `results/` are gitignored. File moves: `docs/MIGRATION.md`. Package map: `docs/MODULE_ORGANIZATION.md`.
 
 ## Dataset
 

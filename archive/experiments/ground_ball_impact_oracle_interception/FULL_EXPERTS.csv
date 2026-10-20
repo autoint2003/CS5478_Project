@@ -1,0 +1,5 @@
+root_id,SUCCESS_NEW,stage_reached,bottleneck,last_reason
+gbi_002,0,D,failed_capture_stabilization,
+gbi_010,0,B,no_bilateral_recatch,
+gbi_014,0,B,no_bilateral_recatch,
+gbi_022,0,none,unreachable_interception,

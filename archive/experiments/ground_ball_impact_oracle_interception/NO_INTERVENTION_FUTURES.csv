@@ -1,0 +1,5 @@
+root,loss_label,loss_obj_z,baseline,n_steps,first_contact_free_t,t_ground_drop,incidental_robot_contact,pure_free_flight,airborne_s
+gbi_002,complete_separation,0.42185155451274536,legal_hold_grip_close_no_chase,121,0.0020000000000000018,0.24200000000000021,False,True,0.24200000000000021
+gbi_010,complete_separation,0.427964738402797,legal_hold_grip_close_no_chase,128,0.0020000000000000018,0.2560000000000002,False,True,0.2560000000000002
+gbi_014,complete_separation,0.4520730022526611,legal_hold_grip_close_no_chase,119,0.0020000000000000018,0.2380000000000002,False,True,0.2380000000000002
+gbi_022,complete_separation,0.4557975322508525,legal_hold_grip_close_no_chase,123,0.0020000000000000018,0.24600000000000022,False,True,0.24600000000000022

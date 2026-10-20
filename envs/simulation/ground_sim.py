@@ -75,6 +75,16 @@ class GroundBallisticSim:
     def park_ball(self) -> None:
         apply_ball_free_state(self, np.array([1.00, 0.80, 1.20]), np.zeros(3))
 
+    def snapshot(self) -> dict:
+        from envs.simulation.grasp_sim import GraspSim
+
+        return GraspSim.snapshot(self)
+
+    def load_snapshot(self, snap) -> None:
+        from envs.simulation.grasp_sim import GraspSim
+
+        GraspSim.load_snapshot(self, snap)
+
     def physics_step(self, residual=None, in_recovery: bool = False) -> None:
         from envs.simulation.grasp_sim import GraspSim
 

@@ -83,14 +83,26 @@ def cpu_adam_state(opt):
     return {"state": state, "param_groups": saved["param_groups"]}
 
 
-def adaptive_resume_plan(checkpoint, out):
-    """Fresh SFT start is epoch 0. A saved adaptive file continues after its epoch."""
+def adaptive_resume_plan(checkpoint, out, init_checkpoint=None, allow_nonempty_out=False):
+    """Fresh SFT start is epoch 0. A saved adaptive file continues after its epoch.
+
+    ``init_checkpoint`` is the KL reference / fresh-start weights. Defaults to the
+    historical Tree80 SFT path. Independent-G passes the equal-weight SFT explicitly.
+
+    Fresh starts refuse existing ``checkpoint_epoch_*.pt`` / ``ic_log.jsonl`` markers.
+    Sibling folders (e.g. ``datasets/``) do not block a fresh Independent-G run.
+    ``allow_nonempty_out`` is retained for API compatibility and currently unused.
+    """
+    del allow_nonempty_out  # API compatibility with callers; markers gate overwrites.
+    ref = _stored_path(init_checkpoint) if init_checkpoint is not None else SFT_CHECKPOINT
     path = _stored_path(checkpoint)
     destination = Path(out).resolve()
-    if path == SFT_CHECKPOINT.resolve():
-        if destination.exists() and any(destination.iterdir()):
-            raise RuntimeError(f"refusing to overwrite {destination}")
-        return {"epoch": 0, "updates": 0, "init_checkpoint": SFT_CHECKPOINT, "weights": path, "optimizer": None}
+    if path.resolve() == ref.resolve():
+        if destination.exists():
+            markers = list(destination.glob("checkpoint_epoch_*.pt")) + list(destination.glob("ic_log.jsonl"))
+            if markers:
+                raise RuntimeError(f"refusing to overwrite existing run markers in {destination}")
+        return {"epoch": 0, "updates": 0, "init_checkpoint": ref, "weights": path, "optimizer": None}
     if not path.is_file():
         raise RuntimeError(f"missing adaptive checkpoint {path}")
     saved = torch.load(path, map_location="cpu", weights_only=False)
@@ -107,13 +119,13 @@ def adaptive_resume_plan(checkpoint, out):
     for slot in optimizer["state"].values():
         if "exp_avg" not in slot or "exp_avg_sq" not in slot:
             raise RuntimeError(f"{path.name} Adam state is missing exp_avg or exp_avg_sq")
-    init = _stored_path(saved.get("init_checkpoint") or SFT_CHECKPOINT)
-    if init != SFT_CHECKPOINT.resolve():
-        raise RuntimeError(f"adaptive KL reference must stay {SFT_CHECKPOINT}")
+    init = _stored_path(saved.get("init_checkpoint") or ref)
+    if init.resolve() != ref.resolve():
+        raise RuntimeError(f"adaptive KL reference must stay {ref}")
     return {
         "epoch": epoch,
         "updates": int(saved.get("updates") or 0),
-        "init_checkpoint": SFT_CHECKPOINT,
+        "init_checkpoint": ref,
         "weights": path,
         "optimizer": optimizer,
     }
@@ -626,7 +638,173 @@ def _epoch_summary(logs, rows, epoch, updates, cumulative, checkpoint_path, init
     }
 
 
+def explore_ic_independent_g(env, model, book, blob, device, limit_s, reward_version, seed, episode_id):
+    """Independent-G only: expand 8→16→32→64 until SUCCESS_12S, then update."""
+    from training.adaptive_independent_g import independent_g_decision, stop_bucket
+
+    group = _sample_group(env, model, book, blob, device, limit_s, reward_version, seed, 0, 8, False)
+    physics = sum(item["recovery_physics"] for item in group)
+    nominal = sum(item["nominal_elapsed"] for item in group)
+    stage_success = {
+        "A": sum(int(item["success"]) for item in group),
+        "B": 0,
+        "C": 0,
+        "D": 0,
+    }
+    while True:
+        state = {
+            "rollouts_done": len(group),
+            "success_count": sum(int(item["success"]) for item in group),
+        }
+        decision = independent_g_decision(state)
+        if decision["action"] == "update":
+            found = bool(state["success_count"])
+            returns = _return_stats(group)
+            log = {
+                "id": episode_id,
+                "updated": True,
+                "exploration": "independent_g",
+                "source": decision["source"],
+                "stage": decision["stage"],
+                "final_g": int(decision["final_g"]),
+                "stop_reason": decision["stop_reason"],
+                "stop_bucket": stop_bucket(int(decision["final_g"]), found),
+                "group_size": len(group),
+                "success_count": sum(int(item.get("label") == "SUCCESS_12S") for item in group),
+                "found_success": found,
+                "stage_a_success": stage_success["A"],
+                "stage_b_success": stage_success["B"],
+                "stage_c_success": stage_success["C"],
+                "stage_d_success": stage_success["D"],
+                "stage_a_rollouts": 8,
+                "stage_b_rollouts": max(0, min(8, len(group) - 8)),
+                "stage_c_rollouts": max(0, min(16, len(group) - 16)),
+                "stage_d_rollouts": max(0, min(32, len(group) - 32)),
+                "tree_uniform_success": 0,
+                "tree_entropy_success": 0,
+                "tree_uniform_rollouts": 0,
+                "tree_entropy_rollouts": 0,
+                "independent_success": found,
+                "recovery_physics": physics,
+                "tree_suffix_physics": 0,
+                "nominal_elapsed": nominal,
+                "return_mean": returns["mean"],
+                "return_std": returns["std"],
+                "return_min": returns["min"],
+                "return_max": returns["max"],
+                "prefix_multiplicity": {"shared_prefix_actions": 0, "max": 0, "mean": 0.0},
+                "rewards": [item["return"] for item in group],
+                "labels": [item["label"] for item in group],
+                "handoff_t": [item.get("handoff_t") for item in group],
+                "outcomes": [item["label"] for item in group],
+                "immediate_handoff": sum(
+                    1 for item in group if item.get("handoff_t") is not None and item["handoff_t"] <= 0.04
+                ),
+            }
+            return log, loss_members(group)
+        add = int(decision["add"])
+        offset = {16: 100, 32: 200, 64: 300}[int(decision["target_g"])]
+        extra = _sample_group(
+            env, model, book, blob, device, limit_s, reward_version, seed, offset, add, False,
+        )
+        group.extend(extra)
+        stage = decision["stage"]
+        stage_success[stage] = sum(int(item["success"]) for item in extra)
+        physics += sum(item["recovery_physics"] for item in extra)
+        nominal += sum(item["nominal_elapsed"] for item in extra)
+
+
+def _validate_merged(env, model, book, device, rows, limit_s, seated_ref):
+    """Deterministic SUCCESS_12S evaluation over a full merged validation list."""
+    from evaluation.classify_validation_skills import classify_mechanism, prepare_blob
+    from evaluation import skill_traces as audit
+
+    per_ic = []
+    for row in rows:
+        with (ROOT / row["snapshot"]).open("rb") as handle:
+            blob = pickle.load(handle)
+        if "ref" not in blob:
+            if seated_ref is not None:
+                try:
+                    blob = prepare_blob(blob, seated_ref)
+                except Exception:
+                    blob = _prepare_blob(blob, seated_ref)
+            else:
+                blob = _prepare_blob(blob, seated_ref)
+        try:
+            if "capture" in blob:
+                samples, t0, traced, handoff_t = audit.roll_policy_full(
+                    env, model, book, blob, device, limit_s,
+                )
+            else:
+                from evaluation.classify_validation_skills import roll_policy_full_ballistic
+
+                samples, t0, traced, handoff_t = roll_policy_full_ballistic(
+                    env, model, book, blob, device, limit_s,
+                )
+            reason = traced.get("reason") if isinstance(traced, dict) else None
+            success = bool(traced.get("success")) if isinstance(traced, dict) else False
+            if reason is None:
+                # Prefer formal SUCCESS_12S from the traced outcome payload when present.
+                reason = "SUCCESS_12S" if success else "UNKNOWN"
+            try:
+                mechanism = classify_mechanism(samples, t0, handoff_t).get("mechanism")
+            except Exception as exc:  # noqa: BLE001
+                mechanism = f"classify_error:{type(exc).__name__}"
+            handoff = handoff_t
+        except Exception as exc:  # noqa: BLE001 — validation must not abort training
+            reason = f"eval_error:{type(exc).__name__}"
+            success = False
+            mechanism = None
+            handoff = None
+        per_ic.append({
+            "id": row["id"],
+            "source_dataset": row.get("source_dataset"),
+            "difficulty": row.get("difficulty"),
+            "categories": list(row.get("categories") or []),
+            "primary_category": row.get("primary_category"),
+            "reason": reason,
+            "success": success,
+            "mechanism": mechanism,
+            "handoff": handoff,
+        })
+    return _summarize_validation(per_ic)
+
+
+def _summarize_validation(per_ic: list[dict]) -> dict:
+    def subset(predicate):
+        rows = [row for row in per_ic if predicate(row)]
+        reasons = {}
+        mechanisms = {}
+        for row in rows:
+            reasons[row["reason"]] = reasons.get(row["reason"], 0) + 1
+            mech = row.get("mechanism") or "unknown"
+            mechanisms[mech] = mechanisms.get(mech, 0) + 1
+        return {
+            "n": len(rows),
+            "success": sum(int(row["success"]) for row in rows),
+            "success_rate": None if not rows else sum(int(row["success"]) for row in rows) / len(rows),
+            "reasons": reasons,
+            "mechanisms": mechanisms,
+            "ids_failed": [row["id"] for row in rows if not row["success"]],
+            "ids_ok": [row["id"] for row in rows if row["success"]],
+        }
+
+    return {
+        "all": subset(lambda _row: True),
+        "heuristic": subset(lambda row: row.get("source_dataset") == "heuristic"),
+        "hard_dev": subset(lambda row: row.get("source_dataset") == "hard"),
+        "sliding_labeled": subset(lambda row: "gravity_assisted_in_hand_sliding" in (row.get("categories") or [])),
+        "vertical_recatch_labeled": subset(lambda row: "vertical_recatch" in (row.get("categories") or [])),
+        "horizontal_recatch_labeled": subset(lambda row: "horizontal_recatch" in (row.get("categories") or [])),
+        "per_ic": per_ic,
+        "note": "category subsets overlap; do not sum subset successes for a global total",
+    }
+
+
 def train_adaptive(cfg, checkpoint, limit_ics=None, epochs=None):
+    if str(cfg.get("exploration") or "") == "independent_g":
+        return train_adaptive_independent_g(cfg, checkpoint, limit_ics, epochs)
     from training.recovery_episode import make_training_env
 
     rows = balanced_schedule(load_train_snapshots())
@@ -726,4 +904,235 @@ def train_adaptive(cfg, checkpoint, limit_ics=None, epochs=None):
             dest,
         )
         print("ADAPTIVE_SUMMARY", json.dumps(summary), flush=True)
+    return summary
+
+
+def _independent_g_epoch_summary(logs, schedule_info, epoch, updates, cumulative, checkpoint_path, init_checkpoint, validation):
+    from collections import Counter
+
+    stop_counts = {}
+    for item in logs:
+        bucket = item.get("stop_bucket") or "unknown"
+        stop_counts[bucket] = stop_counts.get(bucket, 0) + 1
+    by_source = {}
+    for item in logs:
+        src = item.get("source_dataset") or "unknown"
+        slot = by_source.setdefault(src, {
+            "ics": 0, "updates": 0, "success_groups": 0, "env_steps": 0,
+            "trajectories": 0, "g_sum": 0, "g64_no_success": 0,
+            "stop_buckets": {},
+        })
+        slot["ics"] += 1
+        slot["updates"] += int(item["optimizer_updated"])
+        slot["success_groups"] += int(item.get("found_success"))
+        slot["env_steps"] += int(item.get("recovery_physics") or 0)
+        g = int(item.get("final_g") or item.get("group_size") or 0)
+        slot["trajectories"] += g
+        slot["g_sum"] += g
+        bucket = item.get("stop_bucket") or "unknown"
+        slot["stop_buckets"][bucket] = slot["stop_buckets"].get(bucket, 0) + 1
+        if bucket == "G64_no_success":
+            slot["g64_no_success"] += 1
+    for src, slot in by_source.items():
+        slot["mean_g"] = None if slot["ics"] == 0 else slot["g_sum"] / slot["ics"]
+        slot["g64_no_success_rate"] = None if slot["ics"] == 0 else slot["g64_no_success"] / slot["ics"]
+    variances = [item.get("return_std") for item in logs if item.get("return_std") is not None]
+    id_exposures = Counter(item["id"] for item in logs)
+    losses = [item["update_stats"]["loss"] for item in logs if item.get("update_stats") and item["update_stats"].get("loss") is not None]
+    kls = [item["update_stats"]["kl"] for item in logs if item.get("update_stats") and item["update_stats"].get("kl") is not None]
+    grads = [item["update_stats"]["grad_norm"] for item in logs if item.get("update_stats") and item["update_stats"].get("grad_norm") is not None]
+    return {
+        "epoch": int(epoch),
+        "exploration": "independent_g",
+        "ics": len(logs),
+        "training_exposure_count": len(logs),
+        "unique_ic_exposures": len(id_exposures),
+        "exposure_per_ic_min": min(id_exposures.values()) if id_exposures else 0,
+        "exposure_per_ic_max": max(id_exposures.values()) if id_exposures else 0,
+        "updates": updates,
+        "cumulative_updates": cumulative,
+        "stop_buckets": stop_counts,
+        "found_success_ics": sum(int(row.get("found_success")) for row in logs),
+        "train_group_success_rate": None if not logs else sum(int(row.get("found_success")) for row in logs) / len(logs),
+        "skipped": sum(int(not row["optimizer_updated"]) for row in logs),
+        "by_source": by_source,
+        "source_exposure_ratio": {
+            src: slot["ics"] / max(len(logs), 1) for src, slot in by_source.items()
+        },
+        "schedule": schedule_info,
+        "group_reward_std_mean": None if not variances else float(np.mean(variances)),
+        "loss_mean": None if not losses else float(np.mean(losses)),
+        "kl_mean": None if not kls else float(np.mean(kls)),
+        "grad_norm_mean": None if not grads else float(np.mean(grads)),
+        "grad_norm_max": None if not grads else float(np.max(grads)),
+        "env_steps_total": sum(int(row.get("recovery_physics") or 0) for row in logs),
+        "env_steps_per_update": None if updates == 0 else float(
+            sum(int(row.get("recovery_physics") or 0) for row in logs if row["optimizer_updated"])
+        ) / float(updates),
+        "checkpoint": str(checkpoint_path),
+        "init_checkpoint": str(init_checkpoint),
+        "validation": validation,
+    }
+
+
+def train_adaptive_independent_g(cfg, checkpoint, limit_ics=None, epochs=None):
+    """Formal Adaptive Independent-G GRPO. Does not call tree augmentation."""
+    from training.recovery_episode import make_training_env
+    from training.adaptive_independent_g import (
+        load_merged_rows,
+        schedule_source_counts,
+        source_aware_schedule,
+        unique_ic_shuffle_schedule,
+    )
+
+    train_manifest = cfg.get("train_manifest") or "results/grpo/adaptive_g/datasets/merged_train.jsonl"
+    valid_manifest = cfg.get("eval_manifest") or "results/grpo/adaptive_g/datasets/merged_validation.jsonl"
+    # Formal default: natural unique-IC shuffle. Historical 1:1 uses sampling_mode=source_aware.
+    sampling_mode = str(cfg.get("sampling_mode") or "unique_shuffle")
+    hard_fraction = float(cfg.get("hard_sample_fraction") or 0.5)
+    init_ckpt = cfg.get("init_checkpoint") or "results/sft/sliding_equal_weight/checkpoint_epoch_0040.pt"
+
+    train_rows = load_merged_rows(train_manifest)
+    valid_rows = load_merged_rows(valid_manifest)
+    rounds = adaptive_round_count(cfg, epochs)
+    out = ROOT / cfg["grpo_output"]
+    plan = adaptive_resume_plan(
+        checkpoint, out, init_checkpoint=init_ckpt, allow_nonempty_out=False,
+    )
+    out.mkdir(parents=True, exist_ok=True)
+    for epoch in range(plan["epoch"] + 1, plan["epoch"] + rounds + 1):
+        dest = adaptive_epoch_path(out, epoch)
+        if dest.exists():
+            raise RuntimeError(f"refusing to overwrite {dest}")
+    book = load_codebook(ROOT / cfg["codebook"])
+    device = torch.device(cfg.get("device") or "cpu")
+    before = torch.load(plan["weights"], map_location="cpu", weights_only=False)
+    model, saved_book = load_trained_k48(plan["weights"], device)
+    if not np.array_equal(saved_book, book):
+        raise RuntimeError("checkpoint codebook differs from the configured codebook")
+    if plan["epoch"] == 0:
+        loaded = model.logits.weight.detach().cpu()
+        if not torch.equal(loaded, before["model"]["logits.weight"]):
+            raise RuntimeError("independent-G GRPO did not load the SFT weights")
+    model.train()
+    ref_model, _ref_book = load_trained_k48(plan["init_checkpoint"], device)
+    ref_model.eval()
+    for parameter in ref_model.parameters():
+        parameter.requires_grad_(False)
+    env = make_training_env(device, model=model)
+    opt = torch.optim.Adam(model.parameters(), lr=float(cfg["grpo_lr"]))
+    if plan["optimizer"] is not None:
+        opt.load_state_dict(plan["optimizer"])
+        for slot in opt.state.values():
+            for key in ("exp_avg", "exp_avg_sq"):
+                if not torch.isfinite(slot[key]).all():
+                    raise RuntimeError(f"non-finite Adam moment {key}")
+    limit_s = float(cfg.get("recovery_limit_s") or SELECTED_LIMIT_S)
+    reward_version = str(cfg.get("reward_version") or "v2")
+    seated_ref = None
+    cumulative = int(plan["updates"])
+    summary = None
+    run_started = time.perf_counter()
+    for epoch in range(plan["epoch"] + 1, plan["epoch"] + rounds + 1):
+        if sampling_mode == "unique_shuffle":
+            epoch_rng = np.random.default_rng(int(cfg["seed"]) + 7919 * epoch)
+            schedule = unique_ic_shuffle_schedule(train_rows, epoch_rng)
+        elif sampling_mode == "source_aware":
+            schedule = source_aware_schedule(train_rows, hard_fraction=hard_fraction)
+        else:
+            raise RuntimeError(f"unknown sampling_mode {sampling_mode}")
+        schedule_info = schedule_source_counts(schedule)
+        schedule_info["sampling_mode"] = sampling_mode
+        schedule_info["unique_ic_count"] = len({row["snapshot"] for row in schedule})
+        if limit_ics is not None:
+            schedule = schedule[: int(limit_ics)]
+        print(
+            "INDEPENDENT_G_SCHEDULE", epoch, sampling_mode,
+            "slots", len(schedule), "unique", schedule_info["unique_ic_count"],
+            "heuristic_frac", schedule_info["heuristic_fraction"],
+            "hard_frac", schedule_info["hard_fraction"],
+            flush=True,
+        )
+        logs = []
+        updates = 0
+        epoch_started = time.perf_counter()
+        for index, row in enumerate(schedule):
+            with (ROOT / row["snapshot"]).open("rb") as handle:
+                blob = pickle.load(handle)
+            if "ref" not in blob and seated_ref is None:
+                from data_generation.strategies.recatch_oracle import _setup
+
+                _sim, _base, seated_ref, _target, _code = _setup()
+            blob = _prepare_blob(blob, seated_ref)
+            print(
+                "INDEPENDENT_G_IC", epoch, row["id"], row.get("source_dataset"),
+                row["primary_category"], flush=True,
+            )
+            ic_started = time.perf_counter()
+            ic_log, group = explore_ic_independent_g(
+                env, model, book, blob, device, limit_s, reward_version,
+                int(cfg["seed"]) + 1009 * (index + 1) + 10007 * (epoch - 1), row["id"],
+            )
+            ic_log["epoch"] = epoch
+            ic_log["primary_category"] = row["primary_category"]
+            ic_log["categories"] = row["categories"]
+            ic_log["source_dataset"] = row.get("source_dataset")
+            ic_log["difficulty"] = row.get("difficulty")
+            ic_log["recoverability_status"] = row.get("recoverability_status")
+            ic_log["wall_s"] = float(time.perf_counter() - ic_started)
+            stats = None
+            if group is not None:
+                stats = apply_group_update(model, ref_model, group, cfg, opt, device)
+                if not stats["finite"]:
+                    raise RuntimeError(f"non-finite GRPO update on {row['id']}")
+                updates += 0 if stats["skipped"] else 1
+            ic_log["update_stats"] = stats
+            ic_log["optimizer_updated"] = bool(stats and not stats["skipped"])
+            logs.append(ic_log)
+            with (out / "ic_log.jsonl").open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps(_jsonable(ic_log)) + "\n")
+            print(
+                "INDEPENDENT_G_DONE", epoch, row["id"], "G", ic_log["final_g"],
+                ic_log["stop_bucket"], "update", ic_log["optimizer_updated"],
+                "success", ic_log["success_count"], "wall_s", round(ic_log["wall_s"], 2),
+                flush=True,
+            )
+        model.eval()
+        print("INDEPENDENT_G_VALID", epoch, flush=True)
+        validation = _validate_merged(env, model, book, device, valid_rows, limit_s, seated_ref)
+        model.train()
+        (out / f"validation_epoch_{epoch:04d}.json").write_text(
+            json.dumps(_jsonable(validation), indent=2), encoding="utf-8",
+        )
+        cumulative += updates
+        dest = adaptive_epoch_path(out, epoch)
+        summary = _independent_g_epoch_summary(
+            logs, schedule_info, epoch, updates, cumulative, dest, plan["init_checkpoint"], validation,
+        )
+        summary["epoch_wall_s"] = float(time.perf_counter() - epoch_started)
+        summary["run_wall_s"] = float(time.perf_counter() - run_started)
+        (out / f"summary_epoch_{epoch:04d}.json").write_text(json.dumps(_jsonable(summary), indent=2), encoding="utf-8")
+        if plan["epoch"] == 0 and epoch == plan["epoch"] + 1:
+            (out / "summary.json").write_text(json.dumps(_jsonable(summary), indent=2), encoding="utf-8")
+        torch.save(
+            {
+                "proto": book,
+                "res_cap": CAP,
+                "handoff": HANDOFF,
+                "reward_version": reward_version,
+                "exploration": "independent_g",
+                "init_checkpoint": str(plan["init_checkpoint"]),
+                "model": {key: value.detach().cpu() for key, value in model.state_dict().items()},
+                "updates": cumulative,
+                "epoch": epoch,
+                "optimizer": cpu_adam_state(opt),
+            },
+            dest,
+        )
+        # Compact console summary without the full per-IC validation dump.
+        console = {key: value for key, value in summary.items() if key != "validation"}
+        console["validation_all"] = validation["all"]
+        console["validation_heuristic"] = validation["heuristic"]
+        console["validation_hard_dev"] = validation["hard_dev"]
+        print("INDEPENDENT_G_SUMMARY", json.dumps(_jsonable(console)), flush=True)
     return summary

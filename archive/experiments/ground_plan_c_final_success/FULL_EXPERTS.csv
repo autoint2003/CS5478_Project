@@ -1,0 +1,4 @@
+root_id,path,SUCCESS_NEW,pre_pos_mm,pre_theta,n_actions,correction,reason,e_pos_after
+gbi_010,B_immediate_handoff,1,5.431753506569162,0.8726520596259588,402,none_already_in_band,,
+gbi_022,B_immediate_handoff,1,6.821350835655757,2.521179710629848,448,none_already_in_band,,
+gbi_014,best_failed_tail,0,32.07570223911202,67.37681033877946,,slide,DROP_AFTER_HANDOFF,23.459322219403894

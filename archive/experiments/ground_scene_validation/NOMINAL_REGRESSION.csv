@@ -1,0 +1,5 @@
+check,status,command
+elevated_physics_regression,run_separately,python -u tests/test_physics_regression.py
+elevated_table_drop,run_separately,python -u tests/test_table_drop.py
+ground_scene_loads,pass,
+ground_drop_unit,pass,
