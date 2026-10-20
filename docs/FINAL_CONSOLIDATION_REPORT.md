@@ -1,6 +1,6 @@
 # Final Consolidation Report
 
-Canonical copy of `results/consolidation/FINAL_REPORT.md` (that path is gitignored). See also `ARCHIVE_MANIFEST.md`, `ARCHITECTURE.md`, `REPRODUCIBILITY.md`, `DATASET_SCHEMA.md`.
+Canonical copy of `results/consolidation/FINAL_REPORT.md` (that path is gitignored). See also `docs/ARCHIVE_MANIFEST.md`, `docs/ARCHITECTURE.md`, `docs/REPRODUCIBILITY.md`, `docs/DATASET_SCHEMA.md`.
 
 ## 1. Original branch and commit
 
@@ -19,7 +19,7 @@ Completed work from `cleanup/ground-scene-prep` (including Plan C ground recover
 
 ## 4. Archived experiments
 
-See `ARCHIVE_MANIFEST.md`. Golden Plan C binaries: `archive/golden_experts/` (pkl/mp4 local-only) + originals under `results/diagnostics/`.
+See `docs/ARCHIVE_MANIFEST.md`. Golden Plan C binaries: `archive/golden_experts/` (pkl/mp4 local-only) + originals under `results/diagnostics/`.
 
 ## 5–6. Active tree
 

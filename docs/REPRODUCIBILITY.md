@@ -65,4 +65,4 @@ Reports under `results/consolidation/K49_*.md|csv|json`.
 
 ## Archive
 
-See `ARCHIVE_MANIFEST.md`. Diagnostics originals remain under `results/diagnostics/` (gitignored). Do not `git clean -fdx` that tree.
+See `docs/ARCHIVE_MANIFEST.md`. Diagnostics originals remain under `results/diagnostics/` (gitignored). Do not `git clean -fdx` that tree.

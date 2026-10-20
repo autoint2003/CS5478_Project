@@ -8,10 +8,10 @@ Plans A/B/C are offline expert families for a **single** Transformer policy (not
 
 | Doc | Purpose |
 |---|---|
-| `ARCHITECTURE.md` | Minimal dependency map and entry points |
-| `ARCHIVE_MANIFEST.md` | Historical experiment archive index |
-| `REPRODUCIBILITY.md` | Golden replay and checkpoint recovery |
-| `DATASET_SCHEMA.md` | Unified expert schema `unified_experts_v1` |
+| `docs/ARCHITECTURE.md` | Minimal dependency map and entry points |
+| `docs/ARCHIVE_MANIFEST.md` | Historical experiment archive index |
+| `docs/REPRODUCIBILITY.md` | Golden replay and checkpoint recovery |
+| `docs/DATASET_SCHEMA.md` | Unified expert schema `unified_experts_v1` |
 | `docs/FINAL_CONSOLIDATION_REPORT.md` | Consolidation summary |
 | `config/training/unified_plan_abc.yaml` | Minimal training config (not launched) |
 
@@ -49,7 +49,7 @@ Run commands from the repository root.
 | `data/` | Local manifests, demonstrations, snapshots (gitignored) |
 | `results/` | Local SFT/GRPO/diagnostics (gitignored) |
 | `mujoco_menagerie/` | Vendored robot models |
-| `docs/` | Package map, migration log, consolidation report, coursework PDFs |
+| `docs/` | Architecture, archive manifest, reproducibility, dataset schema, consolidation report, package map, coursework PDFs |
 
 `data/` and `results/` are gitignored. File moves: `docs/MIGRATION.md`. Package map: `docs/MODULE_ORGANIZATION.md`.
 

@@ -21,7 +21,7 @@ DIAG = ROOT / "results" / "diagnostics"
 ARCHIVE = ROOT / "archive"
 GOLDEN = ARCHIVE / "golden_experts"
 EXP = ARCHIVE / "experiments"
-MANIFEST = ROOT / "ARCHIVE_MANIFEST.md"
+MANIFEST = ROOT / "docs" / "ARCHIVE_MANIFEST.md"
 MANIFEST_JSON = ARCHIVE / "archive_manifest.json"
 
 # Golden Plan C evidence (must remain recoverable).
