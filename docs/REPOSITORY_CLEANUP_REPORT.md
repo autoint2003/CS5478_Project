@@ -71,7 +71,7 @@ Note: collecting `test_physics_regression.py` / `test_table_drop.py` via bare `p
 
 ## Cleanup commit
 
-Recorded on branch `cleanup/ground-scene-prep` after this document is committed (hash in git log / Part I final report).
+`4663816ccd78e7f7cb7bc693565e4de8d023104e` on branch `cleanup/ground-scene-prep`.
 
 ## Final maintained structure (compact view)
 

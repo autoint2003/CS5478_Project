@@ -8,7 +8,7 @@ Post–Phase I map of where to look for maintained work. Historical one-offs liv
 |---|---|
 | Elevated-table official scene | `assets/scene.xml` via `envs/simulation/grasp_sim.py` |
 | Ballistic / impact diagnostic scenes | `assets/scene_ballistic_impact.xml`, `scene_impact_diag.xml` |
-| Ground scene (Phase II) | `GROUND_SCENE` — `assets/scene_ground.xml` + `envs/simulation/ground_scene.py` |
+| Ground scene (Phase II) | `GROUND_SCENE` — `envs/simulation/ground_scene.py` → `assets/scene_ground.xml`, sim `envs/simulation/ground_sim.py` |
 | Snapshot capture/restore | `envs/simulation/capture.py` |
 | Legal 7D step | `envs/step_legal.py` + `controllers/recovery/action_map.py` |
 | 39D observation | `envs/observations/` |
@@ -50,8 +50,10 @@ Do **not** start SFT/GRPO for GROUND_SCENE until Phase II feasibility evidence e
 
 | Need | Location |
 |---|---|
+| Outcome semantics | `docs/GROUND_SCENE_OUTCOMES.md` |
 | Validation report | `results/diagnostics/ground_scene_validation/` |
-| Maintained runners | `scripts/run_ground_scene_*.py` / `experiments/` ground helpers |
+| Maintained runner | `scripts/run_ground_scene_validation.py` |
+| Unit test | `tests/test_ground_drop.py` |
 
 ## Archive
 

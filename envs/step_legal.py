@@ -35,7 +35,7 @@ def step_legal(sim, action):
     sim.fsm.v_des = vel.copy()
     sim.fsm.w_des = ang.copy()
     sim.fsm.fg_cmd = float(-tau)
-    from envs.outcomes.table_drop import object_vz, observe
+    from envs.outcomes.support_drop import object_vz, observe
 
     dt = float(sim.model.opt.timestep)
     for _ in range(N_SUB):

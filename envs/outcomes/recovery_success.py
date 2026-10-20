@@ -82,7 +82,7 @@ def apply_handoff(sim, ref):
 
 
 def nominal_step(sim):
-    from envs.outcomes.table_drop import object_vz, observe
+    from envs.outcomes.support_drop import object_vz, observe
 
     vz_before = object_vz(sim)
     z_now = float(z_tgt_of(sim))

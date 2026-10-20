@@ -21,7 +21,8 @@ from envs.ballistic_impact import z_tgt_of
 
 from envs.step_legal import step_legal
 from training.recovery_execution import _escaped
-from envs.outcomes.table_drop import latched, terminal_reason
+from envs.outcomes.support_drop import latched, terminal_reason
+from envs.outcomes.drop_thresholds import below_geometric_drop, geometric_drop_z
 from envs.outcomes.recovery_success import (
     CONTROL_PERIOD_S,
     PERSIST_STEPS,
@@ -29,7 +30,6 @@ from envs.outcomes.recovery_success import (
     basin_ok,
     nominal_step,
 )
-from envs.outcomes.physical_recovery import TABLE_DROP
 from training.reward_v2 import NominalHoldTrace
 
 T_RECOVERY_MAX = 120 * CONTROL_PERIOD_S
@@ -47,6 +47,7 @@ REASONS = (
     "NOMINAL_LIFT_NOT_COMPLETED",
     "PHYSICAL_VERIFICATION_FAILED",
     "TABLE_DROP",
+    "GROUND_DROP",
     "INVALID",
 )
 
@@ -102,8 +103,14 @@ def _monitor(sim):
     return {"nL": n_l, "nR": n_r, "z": z}
 
 
-def _dropped(row):
-    return float(row["z"]) < TABLE_DROP or float(row["z"]) < Z_ABORT
+def _dropped(row, sim=None):
+    z = float(row["z"])
+    if sim is not None:
+        return below_geometric_drop(sim, z) or z < Z_ABORT
+    # Legacy elevated-table callers without a live sim.
+    from envs.outcomes.physical_recovery import TABLE_DROP
+
+    return z < TABLE_DROP or z < Z_ABORT
 
 
 def _bilateral(row):
@@ -123,7 +130,7 @@ def nominal_verify(env, ref, seconds=NOMINAL_S):
     end_row = None
     hold_trace = NominalHoldTrace(seconds)
     if latched(sim):
-        reason = "TABLE_DROP"
+        reason = terminal_reason(sim, default="TABLE_DROP")
     while reason is None and float(sim.data.time) - t0 < float(seconds) - 1e-9:
         t_prev = float(sim.data.time)
         nominal_step(sim)
@@ -132,12 +139,12 @@ def nominal_verify(env, ref, seconds=NOMINAL_S):
         target = float(z_tgt_of(sim))
         bilateral = _bilateral(row)
         command_reached = float(sim.fsm.p_des[2]) >= target - 1e-9
-        dropped = _dropped(row) or _escaped(sim)
+        dropped = _dropped(row, sim) or _escaped(sim)
         hold_trace.observe(float(sim.data.time) - t_prev, bilateral, dropped, command_reached)
         if bilateral and command_reached:
             lift_done = True
         if latched(sim):
-            reason = "TABLE_DROP"
+            reason = terminal_reason(sim, default="TABLE_DROP")
             break
         if dropped:
             reason = "DROP_AFTER_HANDOFF"
@@ -152,7 +159,7 @@ def nominal_verify(env, ref, seconds=NOMINAL_S):
     if reason is None:
         if nominal_elapsed < float(seconds) - 1e-6:
             reason = "PHYSICAL_VERIFICATION_FAILED"
-        elif end_row is None or not _bilateral(end_row) or _dropped(end_row) or _escaped(sim):
+        elif end_row is None or not _bilateral(end_row) or _dropped(end_row, sim) or _escaped(sim):
             reason = "LOST_GRASP"
         elif not lift_done:
             reason = "NOMINAL_LIFT_NOT_COMPLETED"
@@ -293,7 +300,7 @@ def roll_policy(env, model, book, blob, device, cap_steps=None, limit_s=None):
     else:
         from models.airborne_v3 import DT_POLICY
         from envs.observations.observable_obs import ObservableObsState
-        from envs.outcomes.table_drop import restore_state
+        from envs.outcomes.support_drop import restore_state
         from training.recovery_execution import restore_ballistic
 
         if "ref" not in blob:

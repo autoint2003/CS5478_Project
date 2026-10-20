@@ -96,6 +96,8 @@ def _switch_blob(switch):
 
 
 def take_capture(env):
+    from envs.outcomes.ground_drop import export_state as export_ground_drop
+    from envs.outcomes.support_drop import export_state as export_support_drop
     from envs.outcomes.table_drop import export_state as export_table_drop
 
     hist = env._hist
@@ -110,6 +112,9 @@ def take_capture(env):
         "prev_seq": [np.asarray(x, np.float32).copy() for x in env._prev_seq],
         "prev": np.asarray(env._prev, np.float32).copy(),
         "table_drop": export_table_drop(env.sim),
+        "ground_drop": export_ground_drop(env.sim),
+        "support_drop": export_support_drop(env.sim),
+        "scene_id": str(getattr(env.sim, "scene_id", "") or ""),
     }
 
 
@@ -172,8 +177,18 @@ def restore_capture(env, cap):
     env._prev = cap["prev"].copy()
     sim.captured = physics["captured"]
     mujoco.mj_forward(sim.model, sim.data)
-    from envs.outcomes.table_drop import restore_state
-    restore_state(sim, cap.get("table_drop"))
+    from envs.outcomes.ground_drop import restore_state as restore_ground_drop
+    from envs.outcomes.support_drop import is_ground_scene
+    from envs.outcomes.table_drop import restore_state as restore_table_drop
+
+    # Legacy contract: a capture missing the elevated ``table_drop`` key restores
+    # as not dropped. GROUND_SCENE uses ``ground_drop`` the same way.
+    if is_ground_scene(sim):
+        restore_ground_drop(sim, cap["ground_drop"] if "ground_drop" in cap else None)
+        restore_table_drop(sim, None)
+    else:
+        restore_table_drop(sim, cap["table_drop"] if "table_drop" in cap else None)
+        restore_ground_drop(sim, None)
     err = float(np.max(np.abs(np.array(sim.data.qpos, float) - physics["qpos"])))
     if err > 1e-6:
         raise RuntimeError(f"qpos restore error {err}")
