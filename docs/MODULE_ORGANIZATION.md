@@ -42,9 +42,11 @@ evaluation/    k48_eval.py  audit_pretrain_data.py  audit_recatch_legality.py
 visualization/ render_video.py  video_recorder.py  camera.py  overlays.py  impact_view.py
                compare_policy_nominal.py  compare_strategy_nominal.py
 scripts/       train.py  evaluate.py  generate_data.py  render_video.py
+               generate_k49_*.py  merge_grpo_ic_datasets.py
 config/        simulation/  controllers/  recovery/  training/k48/  training/k47/  training/legacy/
-experiments/   ball_impact/  handoff/  sliding/  recatch/
+experiments/   ball_impact/  handoff/  sliding/  adaptive_g/  recatch/
                recatch/airborne/  recatch/natural_loss/  recatch/legal/  recatch/top_impact/
+               recatch/k49/
                legacy/  legacy/demo/{audit,replay,diagnose,demonstrations}/
 data_generation/validation/  impact_labels.py  recovery_checks.py
                sliding_mechanism.py  sliding_slip.py
@@ -68,9 +70,11 @@ data_generation/validation/  impact_labels.py  recovery_checks.py
 | `data_generation/validation/` | Impact and sliding-mechanism checks used while building datasets. |
 | `data_generation/maintenance/` | One-shot layout and path repair. `generate.py` does not import it. |
 | `config/training/k48/` | K48 training YAML. Filenames still name the dataset and reward version. |
-| `experiments/sliding/` | Sliding diagnostics, equal-weight SFT ablation eval, and hard-IC mining. |
+| `experiments/sliding/` | Sliding diagnostics, equal-weight SFT ablation eval, hard-IC mining, and K49 slide/return pilots. |
 | `experiments/recatch/` | Horizontal Recatch research, airborne/natural-loss/legal/top-impact studies, and SFT audits. |
-| `evaluation/` | Closed-loop eval, data audits, and validation skill/mechanism classification. |
+| `experiments/recatch/k49/` | One-shot K49 Recatch / Type2–3 / capture–brake / lost-grasp finalize & probe scripts. |
+| `experiments/adaptive_g/` | Adaptive independent-g pilot / smoke / full-run CLIs. |
+| `evaluation/` | Closed-loop eval, data audits, grasp-configuration metrics, and validation skill/mechanism classification. |
 
 ## 3. Important files
 
@@ -213,3 +217,17 @@ The run checks determinism by replaying each tape twice, then compares qpos, qve
 - Current `results/diagnostics/` directories were not moved. Live scripts still point at them.
 - `experiments/ball_impact/privileged_ball_impact_search.py` keeps a one-line `step_legal` delegate. The implementation is `envs/step_legal.py`.
 - `experiments/legacy/demo/build_k48_handoff_policy.py` still has a historical copy of the K48 expansion. Formal training uses `models/k48_checkpoint.py`.
+
+## 11. Post–Round-3 K49 / adaptive-g placement
+
+- Durable expert generators stay in `scripts/generate_k49_*.py` (and `generate_grasp_recovery_pose_experts_v1.py`).
+- Sliding pilots / K49 return diagnoses: `experiments/sliding/` (maintained `pilot_*.py` / `diagnose_*.py`).
+- K49 Recatch / Type2–3 / lost-grasp maintained generators: `scripts/generate_k49_*.py`.
+- Handoff audits / pose-handoff benchmarks: `experiments/handoff/`.
+- Adaptive independent-g pilots: `experiments/adaptive_g/`.
+- Formal metric / migration audits: `evaluation/` (`full_objective.py`, `grasp_configuration.py`, `audit_grasp_configuration_migration.py`, `audit_mechanism_selection_feasibility.py`).
+- Training modules: `training/action_vocab_k49.py`, `training/adaptive_independent_g.py`; configs under `config/training/k48/*adaptive_g*.yaml`.
+
+## 12. Historical archive (Phase I cleanup)
+
+One-off `_tmp_*` / `_continue_*` probes and superseded diagnostic trees moved under `archive/` (see `docs/REPOSITORY_CLEANUP_REPORT.md`, `archive/manifests/`). Do not import archive scripts into the production path. Elevated-table `TABLE_DROP` remains the default until Phase II activates `GROUND_SCENE`.

@@ -1,0 +1,38 @@
+# Adaptive Independent-G GRPO (formal path). Natural unique-IC shuffle.
+# No Heuristic/Hard 1:1 oversampling. No Tree80 augmentation.
+#
+#   python -u scripts/train.py --adaptive-grpo --config config/training/k48/unified_k48_recovery_v3_adaptive_g.yaml --checkpoint results/sft/sliding_equal_weight/checkpoint_epoch_0040.pt --ic-epochs 1
+dataset_version: k48_recovery_v3
+codebook: results/archive/demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy
+supervised_targets: data/supervised_targets_with_horizontal.jsonl
+grpo_initial_conditions: results/grpo/adaptive_g/datasets/merged_train.jsonl
+train_manifest: results/grpo/adaptive_g/datasets/merged_train.jsonl
+eval_manifest: results/grpo/adaptive_g/datasets/merged_validation.jsonl
+supervised_output: results/sft
+eval_output: results/evaluations/adaptive_g_v2
+grpo_output: results/grpo/adaptive_g/full_run_v2_natural_sampling
+init_checkpoint: results/sft/sliding_equal_weight/checkpoint_epoch_0040.pt
+exploration: independent_g
+sampling_mode: unique_shuffle
+baseline_eval: results/archive/demo_results/diagnostics/raw/horizon_migration/checkpoint_eval.json
+seed: 1
+device: cuda
+eval_device: cpu
+epochs: 40
+batch_size: 8
+lr: 0.0003
+grpo_updates: 0
+ic_epochs: 1
+cover_all_ics: false
+grpo_lr: 0.00003
+kl_coef: 0.05
+clip: 0.2
+group: 8
+grpo_save_every: 1
+rollout_cap_steps: 200
+eval_cap_steps: 200
+lambda_time: 0.05
+nominal_seconds: 12.0
+recovery_limit_s: 4.0
+reward_version: v2
+expand_handoff: true

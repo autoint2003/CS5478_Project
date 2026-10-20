@@ -1,0 +1,41 @@
+{
+  "rollback_commit": "d3223833647a8dc7107dc7898bec0b7abef55a47",
+  "branch": "cleanup/ground-scene-prep",
+  "critical_sha256_16": {
+    "envs/outcomes/table_drop.py": "0d9530b1c09cf728",
+    "envs/outcomes/physical_recovery.py": "6499a86cc3f65863",
+    "envs/outcomes/horizon_outcome.py": "40814d8311628e32",
+    "envs/step_legal.py": "61d1d12915492c83",
+    "envs/ballistic_impact.py": "77ddafb40be4b5df",
+    "controllers/recovery/action_map.py": "2c228508d79ed7fd",
+    "assets/scene.xml": "eea9c4103c1dc314",
+    "assets/panda_torque.xml": "59b8a7be3a18531a",
+    "training/recovery_episode.py": "0ca0f4500de183e2",
+    "training/action_vocab_k49.py": "9db2849f64a65e35",
+    "tests/test_physics_regression.py": "28d68a6234515eb4",
+    "tests/test_table_drop.py": "2ea9a1394ea63ec2"
+  },
+  "expert_generation_dirs": [
+    "controlled_slow_detachment",
+    "extended_k49_k50_pose_recovery",
+    "grasp_recovery_pose_v1",
+    "horizontal_offset_freefall_recatch",
+    "k49_ball_impact_dynamic_recovery",
+    "k49_capture_brake_diagnostics",
+    "k49_dynamic_recatch_experts",
+    "k49_hard_dynamic_expansion",
+    "k49_horizontal_endcatch_recatch",
+    "k49_in_recovery_recatch",
+    "k49_large_chase_dynamic_recovery",
+    "k49_lost_grasp_recovery",
+    "k49_sliding_recatch_dataset",
+    "k49_slow_return_position_refinement",
+    "k49_type3_capture_brake",
+    "k49_unified_dataset_expansion",
+    "lateral_force_full_pose_recovery",
+    "lateral_force_grasp_loss_recovery",
+    "real_ball_impact_low_speed_recatch",
+    "return_aware_sliding_k49",
+    "sliding_position_correction_v1"
+  ]
+}
