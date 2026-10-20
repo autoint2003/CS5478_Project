@@ -21,7 +21,7 @@ if str(ROOT) not in sys.path:
 
 from envs.simulation.capture import restore_capture, take_capture
 from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
-from data_generation.ball_impact_dataset import grasp_sample
+from data_generation.datasets.ball_impact import grasp_sample
 
 from envs.outcomes.horizon_outcome import finish_recovery, replay_commands
 
@@ -271,7 +271,7 @@ def failure_traces():
 
 
 def failure_cases(env):
-    from data_generation.rebuild_k48_recovery import propose_actions
+    from data_generation.datasets.recovery_rebuild import propose_actions
     from experiments.sliding.sliding_vs_regrasp import slide_action
 
     destination = OUT / "failure_replays.jsonl"
@@ -323,7 +323,7 @@ def failure_cases(env):
 def main():
     import torch
     from training.recovery_episode import make_training_env
-    from training.unified_k48 import load_trained_k48
+    from training.pipeline import load_trained_k48
 
     OUT.mkdir(parents=True, exist_ok=True)
     model, _book = load_trained_k48(

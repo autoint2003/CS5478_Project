@@ -29,7 +29,7 @@ from envs.outcomes.nominal_pose import hand_R
 from envs.outcomes.recovery_success import apply_handoff, nominal_step
 from envs.simulation.capture import restore_capture, take_capture
 from envs.step_legal import step_legal
-from evaluation.full_objective import (
+from evaluation.success_criteria import (
     P_TGT,
     U_TGT,
     WORKING_POS_MM,
@@ -39,7 +39,7 @@ from evaluation.full_objective import (
     guide_score_after_prefix,
     window_stats,
 )
-from evaluation.grasp_configuration import measure
+from evaluation.grasp_geometry import measure
 from models.k48_checkpoint import load_trained_k48
 from training.action_vocab_k49 import (
     HANDOFF,

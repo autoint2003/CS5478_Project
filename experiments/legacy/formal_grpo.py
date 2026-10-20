@@ -132,7 +132,7 @@ def save_model(path, model, update_index, score):
 
 
 def ball_splits():
-    from data_generation.ball_impact_dataset import ids_for
+    from data_generation.datasets.ball_impact import ids_for
 
     train_ids = list(ids_for("train"))
     val_ids = list(ids_for("validation"))
@@ -145,7 +145,7 @@ def ball_splits():
 
 
 def validation_eval_ball(env, model, episode_ids):
-    from data_generation.ball_impact_dataset import load_episode
+    from data_generation.datasets.ball_impact import load_episode
     from envs.simulation.capture import restore_capture
     from experiments.legacy.supervised_coverage_warmstart import det_roll
 
@@ -233,7 +233,7 @@ def main():
             refuse_final(episode_id)
         rng = np.random.default_rng(int(cfg["seed_base"]) + 19 * index + sum(ord(char) for char in episode_id))
         if dataset == "ball_impact":
-            from data_generation.ball_impact_dataset import load_episode
+            from data_generation.datasets.ball_impact import load_episode
 
             blob = load_episode(episode_id)
             row, _audits = one_update(

@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT))
 
 from envs.simulation.capture import restore_capture
 from envs.step_legal import N_SUB, TRACK
-from evaluation.grasp_configuration import measure
+from evaluation.grasp_geometry import measure
 from models.k48_checkpoint import load_trained_k48
 from training.k47_codebook import decode_action, load_codebook
 from training.recovery_episode import make_training_env

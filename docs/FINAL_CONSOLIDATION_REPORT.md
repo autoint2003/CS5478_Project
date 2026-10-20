@@ -27,7 +27,7 @@ See `docs/ARCHIVE_MANIFEST.md`. Golden Plan C evidence remains at original `resu
 Retain `controllers/ envs/ models/ data_generation/ training/ evaluation/ visualization/ scripts/ config/ experiments/ tests/ datasets/`.
 
 Plan C: `data_generation/strategies/ground_*.py`, `scripts/run_ground_*.py`.
-Dataset/K49: `scripts/build_unified_dataset.py`, `scripts/replay_golden_experts.py`, `scripts/audit_k49.py`.
+Dataset/K49: `scripts/build_expert_dataset.py`, `scripts/replay_experts.py`, `scripts/audit_action_vocab.py`.
 
 ## 7. Golden regression
 

@@ -42,8 +42,8 @@ from scripts.expand_k49_unified_dataset import (
     write_csv,
     write_json,
 )
-from data_generation.ball_impact_dataset import run_episode
-from data_generation.rebuild_k48_recovery import immediate_handoff
+from data_generation.datasets.ball_impact import run_episode
+from data_generation.datasets.recovery_rebuild import immediate_handoff
 from models.k48_checkpoint import load_trained_k48
 from scripts.generate_k49_sliding_recatch_dataset import (
     evaluate_full,

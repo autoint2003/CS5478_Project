@@ -26,7 +26,7 @@ from envs.outcomes.horizon_outcome import (
 )
 from experiments.ball_impact.privileged_ball_impact_search import step_legal
 from training.k47_codebook import decode_action
-from training.unified_k48 import HANDOFF, load_trained_k48
+from training.pipeline import HANDOFF, load_trained_k48
 
 ROOT = Path(__file__).resolve().parents[4]
 CKPT = ROOT / "results/sft/checkpoint_epoch_0040.pt"

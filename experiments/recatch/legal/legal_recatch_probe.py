@@ -14,7 +14,7 @@ if str(ROOT) not in sys.path:
 
 from controllers.recovery.action_map import AIRBORNE_V3, normalize_action
 from envs.simulation.grasp_quality import body_twist
-from data_generation.strategies.capture_geometry import capture_geometry
+from data_generation.oracles.plan_a.contact_geometry import capture_geometry
 from experiments.recatch.legal.legal_recatch_transfer import (
     OUT,
     WIN,

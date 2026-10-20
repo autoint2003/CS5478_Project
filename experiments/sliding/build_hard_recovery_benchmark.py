@@ -31,15 +31,15 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from data_generation.ball_impact_dataset import run_episode
-from data_generation.expand_skill_quotas import _fingerprint, _try_sliding
-from data_generation.rebuild_k48_recovery import (
+from data_generation.datasets.ball_impact import run_episode
+from data_generation.datasets.skill_quotas import _fingerprint, _try_sliding
+from data_generation.datasets.recovery_rebuild import (
     _known_specs,
     _reserved_keys,
     _scenario_key,
     immediate_handoff,
 )
-from data_generation.strategies.vertical_recatch_search import (
+from data_generation.oracles.plan_b.vertical_recatch import (
     _finish,
     _summary,
     rollout as vertical_rollout,

@@ -23,7 +23,7 @@ if str(ROOT) not in sys.path:
 
 from controllers.cartesian.tracking import TRACK
 from envs.initialization.grasp_seat import apply_spec
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 from controllers.recovery.geometry_switch import GeometrySwitch, hand_pose
 from controllers.recovery.action_map import AIRBORNE_V2, normalize_action
 from envs.observations.airborne_obs import OBS_DIM_AIR, observe_airborne, relative_state
@@ -38,7 +38,7 @@ from training.recovery_episode import (
     nominal_substep,
     seat_base,
 )
-from data_generation.airborne_recatch_dataset import drop_supports, restore_to, step_mapped
+from data_generation.datasets.airborne_recatch import drop_supports, restore_to, step_mapped
 from training.recovery_execution import T_TASK
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "autonomous_rl"

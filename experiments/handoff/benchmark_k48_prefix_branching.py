@@ -23,14 +23,14 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from envs.simulation.capture import restore_snapshot, take_snapshot
-from training.prefix_rollout import restore_probe, rollout
+from training.rollout import restore_probe, rollout
 from training.recovery_episode import make_training_env
 
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 from training.grpo_math import SIGMA
 from envs.outcomes.recovery_success import CONTROL_PERIOD_S
 from training.k47_codebook import load_codebook
-from training.unified_k48 import HANDOFF, load_trained_k48
+from training.pipeline import HANDOFF, load_trained_k48
 
 OUT = ROOT / "results/diagnostics/k48_prefix_branching"
 CODEBOOK = ROOT / "results/archive/demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy"
@@ -701,7 +701,7 @@ def main():
     parser = argparse.ArgumentParser(description="K48 prefix-branching exploration benchmark")
     parser.add_argument("--stage", choices=("smoke", "diagnostic", "full"), default="smoke")
     parser.add_argument("--checkpoint", default="results/grpo/v2/checkpoint_u0783.pt")
-    parser.add_argument("--config", default="config/training/k48/unified_k48_recovery_v3_reward_v2.yaml")
+    parser.add_argument("--config", default="experiments/config/training/k48/unified_k48_recovery_v3_reward_v2.yaml")
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--trunks", type=int, default=4)

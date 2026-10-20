@@ -26,7 +26,7 @@ if str(ROOT) not in sys.path:
 from envs.simulation.capture import restore_capture, take_capture
 from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
 from controllers.cartesian.tracking import TRACK
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 import envs.outcomes.recovery_success as success
 from controllers.recovery.geometry_switch import hand_pose, rot_angle
 from controllers.cartesian.jacobian import apply_cartesian_ctrl
@@ -35,12 +35,12 @@ from controllers.recovery.action_map import AIRBORNE_V3, W_MAX, grip_tau, map_ac
 from controllers.recovery.residual_limits import RECOVERY4D_TAU_OPEN, RECOVERY4D_TAU_SECURE
 from envs.outcomes.physical_recovery import physical_pack
 from training.recovery_episode import Z_ABORT, make_training_env
-from data_generation.ball_impact_dataset import grasp_sample, ids_for, label_states, load_episode
+from data_generation.datasets.ball_impact import grasp_sample, ids_for, label_states, load_episode
 
 
 
 from training.recovery_execution import _escaped
-from data_generation.strategies.recovery_laws import STRATEGIES, command, wrist_return
+from data_generation.oracles.plan_a.recovery_laws import STRATEGIES, command, wrist_return
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "privileged_ball_impact_recovery"
 LOG = RAW / "search_log.jsonl"

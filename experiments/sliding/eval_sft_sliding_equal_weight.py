@@ -248,7 +248,7 @@ def matched_compare(env, orig_model, eq_model, book, device, rows):
         blob = pickle.loads((ROOT / row["snapshot"]).read_bytes())
         if "ref" not in blob:
             if seated_ref is None:
-                from data_generation.strategies.recatch_oracle import _setup
+                from data_generation.oracles.plan_b.release_recatch import _setup
 
                 _sim, _base, seated_ref, _t, _c = _setup()
             blob = prepare_blob(blob, seated_ref)
@@ -316,8 +316,8 @@ def write_report(eval_summary, tf_sum, matched, weight_rows):
         "",
         "## Facts about training setup",
         "",
-        "- Base config: `config/training/k48/unified_k48_recovery_v3_horizontal.yaml`",
-        "- Experiment config: `config/training/k48/sft_sliding_equal_weight.yaml`",
+        "- Base config: `experiments/config/training/k48/unified_k48_recovery_v3_horizontal.yaml`",
+        "- Experiment config: `experiments/config/training/k48/sft_sliding_equal_weight.yaml`",
         "- Independent manifest: `data/supervised_targets_sliding_equal_weight.jsonl` (325 rows, same tapes)",
         "- Original manifest untouched: `data/supervised_targets_with_horizontal.jsonl`",
         "- Init: `scratch` via `build_k48`; seed **1**; epochs **40**; batch **8**; Adam lr **3e-4**; **no scheduler**",
@@ -458,7 +458,7 @@ def write_report(eval_summary, tf_sum, matched, weight_rows):
         "## Repro",
         "",
         "```powershell",
-        "python -u scripts/train.py --supervised --config config/training/k48/sft_sliding_equal_weight.yaml",
+        "python -u scripts/train_policy.py --supervised --config experiments/config/training/k48/sft_sliding_equal_weight.yaml",
         "python -u experiments/sliding/eval_sft_sliding_equal_weight.py --device cuda",
         "```",
         "",
@@ -492,7 +492,7 @@ def main():
     orig_rows = load_jsonl(ORIG_MANIFEST)
 
     seated_ref = None
-    from data_generation.strategies.recatch_oracle import _setup
+    from data_generation.oracles.plan_b.release_recatch import _setup
 
     _sim, _base, seated_ref, _t, _c = _setup()
 

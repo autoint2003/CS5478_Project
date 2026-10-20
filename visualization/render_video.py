@@ -22,7 +22,7 @@ if str(ROOT) not in sys.path:
 
 from envs.simulation.capture import restore_capture, take_capture
 from envs.outcomes.physical_recovery import physical_pack
-from data_generation.strategies.capture_geometry import capture_geometry
+from data_generation.oracles.plan_a.contact_geometry import capture_geometry
 
 from envs.outcomes.horizon_outcome import NOMINAL_S
 from envs.step_legal import step_legal
@@ -30,7 +30,7 @@ from visualization.camera import mjv_camera_from_preset
 from visualization.overlays import caption
 from visualization.video_recorder import write_frames_mp4
 from envs.outcomes.recovery_success import apply_handoff, nominal_step
-from data_generation.strategies.vertical_recatch_search import load_blob, make_env
+from data_generation.oracles.plan_b.vertical_recatch import load_blob, make_env
 
 OUT = ROOT / "results" / "diagnostics" / "vertical_recatch" / "VIDEOS"
 EPISODE = "ball_train_v2_0070"

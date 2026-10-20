@@ -166,7 +166,7 @@ def main():
         "`audit_mechanism_selection_feasibility.py`).\n"
         "- Training modules: `training/action_vocab_k49.py`, "
         "`training/adaptive_independent_g.py`; configs under "
-        "`config/training/k48/*adaptive_g*.yaml`.\n"
+        "`experiments/config/training/k48/*adaptive_g*.yaml`.\n"
     )
     text = org.read_text(encoding="utf-8")
     if "## 11. Post–Round-3" not in text:

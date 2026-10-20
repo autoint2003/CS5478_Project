@@ -29,7 +29,7 @@ from models.k48_checkpoint import (
 )
 from training.grpo_math import SIGMA, advantages, gaussian_logprob
 from training.k48_config import CKPT, DATA, ROOT, SELECTED_LIMIT_S
-from training.reward_v2 import grpo_return
+from training.rewards import grpo_return
 from training.k47_codebook import CAP, categorical_kl, decode_action, episode_arrays, group_advantage, load_codebook, read_jsonl
 
 def recorded_end_includes_handoff(n_actions):

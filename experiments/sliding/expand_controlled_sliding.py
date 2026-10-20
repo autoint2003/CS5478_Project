@@ -22,8 +22,8 @@ if str(ROOT) not in sys.path:
 
 from experiments.ball_impact.ball_impact_targeted import cylinder_first, near
 from experiments.sliding.export_inward_training_data import save_pair
-from data_generation.strategies.k48_controlled_slide_search import SEEDS, _measure, build_schedule, rollout
-from data_generation.rebuild_k48_recovery import (
+from data_generation.oracles.plan_a.controlled_sliding import SEEDS, _measure, build_schedule, rollout
+from data_generation.datasets.recovery_rebuild import (
     _draw_spec,
     _known_specs,
     _load_blob,
@@ -309,7 +309,7 @@ def _generate(env, book, have):
     specs = _known_specs()
     reserved = _reserved_keys()
     launches = 0
-    from data_generation.ball_impact_dataset import run_episode
+    from data_generation.datasets.ball_impact import run_episode
     from envs.simulation.capture import restore_capture
 
     while len(have) < TARGET and launches < MAX_LAUNCHES:

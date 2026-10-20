@@ -6,7 +6,7 @@ import numpy as np, mujoco, torch
 from models.k48_checkpoint import load_trained_k48
 from scripts.generate_k49_sliding_recatch_dataset import SFT
 from training.recovery_episode import make_training_env
-from evaluation.full_objective import contact_summary
+from evaluation.success_criteria import contact_summary
 from scripts.expand_k49_large_chase_dynamic import hand_pos, obj_pos
 
 device = torch.device("cpu")

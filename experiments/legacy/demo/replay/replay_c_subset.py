@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[4]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from data_generation.ball_impact_dataset import load_episode
+from data_generation.datasets.ball_impact import load_episode
 from experiments.sliding.sliding_vs_regrasp import _replay_actions
 
 OUT = ROOT / "results" / "diagnostics" / "raw" / "abc_original_revalidation"

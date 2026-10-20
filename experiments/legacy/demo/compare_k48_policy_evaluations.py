@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-CONFIG = "config/training/k48/unified_k48_long_reward_v1.yaml"
+CONFIG = "experiments/config/training/k48/unified_k48_long_reward_v1.yaml"
 COMPARE = ROOT / "results/archive/demo_results/diagnostics/raw/unified_k48/eval_compare"
 VALID_DIR = ROOT / "results/archive/demo_results/diagnostics/raw/ball_impact_dataset/accepted/validation"
 JOBS = (
@@ -109,7 +109,7 @@ def evaluate_validation(name, checkpoint):
     import torch
     from training.recovery_episode import make_training_env
     from envs.outcomes.horizon_outcome import NOMINAL_S, roll_policy
-    from training.unified_k48 import SELECTED_LIMIT_S, load_trained_k48
+    from training.pipeline import SELECTED_LIMIT_S, load_trained_k48
 
     out_dir = COMPARE / f"valid_{name}"
     destination = out_dir / "heldout_valid.json"

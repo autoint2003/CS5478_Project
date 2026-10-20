@@ -23,13 +23,13 @@ from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R,
 from controllers.cartesian.tracking import TRACK
 from envs.simulation.support_contacts import restore_supports, supports_of
 import experiments.recatch.natural_loss.natural_loss_recatch_data_scaling as scale
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 from controllers.recovery.geometry_switch import GeometrySwitch, hand_pose
 from controllers.recovery.action_map import AIRBORNE_V3, grip_tau, normalize_action
 from training.recovery_episode import T_TASK, Z_ABORT, fresh_nominal_state, make_training_env, nominal_substep, seat_base
 
 from experiments.legacy.film_impact_zp6_k33 import load_policy
-from data_generation.airborne_recatch_dataset import drop_supports, restore_to
+from data_generation.datasets.airborne_recatch import drop_supports, restore_to
 
 from experiments.legacy.nominal_pose_audit import (
     HORIZON,

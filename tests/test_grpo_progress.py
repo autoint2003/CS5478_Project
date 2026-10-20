@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from training.unified_k48 import (
+from training.pipeline import (
     epoch_progress,
     format_seconds,
     open_grpo_progress,

@@ -30,8 +30,8 @@ from training.grpo_math import advantages as grpo_advantages
 from training.k47_codebook import decode_action, group_advantage, load_codebook
 from training.k48_config import SELECTED_LIMIT_S
 from training.recovery_episode import make_training_env
-from training.reward_v2 import TIME_PENALTY, SUCCESS_BONUS, grpo_return, reward_components
-from training.unified_k48 import HANDOFF
+from training.rewards import TIME_PENALTY, SUCCESS_BONUS, grpo_return, reward_components
+from training.pipeline import HANDOFF
 
 OUT = ROOT / "results" / "diagnostics" / "handoff_40ms_advantage_audit"
 BENCH = ROOT / "results" / "benchmarks" / "hard_recovery_v1"

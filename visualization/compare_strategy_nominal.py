@@ -20,10 +20,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import models.airborne_v3 as v3
-from data_generation.ball_impact_dataset import LAUNCH_WINDOW_S, aim_ball, cylinder_contacts, ready_to_launch
-from data_generation.rebuild_k48_recovery import _open_env
-from data_generation.strategies.recatch_oracle import _aim, _flight_step, _pose, _setup
+import models.transformer_policy as v3
+from data_generation.datasets.ball_impact import LAUNCH_WINDOW_S, aim_ball, cylinder_contacts, ready_to_launch
+from data_generation.datasets.recovery_rebuild import _open_env
+from data_generation.oracles.plan_b.release_recatch import _aim, _flight_step, _pose, _setup
 from envs.ballistic_impact import z_tgt_of
 from envs.initialization.grasp_seat import hold_step, nominal_physics_step, seat_horizontal
 from envs.simulation.grasp_quality import body_twist

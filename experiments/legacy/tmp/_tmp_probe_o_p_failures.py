@@ -16,7 +16,7 @@ from controllers.recovery.action_map import AIRBORNE_V3, map_action
 from envs.observations.airborne_obs import SCALE_PREL, SCALE_VREL, relative_state
 from envs.simulation.capture import take_capture, restore_capture
 from envs.step_legal import step_legal
-from evaluation.full_objective import P_TGT, contact_summary
+from evaluation.success_criteria import P_TGT, contact_summary
 from models.k48_checkpoint import load_trained_k48
 from scripts.generate_k49_sliding_recatch_dataset import SFT
 from scripts.run_freefall_recatch_pose_feedback import (

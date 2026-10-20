@@ -21,8 +21,8 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from data_generation.expand_skill_quotas import _try_sliding
-from data_generation.strategies.vertical_recatch_search import (
+from data_generation.datasets.skill_quotas import _try_sliding
+from data_generation.oracles.plan_b.vertical_recatch import (
     _finish,
     _summary,
     rollout as vertical_rollout,
@@ -37,7 +37,7 @@ from training.adaptive_grpo import _prepare_blob
 from training.k47_codebook import decode_action, load_codebook
 from training.k48_config import SELECTED_LIMIT_S
 from training.recovery_episode import make_training_env
-from training.reward_v2 import (
+from training.rewards import (
     AFTER_HANDOFF_FAILURES,
     DROP_BASE,
     DROP_PROGRESS,
@@ -50,7 +50,7 @@ from training.reward_v2 import (
     ordering_bounds,
     reward_components,
 )
-from training.unified_k48 import HANDOFF
+from training.pipeline import HANDOFF
 from envs.step_legal import step_legal
 
 OUT = ROOT / "results" / "diagnostics" / "reward_time_handoff_audit"
@@ -881,7 +881,7 @@ def main():
     env_sft = make_training_env(device, model=sft_model)
     env_grpo = make_training_env(device, model=grpo_model)
 
-    from data_generation.strategies.recatch_oracle import _setup
+    from data_generation.oracles.plan_b.release_recatch import _setup
     _sim, _base, seated_ref, _target, _code = _setup()
 
     summaries = []

@@ -37,7 +37,7 @@ from training.adaptive_independent_g import load_merged_rows
 from training.k47_codebook import categorical_kl, group_advantage, load_codebook
 from training.k48_config import SELECTED_LIMIT_S
 from training.recovery_episode import make_training_env
-from training.train_grpo import step_logprob
+from training.grpo import step_logprob
 
 OUT = ROOT / "results" / "diagnostics" / "grpo_v2_regression"
 SFT = ROOT / "results/sft/sliding_equal_weight/checkpoint_epoch_0040.pt"
@@ -46,7 +46,7 @@ V2 = ROOT / "results/grpo/adaptive_g/full_run_v2_natural_sampling"
 VALID = ROOT / "results/grpo/adaptive_g/datasets/merged_validation.jsonl"
 TRAIN = ROOT / "results/grpo/adaptive_g/datasets/merged_train.jsonl"
 CODEBOOK = ROOT / "results/archive/demo_results/diagnostics/raw/legal_recovery_v2/codebook_selected_k47.npy"
-CFG = ROOT / "config/training/k48/unified_k48_recovery_v3_adaptive_g.yaml"
+CFG = ROOT / "experiments/config/training/k48/unified_k48_recovery_v3_adaptive_g.yaml"
 
 
 def _jsonable(value):
@@ -459,7 +459,7 @@ def main():
     book = load_codebook(CODEBOOK)
     valid_rows = load_merged_rows(VALID)
     train_rows = load_merged_rows(TRAIN)
-    from data_generation.strategies.recatch_oracle import _setup
+    from data_generation.oracles.plan_b.release_recatch import _setup
     _sim, _base, seated_ref, _target, _code = _setup()
     limit_s = SELECTED_LIMIT_S
 

@@ -18,7 +18,7 @@ if str(ROOT) not in sys.path:
 import torch
 
 import experiments.recatch.natural_loss.natural_loss_recatch_data_scaling as scale
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 import experiments.legacy.airborne_v3_demos as v3_demos
 from envs.observations.airborne_obs import (
     SCALE_PREL,
@@ -40,7 +40,7 @@ from experiments.legacy.balanced_unified_recovery import (
 )
 from experiments.recatch.natural_loss.clean_natural_loss_recatch import distal_geoms
 from envs.ballistic_impact import assert_noslip
-from data_generation.airborne_recatch_dataset import (
+from data_generation.datasets.airborne_recatch import (
     TRACK,
     begin,
     carry_then_release,

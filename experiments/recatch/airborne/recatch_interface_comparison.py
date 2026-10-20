@@ -24,9 +24,9 @@ from controllers.nominal import _integrate_rot
 from controllers.recovery.action_map import AIRBORNE_V3, map_action, normalize_action
 from envs.observations.airborne_obs import relative_state
 from envs.simulation.grasp_quality import body_twist
-from data_generation.strategies.capture_geometry import capture_geometry
+from data_generation.oracles.plan_a.contact_geometry import capture_geometry
 from envs.ballistic_impact import assert_noslip, make_sim
-from data_generation.airborne_recatch_dataset import (
+from data_generation.datasets.airborne_recatch import (
     TRACK,
     capture_nominal,
     capture_pads,
@@ -568,7 +568,7 @@ def impact_probe():
     from training.recovery_episode import make_training_env
     from envs.simulation.capture import restore_capture
     from envs.outcomes.table_drop import latched
-    from training.unified_k48 import load_trained_k48
+    from training.pipeline import load_trained_k48
 
     path = ROOT / "data" / "snapshots" / "train" / "ball_train_v2_0002.pkl"
     device = torch.device("cpu")

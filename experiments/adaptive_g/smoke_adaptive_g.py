@@ -20,7 +20,7 @@ if str(ROOT) not in sys.path:
 from envs.simulation.yaml_config import load_yaml
 from training.adaptive_grpo import train_adaptive_independent_g
 
-CFG = "config/training/k48/unified_k48_recovery_v3_adaptive_g.yaml"
+CFG = "experiments/config/training/k48/unified_k48_recovery_v3_adaptive_g.yaml"
 SFT = "results/sft/sliding_equal_weight/checkpoint_epoch_0040.pt"
 SMOKE_OUT = ROOT / "results" / "grpo" / "adaptive_g" / "smoke"
 

@@ -18,14 +18,14 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
-from data_generation.strategies.recatch_oracle import _flight_step, _ref_now
+from data_generation.oracles.plan_b.release_recatch import _flight_step, _ref_now
 
 from controllers.recovery.geometry_switch import hand_pose
 from controllers.recovery.action_map import AIRBORNE_V3, normalize_action
 from envs.observations.airborne_obs import relative_state
 from envs.simulation.grasp_quality import body_twist
-from data_generation.ball_impact_dataset import aim_ball, cylinder_contacts, physics_record
-from data_generation.strategies.capture_geometry import capture_geometry
+from data_generation.datasets.ball_impact import aim_ball, cylinder_contacts, physics_record
+from data_generation.oracles.plan_a.contact_geometry import capture_geometry
 from envs.outcomes.horizon_outcome import NOMINAL_S, nominal_verify
 from envs.simulation.impact_ball import apply_ball_free_state
 from experiments.recatch.legal.legal_recatch_speed_match import run_speed

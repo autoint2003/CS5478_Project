@@ -18,8 +18,8 @@ from envs.outcomes.recovery_success import apply_handoff, nominal_step
 from envs.outcomes.table_drop import latched, restore_state as restore_table_drop
 from envs.simulation.capture import restore_capture
 from envs.step_legal import step_legal
-from evaluation.full_objective import P_TGT, U_TGT, contact_summary
-from evaluation.grasp_configuration import measure
+from evaluation.success_criteria import P_TGT, U_TGT, contact_summary
+from evaluation.grasp_geometry import measure
 from models.k48_checkpoint import load_trained_k48
 from scripts.generate_k49_sliding_recatch_dataset import CONFIG_ID, SFT, decode
 from training.action_vocab_k49 import build_k49_table

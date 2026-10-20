@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from data_generation.action_kmeans import kmeans
+from data_generation.datasets.action_kmeans import kmeans
 OUT = ROOT / "results" / "diagnostics" / "raw" / "single_step_action_token_policy"
 DIMS = ["vx", "vy", "vz", "wx", "wy", "wz", "grip"]
 EPOCHS = 80

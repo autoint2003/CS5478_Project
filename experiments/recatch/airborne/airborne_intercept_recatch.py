@@ -379,7 +379,7 @@ def _refine(best):
 
 
 def search_ic(env, blob, book, verify_nominal=True):
-    from data_generation.rebuild_k48_recovery import legal_verify, legalize
+    from data_generation.datasets.recovery_rebuild import legal_verify, legalize
 
     tried = []
     physics = 0
@@ -620,7 +620,7 @@ def main():
     import torch
     from training.recovery_episode import make_training_env
     from training.k47_codebook import load_codebook
-    from training.unified_k48 import load_trained_k48
+    from training.pipeline import load_trained_k48
 
     RAW.mkdir(parents=True, exist_ok=True)
     started = time.perf_counter()

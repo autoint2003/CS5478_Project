@@ -38,7 +38,7 @@ from experiments.legacy.future_state_ablation import FuturePolicy, counts, evalu
 
 
 from experiments.legacy.supervised_coverage_warmstart import dataset
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 from training.grpo_math import LOG2PI, SIGMA, advantages, gaussian_logprob
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "pre_grpo_sanity"

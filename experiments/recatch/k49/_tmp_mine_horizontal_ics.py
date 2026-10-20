@@ -14,8 +14,8 @@ sys.path.insert(0, str(ROOT))
 
 from envs.simulation.ballistic_scene import CYL_H
 from envs.simulation.capture import restore_capture
-from evaluation.full_objective import P_TGT, U_TGT, contact_summary
-from evaluation.grasp_configuration import cylinder_axis_world, measure, object_R
+from evaluation.success_criteria import P_TGT, U_TGT, contact_summary
+from evaluation.grasp_geometry import cylinder_axis_world, measure, object_R
 from models.k48_checkpoint import load_trained_k48
 from scripts.generate_k49_dynamic_recatch_experts import contact_axial_offset
 from scripts.generate_k49_sliding_recatch_dataset import (

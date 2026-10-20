@@ -25,9 +25,9 @@ from envs.simulation.capture import restore_capture, take_capture
 from training.recovery_episode import make_training_env
 
 from envs.outcomes.horizon_outcome import _contacts, finish_recovery, recovery_failed
-from training.reward_v2 import grpo_return
+from training.rewards import grpo_return
 from training.k47_codebook import decode_action, load_codebook
-from training.unified_k48 import HANDOFF, load_trained_k48
+from training.pipeline import HANDOFF, load_trained_k48
 
 OUT = ROOT / "results/diagnostics/k48_counterfactual_credit"
 LIMIT = 4.0
@@ -112,7 +112,7 @@ Forced HANDOFF 不是 token 47 的采样结果，见下一节。
 - `DROP_DURING_RECOVERY`：`-1.0 + 0.10 * q_recovery`，`q_recovery = clip(elapsed / 4, 0, 1)`，没有时间惩罚
 - 交接后的 `DROP_AFTER_HANDOFF`、`LOST_GRASP`、`NOMINAL_LIFT_NOT_COMPLETED`、`PHYSICAL_VERIFICATION_FAILED`：`-0.5 + 0.20 * q_nominal - 0.05 * recovery_seconds`
 
-`q_nominal` 只统计名义抬起命令到达目标之后、双侧接触仍在、且尚未判定抓取失败的时间占 12 s 的比例。`grpo_return` 在 `reward_version: v2` 时采用这个标量。配置文件 `config/training/k48/unified_k48_recovery_v3_reward_v2.yaml` 的 `lambda_time` 是 0.05，`nominal_seconds` 是 12，`recovery_limit_s` 是 4。
+`q_nominal` 只统计名义抬起命令到达目标之后、双侧接触仍在、且尚未判定抓取失败的时间占 12 s 的比例。`grpo_return` 在 `reward_version: v2` 时采用这个标量。配置文件 `experiments/config/training/k48/unified_k48_recovery_v3_reward_v2.yaml` 的 `lambda_time` 是 0.05，`nominal_seconds` 是 12，`recovery_limit_s` 是 4。
 
 ## 6. 状态恢复接口
 

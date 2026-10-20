@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-FREEZE = ROOT / "scripts" / "consolidation" / "freeze_unified_experts.py"
+FREEZE = ROOT / "scripts" / "consolidation" / "freeze_experts.py"
 
 
 @pytest.mark.slow

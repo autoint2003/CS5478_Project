@@ -20,7 +20,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from controllers.cartesian.tracking import TRACK
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 from controllers.recovery.geometry_switch import (
     CONTROL_PERIOD_S,
     GeometrySwitch,
@@ -29,7 +29,7 @@ from envs.observations.airborne_obs import OBS_DIM_AIR, observe_airborne
 from envs.observations.observable_obs import ObservableObsState
 from envs.outcomes.physical_recovery import Z_AIR, physical_pack
 from envs.ballistic_impact import HAND_RISE_M, TAU_SEC, assert_noslip, ball_force_on_ball, z_tgt_of
-from data_generation.airborne_recatch_dataset import drop_supports, limits_of
+from data_generation.datasets.airborne_recatch import drop_supports, limits_of
 from envs.initialization.grasp_seat import begin, grasp_settled, hold_step
 
 def load_balanced(device=None):

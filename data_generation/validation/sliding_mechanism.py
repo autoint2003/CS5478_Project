@@ -18,7 +18,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from data_generation.oracles.representability import representability
-from data_generation.rebuild_k48_recovery import _open_env
+from data_generation.datasets.recovery_rebuild import _open_env
 from envs.outcomes.horizon_outcome import nominal_verify
 from envs.outcomes.physical_recovery import physical_pack
 from envs.simulation.capture import restore_capture

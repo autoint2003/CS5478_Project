@@ -29,9 +29,9 @@ from models.k48_checkpoint import HANDOFF, load_trained_k48
 from training.dataset import episode_tensors
 from training.k47_codebook import decode_action, load_codebook
 from training.k48_config import SELECTED_LIMIT_S
-from training.prefix_rollout import sample_action
+from training.rollout import sample_action
 from training.recovery_episode import make_training_env
-from training.train_grpo import step_logprob
+from training.grpo import step_logprob
 from evaluation import skill_traces as audit
 from evaluation.classify_validation_skills import BOTH_OFF_HOLD_S, POST_GAP_MIGRATION_M, classify_mechanism, prepare_blob, restore_ic
 
@@ -492,7 +492,7 @@ def phase4_matched_rollouts(rows, book, model, device):
         blob = pickle.loads((ROOT / row["snapshot"]).read_bytes())
         if "ref" not in blob:
             if seated_ref is None:
-                from data_generation.strategies.recatch_oracle import _setup
+                from data_generation.oracles.plan_b.release_recatch import _setup
                 _sim, _base, seated_ref, _target, _code = _setup()
             blob = prepare_blob(blob, seated_ref)
         if "capture" not in blob:

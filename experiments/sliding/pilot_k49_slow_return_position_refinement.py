@@ -29,8 +29,8 @@ from envs.outcomes.recovery_success import apply_handoff, nominal_step
 from envs.outcomes.table_drop import latched
 from envs.simulation.capture import restore_capture
 from envs.step_legal import step_legal
-from evaluation.full_objective import P_TGT, U_TGT, contact_summary, window_stats
-from evaluation.grasp_configuration import measure
+from evaluation.success_criteria import P_TGT, U_TGT, contact_summary, window_stats
+from evaluation.grasp_geometry import measure
 from models.k48_checkpoint import load_trained_k48
 from training.action_vocab_k49 import (
     SECURE_REVERSE_WRIST,

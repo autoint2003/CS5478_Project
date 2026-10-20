@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 import experiments.legacy.airborne_v3_demos as v3_demos
 from envs.observations.airborne_obs import observe_airborne, relative_state
 from envs.observations.observable_obs import ObservableObsState
@@ -34,7 +34,7 @@ from experiments.recatch.natural_loss.clean_natural_loss_recatch import (
     windows_from,
 )
 from envs.ballistic_impact import assert_noslip
-from data_generation.airborne_recatch_dataset import (
+from data_generation.datasets.airborne_recatch import (
     TRACK,
     begin,
     drop_supports,

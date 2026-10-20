@@ -24,7 +24,7 @@ import numpy as np
 import torch
 
 from envs.simulation.capture import take_snapshot
-from training.prefix_rollout import rollout as tree_rollout
+from training.rollout import rollout as tree_rollout
 from models.k48_checkpoint import HANDOFF, load_trained_k48
 from training.adaptive_hybrid import (
     BRANCHES_PER_METHOD,
@@ -42,8 +42,8 @@ from training.adaptive_hybrid import (
 from training.grpo_math import SIGMA
 from training.k47_codebook import CAP, categorical_kl, decode_action, group_advantage, load_codebook
 from training.k48_config import ROOT, SELECTED_LIMIT_S
-from training.reward_v2 import grpo_return
-from training.train_grpo import step_logprob
+from training.rewards import grpo_return
+from training.grpo import step_logprob
 
 SFT_CHECKPOINT = ROOT / "results/sft/checkpoint_epoch_0040.pt"
 
@@ -168,7 +168,7 @@ def independent_rollout(env, model, book, blob, rng, device, limit_s, reward_ver
     if "capture" in blob:
         restore_capture(env, blob["capture"])
     else:
-        from models.airborne_v3 import DT_POLICY
+        from models.transformer_policy import DT_POLICY
         from envs.observations.observable_obs import ObservableObsState
         from envs.outcomes.table_drop import restore_state
         from training.recovery_execution import restore_ballistic
@@ -853,7 +853,7 @@ def train_adaptive(cfg, checkpoint, limit_ics=None, epochs=None):
             with (ROOT / row["snapshot"]).open("rb") as handle:
                 blob = pickle.load(handle)
             if "ref" not in blob and seated_ref is None:
-                from data_generation.strategies.recatch_oracle import _setup
+                from data_generation.oracles.plan_b.release_recatch import _setup
 
                 _sim, _base, seated_ref, _target, _code = _setup()
             blob = _prepare_blob(blob, seated_ref)
@@ -1060,7 +1060,7 @@ def train_adaptive_independent_g(cfg, checkpoint, limit_ics=None, epochs=None):
             with (ROOT / row["snapshot"]).open("rb") as handle:
                 blob = pickle.load(handle)
             if "ref" not in blob and seated_ref is None:
-                from data_generation.strategies.recatch_oracle import _setup
+                from data_generation.oracles.plan_b.release_recatch import _setup
 
                 _sim, _base, seated_ref, _target, _code = _setup()
             blob = _prepare_blob(blob, seated_ref)

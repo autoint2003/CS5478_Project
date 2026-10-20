@@ -23,7 +23,7 @@ if str(ROOT) not in sys.path:
 from models.historical.k36_policy import ContinualPolicy
 from envs.simulation.capture import restore_capture, take_capture
 from envs.simulation.support_contacts import restore_supports, supports_of
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 import envs.outcomes.recovery_success as success
 from models.k48_policy import build_policy
 from training.recovery_episode import make_training_env, seat_base
@@ -274,7 +274,7 @@ def trace_case(env, model, kind, name):
     """First 24 recovery steps, for the interference comparison."""
     from envs.outcomes.nominal_pose import errors
     from training.recovery_episode import Z_ABORT
-    import models.airborne_v3 as v3
+    import models.transformer_policy as v3
     env.model = model.to(env.device)
     env.model.eval()
     if kind == "ic":

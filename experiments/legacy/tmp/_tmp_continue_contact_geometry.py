@@ -14,8 +14,8 @@ import torch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-import models.airborne_v3 as v3
-from data_generation.ball_impact_dataset import (
+import models.transformer_policy as v3
+from data_generation.datasets.ball_impact import (
     LAUNCH_WINDOW_S, aim_ball, cylinder_contacts, ready_to_launch,
 )
 from envs.outcomes.horizon_outcome import recovery_failed

@@ -8,7 +8,7 @@ import torch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from evaluation.full_objective import contact_summary
+from evaluation.success_criteria import contact_summary
 from models.k48_checkpoint import load_trained_k48
 from scripts.generate_k49_sliding_recatch_dataset import SFT
 from scripts.run_freefall_recatch_pose_feedback import load_root

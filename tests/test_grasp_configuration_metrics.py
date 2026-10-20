@@ -4,7 +4,7 @@ import math
 
 import numpy as np
 
-from evaluation.grasp_configuration import (
+from evaluation.grasp_geometry import (
     calibrate_from_samples,
     orientation_error_rad,
     position_error_m,

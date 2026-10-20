@@ -17,7 +17,7 @@ if str(ROOT) not in sys.path:
 
 from experiments.ball_impact.ball_impact_targeted import cylinder_first, near
 from experiments.sliding.export_inward_training_data import DEST, propose, save_pair
-from data_generation.rebuild_k48_recovery import (
+from data_generation.datasets.recovery_rebuild import (
     _draw_spec,
     _grasp_now,
     _known_specs,
@@ -76,7 +76,7 @@ def main():
             "attempt_id": episode_id,
             "protocol": "inward_sliding_data",
         })
-        from data_generation.ball_impact_dataset import run_episode
+        from data_generation.datasets.ball_impact import run_episode
 
         evidence, blob = run_episode(env, spec)
         evidence, blob = cylinder_first(evidence, blob)

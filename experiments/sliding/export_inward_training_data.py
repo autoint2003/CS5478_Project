@@ -21,9 +21,9 @@ if str(ROOT) not in sys.path:
 
 from envs.outcomes.horizon_outcome import recovery_failed
 from data_generation.recording.trajectory_recorder import save_pair
-from data_generation.strategies.k48_inward_sliding_search import row_snapshot
+from data_generation.oracles.plan_a.inward_reseat import row_snapshot
 from experiments.ball_impact.privileged_ball_impact_search import step_legal
-from data_generation.rebuild_k48_recovery import (
+from data_generation.datasets.recovery_rebuild import (
     CAP_STEPS,
     LIMIT_S,
     _load_blob,

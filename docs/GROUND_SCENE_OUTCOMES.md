@@ -30,7 +30,7 @@ Usable vertical workspace for airborne Recovery is approximately from grasp heig
 
 Hand-frame targets (working SUCCESS_NEW):
 
-- `p_COM_hand ≈ (0, 0, 0.105)` m (calibration uses `evaluation/full_objective.py` `P_TGT`)
+- `p_COM_hand ≈ (0, 0, 0.105)` m (calibration uses `evaluation/success_criteria.py` `P_TGT`)
 - Angular ≤ 10°, position ≤ 12 mm, hold ≥ 0.5 s
 - Legal recatch, stable grasp, legal HANDOFF, unchanged nominal continuation
 

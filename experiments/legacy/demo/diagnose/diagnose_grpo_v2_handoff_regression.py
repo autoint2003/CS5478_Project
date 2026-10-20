@@ -25,7 +25,7 @@ from experiments.legacy.demo.diagnose.diagnose_sft_epoch40_closed_loop import (
 
 from envs.outcomes.horizon_outcome import finish_recovery, recovery_failed, roll_policy
 from training.k47_codebook import load_codebook
-from training.unified_k48 import HANDOFF, load_trained_k48
+from training.pipeline import HANDOFF, load_trained_k48
 from training.recovery_episode import make_training_env
 
 ROOT = Path(__file__).resolve().parents[4]

@@ -21,7 +21,7 @@ from controllers.cartesian.tracking import TRACK
 from controllers.recovery.action_map import grip_tau, v1_normalized_to_v3
 from envs.outcomes.physical_recovery import physical_pack
 from envs.ballistic_impact import assert_noslip
-from models.airborne_v3 import step_v3
+from models.transformer_policy import step_v3
 from experiments.legacy.phase_decoupled_recovery_pilot import world
 from experiments.legacy.recovery_policy_pretraining_preparation import schedules
 from training.recovery_execution import T_TASK, continue_long, physical_of, restore_dyn, run_impact

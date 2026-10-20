@@ -30,8 +30,8 @@ from training.adaptive_hybrid import (
 from training.grpo_math import advantages
 from training.k47_codebook import group_advantage, load_codebook
 from training.k48_config import ROOT
-from training.reward_v2 import reward_components
-from training.train_grpo import step_logprob
+from training.rewards import reward_components
+from training.grpo import step_logprob
 
 
 def _trunk(index, steps, entropies=None):
@@ -343,7 +343,7 @@ class TreeAugmentedTests(unittest.TestCase):
         with snapshot.open("rb") as handle:
             blob = pickle.load(handle)
         if "ref" not in blob:
-            from data_generation.strategies.recatch_oracle import _setup
+            from data_generation.oracles.plan_b.release_recatch import _setup
 
             _sim, _base, ref, _target, _code = _setup()
             blob = dict(blob)

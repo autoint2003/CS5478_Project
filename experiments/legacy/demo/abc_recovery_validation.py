@@ -31,7 +31,7 @@ from controllers.recovery.action_map import AIRBORNE_V3, grip_tau, normalize_act
 from controllers.recovery.geometry_switch import hand_pose
 from envs.outcomes.physical_recovery import physical_pack
 from training.recovery_episode import make_training_env
-from data_generation.ball_impact_dataset import ids_for, label_states, load_episode
+from data_generation.datasets.ball_impact import ids_for, label_states, load_episode
 
 
 from experiments.ball_impact.privileged_ball_impact_search import (
@@ -88,7 +88,7 @@ def _tilt_rad(sim):
 
 
 def _contacts(sim, switch, memory):
-    from data_generation.ball_impact_dataset import grasp_sample
+    from data_generation.datasets.ball_impact import grasp_sample
 
     sample, anchor = grasp_sample(sim, switch, memory.get("anchor"))
     memory["anchor"] = anchor

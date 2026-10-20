@@ -397,7 +397,7 @@ def maybe_nominal(env, blob, result):
 def quantify(env, blob, result, book):
     if not result.get("success"):
         return None
-    from data_generation.rebuild_k48_recovery import legal_verify, legalize
+    from data_generation.datasets.recovery_rebuild import legal_verify, legalize
 
     _tokens, _residuals, decoded, packed = legalize(result["actions"], book)
     legal = packed["fraction_within_0.25"] is not None and float(packed["max_linf"]) <= 0.25 + 1e-8
@@ -515,7 +515,7 @@ def main():
     from experiments.recatch.airborne.airborne_intercept_recatch import rollout as old_rollout
     from training.recovery_episode import make_training_env
     from training.k47_codebook import load_codebook
-    from training.unified_k48 import load_trained_k48
+    from training.pipeline import load_trained_k48
 
     RAW.mkdir(parents=True, exist_ok=True)
     started = time.perf_counter()

@@ -16,13 +16,13 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from data_generation.strategies.recatch_oracle import MAIN_HALF, MAIN_CENTER, _geom_name, _geom_kind, _class_of, contacts_now, _pad_band, _class_force, _wrist_sat, _metrics, rollout, staged_choose, _depth_vz, _blend_depth, _base_spec
+from data_generation.oracles.plan_b.release_recatch import MAIN_HALF, MAIN_CENTER, _geom_name, _geom_kind, _class_of, contacts_now, _pad_band, _class_force, _wrist_sat, _metrics, rollout, staged_choose, _depth_vz, _blend_depth, _base_spec
 
 from controllers.recovery.action_map import TAU_OPEN, TAU_SECURE
 from experiments.ball_impact.ball_impact_recoverability import _action_from, _nominal_fail, _setup
 from envs.observations.airborne_obs import observe_airborne
 from envs.observations.observable_obs import ObservableObsState
-from data_generation.strategies.capture_geometry import capture_geometry
+from data_generation.oracles.plan_a.contact_geometry import capture_geometry
 from envs.outcomes.horizon_outcome import NOMINAL_S
 from experiments.ball_impact.privileged_ball_impact_search import representability, step_legal
 from envs.outcomes.table_drop import latched, restore_state

@@ -32,8 +32,8 @@ from envs.simulation.capture import restore_capture, take_capture
 from envs.simulation.grasp_quality import body_twist
 from envs.simulation.object_dynamics import set_finger_object_sliding_mu
 from envs.step_legal import N_SUB, TRACK, step_legal
-from evaluation.full_objective import P_TGT, U_TGT
-from evaluation.grasp_configuration import measure
+from evaluation.success_criteria import P_TGT, U_TGT
+from evaluation.grasp_geometry import measure
 from models.k48_checkpoint import load_trained_k48
 from training.action_vocab_k49 import SECURE_REVERSE_WRIST, build_k49_table, decode_action as decode_k49
 from training.k47_codebook import decode_action as decode_k48

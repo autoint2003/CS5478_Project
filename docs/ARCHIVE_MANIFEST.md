@@ -37,7 +37,7 @@ Leave these paths unchanged:
 | `results/diagnostics/ground_dynamic_catch_oracle/` | prefix catch tapes |
 | `results/diagnostics/ground_postcatch_endgrasp_recovery/` | brake / slow-lift tapes |
 
-Replay: `python -u scripts/replay_golden_experts.py`
+Replay: `python -u scripts/replay_experts.py`
 
 ## Historical experimental code
 

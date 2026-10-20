@@ -22,8 +22,8 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from data_generation.expand_skill_quotas import _try_sliding
-from data_generation.strategies.vertical_recatch_search import (
+from data_generation.datasets.skill_quotas import _try_sliding
+from data_generation.oracles.plan_b.vertical_recatch import (
     _finish,
     rollout as vertical_rollout,
     specs as vertical_specs,
@@ -37,7 +37,7 @@ from models.k48_checkpoint import load_trained_k48
 from training.k47_codebook import decode_action, load_codebook
 from training.k48_config import SELECTED_LIMIT_S
 from training.recovery_episode import make_training_env
-from training.unified_k48 import HANDOFF
+from training.pipeline import HANDOFF
 
 OUT = ROOT / "results" / "diagnostics" / "nontrivial_recovery_ic_mining"
 PRIOR = ROOT / "results" / "diagnostics" / "mechanism_selection_feasibility"

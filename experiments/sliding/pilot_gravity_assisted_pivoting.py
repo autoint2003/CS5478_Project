@@ -33,7 +33,7 @@ from envs.outcomes.table_drop import latched, object_vz, observe
 from envs.simulation.capture import restore_capture
 from envs.step_legal import N_SUB, TRACK, step_legal
 from envs.ballistic_impact import z_tgt_of
-from evaluation.grasp_configuration import (
+from evaluation.grasp_geometry import (
     AXIS_REVERSAL_SYMMETRIC,
     cylinder_axis_hand,
     measure,
@@ -46,7 +46,7 @@ from training.k47_codebook import decode_action, load_codebook
 from training.k48_config import SELECTED_LIMIT_S
 from training.recovery_episode import make_training_env
 from training.recovery_execution import _escaped
-from training.unified_k48 import HANDOFF
+from training.pipeline import HANDOFF
 
 OUT = ROOT / "results" / "diagnostics" / "gravity_assisted_pivoting_feasibility"
 MIG = ROOT / "results" / "diagnostics" / "grasp_configuration_migration"

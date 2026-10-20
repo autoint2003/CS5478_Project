@@ -21,7 +21,7 @@ ROOT_PATH = Path(__file__).resolve().parents[2]
 if str(ROOT_PATH) not in sys.path:
     sys.path.insert(0, str(ROOT_PATH))
 
-from data_generation.strategies.recatch_oracle import _setup
+from data_generation.oracles.plan_b.release_recatch import _setup
 from envs.outcomes.horizon_outcome import finish_recovery, recovery_failed
 from envs.outcomes.table_drop import export_state
 from envs.step_legal import step_legal
@@ -30,7 +30,7 @@ from training.dataset import episode_tensors
 from training.k47_codebook import CAP, decode_action, load_codebook, read_jsonl
 from training.k48_config import ROOT
 from training.recovery_episode import make_training_env
-from training.train_sft import supervised_loss
+from training.sft import supervised_loss
 from experiments.recatch.diagnose_horizontal_recatch import (
     CKPT,
     begin,

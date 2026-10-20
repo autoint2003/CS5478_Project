@@ -19,8 +19,8 @@ ROOT_PATH = Path(__file__).resolve().parents[2]
 if str(ROOT_PATH) not in sys.path:
     sys.path.insert(0, str(ROOT_PATH))
 
-from data_generation.strategies.build_open_overchase_recatch_dataset import _specs
-from data_generation.strategies.recatch_oracle import (
+from data_generation.datasets.open_overchase_recatch import _specs
+from data_generation.oracles.plan_b.release_recatch import (
     _action_from,
     _bottom,
     _class_force,
@@ -35,7 +35,7 @@ from envs.outcomes.table_drop import export_state, latched, restore_state
 from envs.simulation.capture import restore_capture
 from envs.simulation.scene_state import TABLE_TOP
 from envs.step_legal import step_legal
-from models.airborne_v3 import DT_POLICY
+from models.transformer_policy import DT_POLICY
 from models.k48_checkpoint import HANDOFF, load_trained_k48
 from training.adaptive_hybrid import HORIZONTAL, SLIDING, VERTICAL, load_train_snapshots
 from training.grpo_math import SIGMA

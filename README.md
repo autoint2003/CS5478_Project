@@ -15,15 +15,22 @@ Plans A/B/C are offline expert families for a **single** Transformer policy (not
 | `docs/FINAL_CONSOLIDATION_REPORT.md` | Consolidation summary |
 | `config/training/unified_plan_abc.yaml` | Minimal training config (not launched) |
 
-### Consolidation commands
+### Supported commands
 
 ```powershell
-python -u scripts/build_unified_dataset.py
-python -u scripts/replay_golden_experts.py
-python -u scripts/audit_k49.py
+python -u scripts/generate_experts.py
+python -u scripts/generate_plan_c_experts.py
+python -u scripts/build_expert_dataset.py
+python -u scripts/replay_experts.py
+python -u scripts/audit_action_vocab.py
+python -u scripts/train_policy.py --supervised --config config/training/sft.yaml
+python -u scripts/evaluate_policy.py --eval --config config/training/unified_transformer.yaml --checkpoint <ckpt>
+python -u scripts/render_trajectory.py
 ```
 
-Tracked dataset manifests: `datasets/unified_experts/`. Heavy tapes: `data/unified_experts/` (gitignored). Source checkpoint: git tag `archive/pre-consolidation-20261021-src`. Historical code → `experiments/`; leave `results/` untouched (no top-level `archive/` directory).
+Tracked dataset manifests: `datasets/unified_experts/` (unchanged contents). Heavy tapes: `data/unified_experts/` (gitignored).  
+Historical **code** → `experiments/`. Leave `results/` untouched. Rename map: `docs/RENAME_MAP.md`.  
+Checkpoints: `archive/pre-consolidation-20261021-src`, `refactor/pre-naming-20261021-src`.
 
 ## Directory layout
 
@@ -31,24 +38,24 @@ Run commands from the repository root.
 
 | Path | Role |
 |---|---|
-| `assets/` | MuJoCo XML, including `scene_ballistic_impact.xml` |
-| `config/` | `simulation/`, `controllers/`, `recovery/`, `training/` (incl. `unified_plan_abc.yaml`) |
-| `controllers/` | `nominal.py`, `cartesian/`, `gripper/`, `recovery/action_map.py` |
-| `envs/` | `step_legal.py`, `ballistic_impact.py`, `simulation/` (incl. `ground_sim.py`), `observations/`, `contacts/`, `outcomes/`, `initialization/` |
-| `sensors/` | Finger-pad tactile array and the hand-x offset estimate `lateral_offset.py` |
-| `models/` | Policy modules. `airborne_v3.py` is the 39-D policy and `step_v3`. `historical/` is K33/K36 |
-| `data_generation/` | Generators and `strategies/` (incl. Plan C `ground_*.py`) |
-| `training/` | `train_sft.py`, `train_grpo.py`, `action_vocab_k49.py`, `unified_k48.py`, … |
-| `evaluation/` | Closed-loop eval, audits, SUCCESS_NEW helpers |
-| `visualization/` | Camera, captions, MP4 encoding, tape replay |
-| `experiments/` | Historical / superseded experimental code (only code archive) |
+| `assets/` | MuJoCo XML |
+| `config/` | Active controllers / recovery / simulation / training YAMLs |
+| `controllers/` | `nominal.py`, `cartesian/`, `gripper/`, `recovery/` |
+| `envs/` | `step_legal.py`, simulation, observations, contacts, outcomes |
+| `sensors/` | Tactile + lateral offset |
+| `models/` | `transformer_policy.py`, K48 checkpoint/policy loaders, `historical/` |
+| `data_generation/` | `oracles/plan_{a,b,c}/`, `datasets/`, `recording/`, `initial_conditions/` |
+| `training/` | `sft.py`, `grpo.py`, `pipeline.py`, `action_vocab_k49.py`, rewards, rollout |
+| `evaluation/` | Success criteria, handoff validation, policy evaluation, grasp geometry |
+| `visualization/` | Rendering / video |
+| `experiments/` | Historical experimental code + archived configs/docs/diagnostics |
 | `datasets/` | Tracked unified expert manifests |
-| `scripts/` | Entry points (`build_unified_dataset`, `replay_golden_experts`, `audit_k49`, `train`, `evaluate`, Plan C runners) |
-| `tests/` | Regression tests (incl. Plan C golden replay) |
-| `data/` | Local manifests, demonstrations, snapshots (gitignored) |
-| `results/` | Local SFT/GRPO/diagnostics (gitignored) |
+| `scripts/` | Minimal user-facing entry points |
+| `tests/` | Regression tests |
+| `data/` | Local manifests / snapshots (gitignored) |
+| `results/` | Diagnostics / training outputs (gitignored; do not reorganize) |
 | `mujoco_menagerie/` | Vendored robot models |
-| `docs/` | Architecture, archive manifest, reproducibility, dataset schema, consolidation report, package map, coursework PDFs |
+| `docs/` | Architecture, reproducibility, dataset schema, rename map, coursework |
 
 `data/` and `results/` are gitignored. File moves: `docs/MIGRATION.md`. Package map: `docs/MODULE_ORGANIZATION.md`.
 
@@ -90,15 +97,15 @@ The training entry points import PyTorch in addition to the packages in `require
 Print the rebuilt category counts. This does not generate data:
 
 ```powershell
-python -u scripts/generate_data.py --counts
+python -u scripts/generate_experts.py --counts
 ```
 
 Generation entry point, when new ballistic initial conditions are actually required:
 
 ```powershell
-python -u scripts/generate_data.py --recatch --target-train 200 --target-valid 50 --max-search-trials 400
-python -u scripts/generate_data.py --controlled-slide --target-train 200 --target-valid 50 --max-search-trials 400
-python -u scripts/generate_data.py --inward-reseat --target-train 200 --target-valid 50 --max-search-trials 400
+python -u scripts/generate_experts.py --recatch --target-train 200 --target-valid 50 --max-search-trials 400
+python -u scripts/generate_experts.py --controlled-slide --target-train 200 --target-valid 50 --max-search-trials 400
+python -u scripts/generate_experts.py --inward-reseat --target-train 200 --target-valid 50 --max-search-trials 400
 ```
 
 `--max-search-trials` is a cap, not a request to synthesize that many initial conditions. Static dataset checks:
@@ -116,7 +123,7 @@ Run these from the repository root. Evaluation is deterministic argmax on CPU. T
 Check the codebook, the HANDOFF head, one supervised loss, and the reward order. This does not update parameters or write a checkpoint:
 
 ```powershell
-python -u scripts/train.py --check
+python -u scripts/train_policy.py --check
 ```
 
 ### Supervised training (Horizontal Recatch included)
@@ -126,7 +133,7 @@ python -u scripts/train.py --check
 `config/training/k48/unified_k48_recovery_v3_horizontal.yaml` trains on `data/supervised_targets_with_horizontal.jsonl` and writes `results/sft/checkpoint_epoch_0001.pt` through `checkpoint_epoch_0040.pt`. Do not pass `--checkpoint`. Do not use `config/training/k48/unified_k48_recovery_v3.yaml` for a scratch run; that older config expands the historical K=47 checkpoint.
 
 ```powershell
-python -u scripts/train.py --supervised --config config/training/k48/unified_k48_recovery_v3_horizontal.yaml
+python -u scripts/train_policy.py --supervised --config config/training/k48/unified_k48_recovery_v3_horizontal.yaml
 ```
 
 Closed-loop skill eval uses the 17 unique ICs in `data/valid_skill_quotas.jsonl` (deterministic argmax). Mechanism labels (Contact-Preserving / Release–Recatch / Hybrid / Other) come from contact timelines, not data tags:
@@ -142,7 +149,7 @@ On that 17-IC set, the horizontal SFT Epoch 40 is **8/17** `SUCCESS_12S` and **0
 Hypothesis: Sliding was lost mainly because its `sample_weight` was ~0.02. This run keeps the same 325 tapes, seed, epochs, and hparams, but sets every Sliding tape weight to **1.0** in an independent manifest. Train from **scratch**; do not continue from Epoch 40.
 
 ```powershell
-python -u scripts/train.py --supervised --config config/training/k48/sft_sliding_equal_weight.yaml
+python -u scripts/train_policy.py --supervised --config config/training/k48/sft_sliding_equal_weight.yaml
 python -u experiments/sliding/eval_sft_sliding_equal_weight.py --device cuda
 ```
 
@@ -151,7 +158,7 @@ Writes `results/sft/sliding_equal_weight/checkpoint_epoch_*.pt` and does **not**
 Optional older path that writes under `results/sft/current/` from the 303-row manifest without Horizontal tapes:
 
 ```powershell
-python -u scripts/train.py --supervised --config config/training/k48/unified_k48_recovery_v3_current.yaml
+python -u scripts/train_policy.py --supervised --config config/training/k48/unified_k48_recovery_v3_current.yaml
 ```
 
 ### Tree-augmented GRPO
@@ -163,13 +170,13 @@ The finished tree80 run started from the **downweighted** horizontal SFT (`resul
 Start from supervised epoch 40 into an empty GRPO output directory:
 
 ```powershell
-python -u scripts/train.py --adaptive-grpo --config config/training/k48/unified_k48_recovery_v3_tree80.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt --ic-epochs 1
+python -u scripts/train_policy.py --adaptive-grpo --config config/training/k48/unified_k48_recovery_v3_tree80.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt --ic-epochs 1
 ```
 
 Continue from a saved epoch that contains Adam moments. Replace the checkpoint path and the round count:
 
 ```powershell
-python -u scripts/train.py --adaptive-grpo --config config/training/k48/unified_k48_recovery_v3_tree80.yaml --checkpoint results/grpo/tree80/checkpoint_epoch_0001.pt --ic-epochs 1
+python -u scripts/train_policy.py --adaptive-grpo --config config/training/k48/unified_k48_recovery_v3_tree80.yaml --checkpoint results/grpo/tree80/checkpoint_epoch_0001.pt --ic-epochs 1
 ```
 
 `results/grpo/tree80/history/checkpoint_epoch_0001.pt` is the earlier weights-only pass. It has no Adam moments, and training refuses to resume it.
@@ -179,7 +186,7 @@ python -u scripts/train.py --adaptive-grpo --config config/training/k48/unified_
 Three passes over the 87 training recovery initial conditions, 261 updates. Writes `results/grpo/v1/`. The last file is `results/grpo/v1/checkpoint_u0261.pt`. The success terminal is only `SUCCESS_12S`.
 
 ```powershell
-python -u scripts/train.py --grpo --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
+python -u scripts/train_policy.py --grpo --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
 ```
 
 ### GRPO reward v2
@@ -187,7 +194,7 @@ python -u scripts/train.py --grpo --config config/training/k48/unified_k48_recov
 `config/training/k48/unified_k48_recovery_v3_reward_v2.yaml` runs nine passes, 783 updates, and writes `results/grpo/v2/`. A checkpoint saved after update 261 is the end of the first three passes. This command continues that file from update 262 through 783 and appends `training_log.jsonl` and `rollouts.jsonl`. It does not overwrite `checkpoint_u0261.pt`. The frozen KL reference stays `results/sft/checkpoint_epoch_0040.pt`. The last new file is `results/grpo/v2/checkpoint_u0783.pt`.
 
 ```powershell
-python -u scripts/train.py --grpo --config config/training/k48/unified_k48_recovery_v3_reward_v2.yaml --checkpoint results/grpo/v2/checkpoint_u0261.pt
+python -u scripts/train_policy.py --grpo --config config/training/k48/unified_k48_recovery_v3_reward_v2.yaml --checkpoint results/grpo/v2/checkpoint_u0261.pt
 ```
 
 ### Evaluation
@@ -197,25 +204,25 @@ The default IC list is `data/valid_recovery.jsonl` (8 validation recovery initia
 SFT epoch 40:
 
 ```powershell
-python -u scripts/evaluate.py --eval --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
+python -u scripts/evaluate_policy.py --eval --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/sft/checkpoint_epoch_0040.pt
 ```
 
 GRPO v1, same 8 validation initial conditions:
 
 ```powershell
-python -u scripts/evaluate.py --eval --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/grpo/v1/checkpoint_u0261.pt
+python -u scripts/evaluate_policy.py --eval --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/grpo/v1/checkpoint_u0261.pt
 ```
 
 GRPO v2, same 8 validation initial conditions:
 
 ```powershell
-python -u scripts/evaluate.py --eval --config config/training/k48/unified_k48_recovery_v3_reward_v2.yaml --checkpoint results/grpo/v2/checkpoint_u0261.pt
+python -u scripts/evaluate_policy.py --eval --config config/training/k48/unified_k48_recovery_v3_reward_v2.yaml --checkpoint results/grpo/v2/checkpoint_u0261.pt
 ```
 
 `--eval-data` selects another recovery list. The 87 training recovery initial conditions are `data/grpo_initial_conditions.jsonl`. Pass `--eval-output` so this does not overwrite `results/evaluations/heldout_train.json`. The rows are written to `closed_loop.json` in that directory.
 
 ```powershell
-python -u scripts/evaluate.py --eval --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/grpo/v1/checkpoint_u0261.pt --eval-data data/grpo_initial_conditions.jsonl --eval-output results/evaluations/raw/grpo_v1_train_eval
+python -u scripts/evaluate_policy.py --eval --config config/training/k48/unified_k48_recovery_v3.yaml --checkpoint results/grpo/v1/checkpoint_u0261.pt --eval-data data/grpo_initial_conditions.jsonl --eval-output results/evaluations/raw/grpo_v1_train_eval
 ```
 
 Replace the checkpoint path to evaluate another run on the same 87 initial conditions. Reward v1 and reward v2 use the same rollout. The config selects the codebook and the 4 s / 12 s limits.
@@ -225,8 +232,8 @@ Replace the checkpoint path to evaluate another run on the same 87 initial condi
 Replay a saved tape from its snapshot. The default is `ball_train_v2_0070` / `follow_early`, with recovery frames repeated 6 times and the official 12 s nominal hold at 25 fps. `--extra-hold 5` continues the nominal controller for another 5 seconds. This resimulates the initial condition; it does not interpolate poses.
 
 ```powershell
-python -u scripts/render_video.py
-python -u scripts/render_video.py --episode ball_train_v2_0070 --strategy follow_early --extra-hold 5
+python -u scripts/render_trajectory.py
+python -u scripts/render_trajectory.py --episode ball_train_v2_0070 --strategy follow_early --extra-hold 5
 ```
 
 Side-by-side **policy vs immediate nominal handoff** on the 17 validation ICs (`data/valid_skill_quotas.jsonl`). Left panel is deterministic K48; right panel hands off to nominal immediately. Labels match `horizon_outcome`.

@@ -21,7 +21,7 @@ from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R,
 import envs.outcomes.recovery_success as success
 from envs.outcomes.physical_recovery import TABLE_DROP, Z_AIR
 from training.recovery_episode import Z_ABORT, make_training_env
-from data_generation.ball_impact_dataset import load_episode
+from data_generation.datasets.ball_impact import load_episode
 
 
 from experiments.ball_impact.privileged_ball_impact_search import step_legal

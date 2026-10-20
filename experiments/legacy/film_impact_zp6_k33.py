@@ -24,7 +24,7 @@ if str(ROOT) not in sys.path:
 
 from controllers.cartesian.tracking import TRACK
 from envs.simulation.support_contacts import restore_supports, supports_of
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 from controllers.recovery.geometry_switch import hand_pose
 from controllers.recovery.action_map import AIRBORNE_V3, map_action
 from envs.observations.airborne_obs import relative_state

@@ -12,8 +12,8 @@ sys.path.insert(0, str(ROOT))
 
 from envs.outcomes.table_drop import latched
 from envs.step_legal import step_legal
-from evaluation.full_objective import P_TGT, U_TGT, contact_summary
-from evaluation.grasp_configuration import cylinder_axis_hand, measure as gmeasure, p_com_hand
+from evaluation.success_criteria import P_TGT, U_TGT, contact_summary
+from evaluation.grasp_geometry import cylinder_axis_hand, measure as gmeasure, p_com_hand
 from models.k48_checkpoint import load_trained_k48
 from scripts.generate_k49_sliding_recatch_dataset import SFT
 from scripts.run_freefall_recatch_collision_aware_feedback import (

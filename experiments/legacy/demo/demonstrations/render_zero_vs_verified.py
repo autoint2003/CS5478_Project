@@ -24,17 +24,17 @@ if str(ROOT) not in sys.path:
 from envs.simulation.capture import restore_capture, take_capture
 from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
 import envs.outcomes.horizon_outcome as horizon
-import data_generation.rebuild_k48_recovery as rebuild
+import data_generation.datasets.recovery_rebuild as rebuild
 import envs.outcomes.recovery_success as success
 import experiments.sliding.sliding_vs_regrasp as replay
 from experiments.legacy.demo.demonstrations.demo_ballistic_recovery_comparison import caption
 from experiments.legacy.demo.demonstrations.demo_grav_reposition_comparison import hstack_videos
 from training.recovery_episode import Z_ABORT, make_training_env, nominal_substep
-from data_generation.ball_impact_dataset import _hold_state
+from data_generation.datasets.ball_impact import _hold_state
 
 from visualization.impact_view import mjv_camera_from_preset
 
-from training.unified_k48 import load_trained_k48
+from training.pipeline import load_trained_k48
 
 FPS = 25
 RENDER_W, RENDER_H = 640, 480

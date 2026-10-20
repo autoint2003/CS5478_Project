@@ -20,7 +20,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from envs.simulation.support_contacts import restore_supports, supports_of
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 from envs.observations.airborne_obs import OBS_NAMES_AIR, SCALE_PREL, SCALE_VREL
 from envs.outcomes.physical_recovery import SCALE_AP
 from training.recovery_episode import make_training_env, seat_base

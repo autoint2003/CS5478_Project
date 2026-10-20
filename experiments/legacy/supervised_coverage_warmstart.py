@@ -20,7 +20,7 @@ if str(ROOT) not in sys.path:
 from envs.simulation.capture import restore_capture, take_capture
 from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R, rotvec
 from envs.simulation.support_contacts import restore_supports, supports_of
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 import envs.outcomes.recovery_success as success
 from models.k48_policy import build_policy
 from training.recovery_episode import Z_ABORT, make_training_env, seat_base
@@ -42,7 +42,7 @@ from experiments.legacy.final_rl_readiness import (
 
 from experiments.recatch.new_recatch_supervised import _enter_air
 from experiments.legacy.nominal_pose_audit import until_impact
-from data_generation.policy_rollout import policy_step
+from data_generation.datasets.policy_rollout import policy_step
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "supervised_coverage_warmstart"
 RECOV = ROOT / "results" / "diagnostics" / "raw" / "train_recoverability"

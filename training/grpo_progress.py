@@ -32,7 +32,7 @@ from models.k48_checkpoint import (
 )
 from training.grpo_math import SIGMA, advantages, gaussian_logprob
 from training.k48_config import CKPT, DATA, ROOT, SELECTED_LIMIT_S
-from training.reward_v2 import grpo_return
+from training.rewards import grpo_return
 from training.k47_codebook import CAP, categorical_kl, decode_action, episode_arrays, group_advantage, load_codebook, read_jsonl
 
 from training.dataset import assert_recovery_v3_paths, collate, episode_tensors
@@ -141,7 +141,7 @@ def write_progress_row(handle, record):
 
 def assert_selected_reward(version, limit_s):
     """Fail before training if the configured version is wired to the other formula."""
-    from training.reward_v2 import reward_components
+    from training.rewards import reward_components
 
     elapsed = 1.0
     historical = physical_reward("SUCCESS_12S", elapsed)

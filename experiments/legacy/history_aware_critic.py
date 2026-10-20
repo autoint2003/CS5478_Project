@@ -28,10 +28,10 @@ if str(ROOT) not in sys.path:
 from controllers.cartesian.tracking import TRACK
 from envs.simulation.support_contacts import restore_supports, supports_of
 import experiments.legacy.autonomous_rl_sanity as sanity
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 from envs.observations.airborne_obs import OBS_DIM_AIR
 from envs.observations.observable_obs import ObservableObsState
-from data_generation.autonomous_episodes import IMPACT, SKILLS, _until_impact_entry
+from data_generation.datasets.autonomous_episodes import IMPACT, SKILLS, _until_impact_entry
 from training.recovery_episode import Z_ABORT, make_training_env, seat_base
 from experiments.legacy.autonomous_rl_sanity import (
     CRITIC_LR,

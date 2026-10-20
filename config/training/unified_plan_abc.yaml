@@ -1,7 +1,7 @@
 # Minimal unified Transformer training configuration (DO NOT launch yet).
-# Rebuild dataset first: python -u scripts/build_unified_dataset.py
-# K49 audit: python -u scripts/audit_k49.py
-# Golden replay: python -u scripts/replay_golden_experts.py
+# Rebuild dataset first: python -u scripts/build_expert_dataset.py
+# K49 audit: python -u scripts/audit_action_vocab.py
+# Golden replay: python -u scripts/replay_experts.py
 
 schema_version: unified_experts_v1
 dataset:

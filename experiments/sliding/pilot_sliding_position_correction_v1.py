@@ -33,7 +33,7 @@ from envs.outcomes.horizon_outcome import recovery_failed, terminal_reason
 from envs.outcomes.table_drop import object_vz, observe
 from envs.simulation.capture import restore_capture, take_capture
 from envs.step_legal import N_SUB, TRACK, step_legal
-from evaluation.full_objective import (
+from evaluation.success_criteria import (
     P_TGT,
     U_TGT,
     WORKING_POS_MM,
@@ -42,7 +42,7 @@ from evaluation.full_objective import (
     evaluate_tokens,
     guide_score_after_prefix,
 )
-from evaluation.grasp_configuration import cylinder_axis_hand, measure, p_com_hand
+from evaluation.grasp_geometry import cylinder_axis_hand, measure, p_com_hand
 from models.k48_checkpoint import load_trained_k48
 from training.k47_codebook import decode_action, load_codebook
 from training.recovery_episode import make_training_env

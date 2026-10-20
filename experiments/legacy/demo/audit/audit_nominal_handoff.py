@@ -23,7 +23,7 @@ from envs.simulation.capture import restore_capture, take_capture
 
 from envs.outcomes.horizon_outcome import finish_recovery, replay_commands
 from training.k47_codebook import read_jsonl
-from training.unified_k48 import load_trained_k48
+from training.pipeline import load_trained_k48
 
 OUT = ROOT / "results/archive/demo_results/diagnostics/raw/k48_handoff/nominal_audit"
 ICS = ROOT / "results/archive/demo_results/diagnostics/raw/k48_handoff/grpo_initial_conditions.jsonl"

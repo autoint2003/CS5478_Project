@@ -31,7 +31,7 @@ from envs.outcomes.horizon_outcome import (
 from experiments.legacy.migrate_horizon_dataset import mechanism
 from experiments.ball_impact.privileged_ball_impact_search import representability, step_legal
 from training.k47_codebook import CAP, load_codebook, read_jsonl
-from training.unified_k48 import HANDOFF, SELECTED_LIMIT_S
+from training.pipeline import HANDOFF, SELECTED_LIMIT_S
 
 RAW = ROOT / "results/archive/demo_results/diagnostics/raw/legal_recovery_v2"
 MIGRATED = ROOT / "results/archive/demo_results/diagnostics/raw/horizon_migration"

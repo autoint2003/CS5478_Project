@@ -33,12 +33,12 @@ from envs.outcomes.recovery_success import apply_handoff, nominal_step
 from envs.outcomes.table_drop import latched, object_vz, observe
 from envs.simulation.capture import restore_capture
 from envs.step_legal import N_SUB, TRACK, step_legal
-from evaluation.grasp_configuration import measure
+from evaluation.grasp_geometry import measure
 from models.k48_checkpoint import load_trained_k48
 from training.k47_codebook import decode_action, load_codebook
 from training.recovery_episode import make_training_env
 from training.recovery_execution import _escaped
-from training.unified_k48 import HANDOFF
+from training.pipeline import HANDOFF
 
 OUT = ROOT / "results" / "benchmarks" / "pose_correction_counterfactual_v1"
 WRIST = ROOT / "results" / "diagnostics" / "wrist_tilt_gravity_pivoting"

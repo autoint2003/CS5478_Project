@@ -77,7 +77,7 @@ tests/         test_physics_regression.py  test_table_drop.py  test_ground_drop.
 | `data_generation/oracles/` | Codeword projection (`representability`). Search loops stay in `strategies/`. |
 | `data_generation/validation/` | Impact and sliding-mechanism checks used while building datasets. |
 | `data_generation/maintenance/` | One-shot layout and path repair. `generate.py` does not import it. |
-| `config/training/k48/` | K48 training YAML. Filenames still name the dataset and reward version. |
+| `experiments/config/training/k48/` | K48 training YAML. Filenames still name the dataset and reward version. |
 | `experiments/sliding/` | Sliding diagnostics, equal-weight SFT ablation eval, hard-IC mining, K49 slide/return pilots, and `_tmp_*` one-shots. |
 | `experiments/recatch/` | Horizontal Recatch research, airborne/natural-loss/legal/top-impact studies, and SFT audits. |
 | `experiments/recatch/k49/` | Historical K49 Recatch / Type2–3 / capture–brake / lost-grasp `_tmp_*` probes. Maintained generators are in `scripts/`. |
@@ -103,7 +103,7 @@ tests/         test_physics_regression.py  test_table_drop.py  test_ground_drop.
 | `controllers/cartesian/tracking.py` | `TRACK` gains used by the verified catch. |
 | `models/k48_policy.py` | K48 transformer. The residual head is `res`. |
 | `models/k48_checkpoint.py` | Load a K48 checkpoint or expand a K47 checkpoint. Keys are unchanged. |
-| `models/airborne_v3.py` | 39D policy load and `step_v3`. The demo generator is `experiments/legacy/airborne_v3_demos.py`. |
+| `models/transformer_policy.py` | 39D policy load and `step_v3`. The demo generator is `experiments/legacy/airborne_v3_demos.py`. |
 | `training/train_sft.py` | Supervised loss and the SFT loop. |
 | `training/train_grpo.py` | GRPO objective and the GRPO loop. |
 | `training/reward_v2.py` | Selected GRPO return. Configs call it `reward_version: v2`. |
@@ -148,7 +148,7 @@ tests/         test_physics_regression.py  test_table_drop.py  test_ground_drop.
 | `models/action_kmeans.py` | `data_generation/action_kmeans.py` | Offline token clustering, not a network. |
 | `training/k33_checkpoint.py` | `models/historical/k33_checkpoint.py` | Historical loader. |
 | `training/k36_checkpoint.py` | `models/historical/k36_checkpoint.py` | Historical loader. |
-| `training/natural_loss_recatch_transformer_v3.py` | `models/airborne_v3.py` | 39D policy used by the closed-loop episode. |
+| `training/natural_loss_recatch_transformer_v3.py` | `models/transformer_policy.py` | 39D policy used by the closed-loop episode. |
 | `training/replay_core.py` | `envs/simulation/rule_replay.py` | Scene replay used by the simulator. |
 | `training/impact_ball.py` | `envs/simulation/impact_ball.py` | Ball state used by the ballistic scene. |
 | `training/write_ballistic_impact_scene.py` | `envs/simulation/ballistic_scene.py` | Scene XML and cylinder constants. |
@@ -246,9 +246,9 @@ The run checks determinism by replaying each tape twice, then compares qpos, qve
 | Plan A sliding pilots | `experiments/sliding/pilot_*.py`, `scripts/generate_k49_sliding_recatch_dataset.py` |
 | Plan B / C generators | `scripts/generate_k49_*.py`, `scripts/run_freefall_*.py`, `run_*ball_impact*`, `run_plan_c_*` |
 | Ground-scene validation | `scripts/run_ground_scene_validation.py`, `tests/test_ground_drop.py` |
-| Adaptive-g | `experiments/adaptive_g/`, `training/adaptive_independent_g.py`, `config/training/k48/*adaptive_g*.yaml` |
+| Adaptive-g | `experiments/adaptive_g/`, `training/adaptive_independent_g.py`, `experiments/config/training/k48/*adaptive_g*.yaml` |
 | Handoff audits | `experiments/handoff/` |
-| Formal metrics | `evaluation/full_objective.py`, `grasp_configuration.py` |
+| Formal metrics | `evaluation/success_criteria.py`, `grasp_configuration.py` |
 
 Durable expert generators stay in `scripts/generate_k49_*.py` (and `generate_grasp_recovery_pose_experts_v1.py`). Do not import `_tmp_*` one-offs into the production path.
 

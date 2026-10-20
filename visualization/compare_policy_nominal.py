@@ -43,7 +43,7 @@ from training.k47_codebook import decode_action, load_codebook
 from training.k48_config import SELECTED_LIMIT_S
 from training.recovery_episode import make_training_env
 from training.recovery_execution import _escaped, restore_ballistic
-from training.reward_v2 import NominalHoldTrace
+from training.rewards import NominalHoldTrace
 from visualization.camera import mjv_camera_from_preset
 from visualization.overlays import caption
 from visualization.video_recorder import write_frames_mp4
@@ -101,7 +101,7 @@ def restore_ic(env, blob):
     if "capture" in blob:
         restore_capture(env, blob["capture"])
         return
-    from models.airborne_v3 import DT_POLICY
+    from models.transformer_policy import DT_POLICY
     from envs.observations.observable_obs import ObservableObsState
     from envs.outcomes.table_drop import restore_state
 
@@ -268,7 +268,7 @@ def main():
             blob = pickle.load(handle)
         if "ref" not in blob:
             if seated_ref is None:
-                from data_generation.strategies.recatch_oracle import _setup
+                from data_generation.oracles.plan_b.release_recatch import _setup
 
                 _sim, _base, seated_ref, _target, _code = _setup()
         blob = prepare_blob(blob, seated_ref)

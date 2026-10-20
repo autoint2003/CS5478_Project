@@ -30,7 +30,7 @@ Prefix tapes:
 ### Validate
 
 ```powershell
-python -u scripts/replay_golden_experts.py
+python -u scripts/replay_experts.py
 # expect gbi_010: 3/3 and gbi_022: 3/3
 ```
 
@@ -43,7 +43,7 @@ pytest -q tests/test_plan_c_golden_regression.py -m slow
 ### Rebuild unified dataset
 
 ```powershell
-python -u scripts/build_unified_dataset.py
+python -u scripts/build_expert_dataset.py
 ```
 
 Tracked manifests: `datasets/unified_experts/`. Heavy records: `data/unified_experts/records/` (gitignored).
@@ -51,7 +51,7 @@ Tracked manifests: `datasets/unified_experts/`. Heavy records: `data/unified_exp
 ### K49 audit
 
 ```powershell
-python -u scripts/audit_k49.py
+python -u scripts/audit_action_vocab.py
 ```
 
 Reports under `results/consolidation/` (new outputs only; do not alter prior diagnostics).

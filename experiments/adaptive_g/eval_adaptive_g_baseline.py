@@ -85,7 +85,7 @@ def main() -> None:
     model.eval()
     env = make_training_env(device, model=model)
     seated_ref = None
-    from data_generation.strategies.recatch_oracle import _setup
+    from data_generation.oracles.plan_b.release_recatch import _setup
 
     _sim, _base, seated_ref, _target, _code = _setup()
     started = time.perf_counter()

@@ -12,7 +12,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from data_generation.strategies.vertical_recatch_search import make_env
+from data_generation.oracles.plan_b.vertical_recatch import make_env
 from envs.outcomes.physical_recovery import physical_pack
 from envs.outcomes.recovery_success import apply_handoff, nominal_step
 from envs.simulation.capture import restore_capture

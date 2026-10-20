@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import unittest
 
-from data_generation.skill_filters import (
+from data_generation.datasets.skill_filters import (
     admit_horizontal_search,
     blocks_task_success,
     observed_mechanism,

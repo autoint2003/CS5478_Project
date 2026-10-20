@@ -23,7 +23,7 @@ from envs.observations.airborne_obs import relative_state
 from envs.simulation.grasp_quality import body_twist
 from envs.outcomes.physical_recovery import physical_pack
 from envs.ballistic_impact import assert_noslip, make_sim
-from data_generation.airborne_recatch_dataset import (
+from data_generation.datasets.airborne_recatch import (
     TRACK,
     begin,
     capture_nominal,

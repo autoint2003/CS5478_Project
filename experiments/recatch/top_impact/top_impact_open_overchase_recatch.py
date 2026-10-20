@@ -16,14 +16,14 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from data_generation.strategies.recatch_oracle import _contacts, _pose, _aim, _impact, _finish
+from data_generation.oracles.plan_b.release_recatch import _contacts, _pose, _aim, _impact, _finish
 
 from controllers.recovery.action_map import AIRBORNE_V3, TAU_OPEN, TAU_SECURE
 from envs.observations.airborne_obs import relative_state
 from envs.simulation.grasp_quality import body_twist
-from data_generation.ball_impact_dataset import cylinder_contacts
+from data_generation.datasets.ball_impact import cylinder_contacts
 from experiments.ball_impact.ball_impact_recoverability import _action_from, _nominal_fail, _setup
-from data_generation.strategies.capture_geometry import PINCH_HAND, capture_geometry, choose_grip_tau
+from data_generation.oracles.plan_a.contact_geometry import PINCH_HAND, capture_geometry, choose_grip_tau
 from envs.outcomes.horizon_outcome import NOMINAL_S, nominal_verify
 from envs.simulation.impact_ball import apply_ball_free_state
 from experiments.recatch.legal.legal_recatch_transfer import _bottom

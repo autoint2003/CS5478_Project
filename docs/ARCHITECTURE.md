@@ -1,40 +1,51 @@
-# Architecture (post Plan A/B/C consolidation)
+# Architecture
 
-## Dependency map (minimal active path)
+## Layout policy
+
+| Location | Role |
+|---|---|
+| `experiments/` | Historical experimental **code** only |
+| `results/` | Diagnostics and outputs — **do not reorganize** |
+| `datasets/` | Tracked unified expert manifests (contents preserved) |
+| Active packages | Responsibility-named modules for Plan A/B/C + training |
+
+Source checkpoint before this naming refactor: git tag `refactor/pre-naming-20261021-src`.
+
+Rename map: `docs/RENAME_MAP.md`.
+
+## Dependency map
 
 | Capability | Modules |
 |---|---|
-| MuJoCo simulation | `envs/simulation/grasp_sim.py`, `envs/simulation/ground_sim.py`, `assets/` |
-| Legacy elevated table | `envs/simulation/grasp_sim.py` + ballistic scene XML |
-| Legal 7D actions / 20 ms | `controllers/recovery/action_map.py`, `envs/step_legal.py` |
+| MuJoCo simulation | `envs/simulation/`, `assets/` |
+| Legal 7D / 20 ms | `controllers/recovery/action_map.py`, `envs/step_legal.py` |
 | Nominal controller | `controllers/nominal.py` |
-| 39D observation | `envs/observations/airborne_obs.py` (`OBS_DIM_AIR=39`) |
-| SUCCESS_NEW / SUCCESS_12S | `evaluation/full_objective.py`, `envs/outcomes/recovery_success.py` |
+| 39D observation | `envs/observations/airborne_obs.py` |
+| SUCCESS_NEW | `evaluation/success_criteria.py`, `envs/outcomes/recovery_success.py` |
 | GROUND_DROP | `envs/outcomes/ground_drop.py` |
-| Offline expert search (Plan C) | `data_generation/strategies/ground_*.py`, `scripts/run_ground_*.py` |
-| Expert replay | `scripts/replay_golden_experts.py`, `training/recovery_execution.py` |
-| Unified dataset | `scripts/build_unified_dataset.py` → `datasets/unified_experts/` |
-| Frozen K49 | `training/action_vocab_k49.py` (IDs 0–48; HANDOFF=47; tok48 reverse wrist) |
-| Transformer policy | `models/airborne_v3.py`, `training/train_sft.py`, `training/train_grpo.py` |
-| Evaluation / viz | `evaluation/`, `visualization/` |
-
-## Plan families
-
-- **Plan A** — continuous-contact sliding / pivoting recovery (legacy elevated + mechanism audits).
-- **Plan B** — legal release and recatch (legacy elevated).
-- **Plan C** — GROUND_SCENE ball impact → full detach → active recatch → brake → slow lift → legal HANDOFF → SUCCESS_NEW.
-
-Runtime inference uses **one** Transformer policy. Plan labels are offline metadata only. Offline search may use privileged future simulation; runtime observations must remain 39D without privileged state.
+| Plan A oracles | `data_generation/oracles/plan_a/` |
+| Plan B oracles | `data_generation/oracles/plan_b/` |
+| Plan C oracles | `data_generation/oracles/plan_c/` |
+| Dataset construction | `data_generation/datasets/` |
+| Recording | `data_generation/recording/` |
+| Transformer policy | `models/transformer_policy.py` |
+| K48 checkpoint format | `models/k48_checkpoint.py`, `models/k48_policy.py` |
+| Frozen K49 vocab | `training/action_vocab_k49.py` |
+| SFT / GRPO | `training/sft.py`, `training/grpo.py`, `training/pipeline.py` |
+| Visualization | `visualization/` |
 
 ## Active entry points
 
 ```text
-python -u scripts/build_unified_dataset.py
-python -u scripts/replay_golden_experts.py
-python -u scripts/audit_k49.py
-python -u scripts/run_ground_plan_c_final_success.py   # regenerate Plan C search (expensive)
-python -u scripts/train.py                             # SFT/GRPO — do not launch until ready
-python -u scripts/evaluate.py
+python -u scripts/generate_experts.py
+python -u scripts/generate_plan_c_experts.py
+python -u scripts/build_expert_dataset.py
+python -u scripts/replay_experts.py
+python -u scripts/audit_action_vocab.py
+python -u scripts/train_policy.py
+python -u scripts/evaluate_policy.py
+python -u scripts/render_trajectory.py
 ```
 
-Historical one-off probes live under `experiments/` only. Results stay under `results/` (untouched).
+Active training configs: `config/training/{unified_transformer,sft,grpo,unified_plan_abc}.yaml`.  
+Historical K47/K48 YAMLs: `experiments/config/training/`.

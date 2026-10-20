@@ -30,7 +30,7 @@ from envs.outcomes.recovery_success import (
     basin_ok,
     nominal_step,
 )
-from training.reward_v2 import NominalHoldTrace
+from training.rewards import NominalHoldTrace
 
 T_RECOVERY_MAX = 120 * CONTROL_PERIOD_S
 NOMINAL_S = 12.0
@@ -298,7 +298,7 @@ def roll_policy(env, model, book, blob, device, cap_steps=None, limit_s=None):
     if "capture" in blob:
         restore_capture(env, blob["capture"])
     else:
-        from models.airborne_v3 import DT_POLICY
+        from models.transformer_policy import DT_POLICY
         from envs.observations.observable_obs import ObservableObsState
         from envs.outcomes.support_drop import restore_state
         from training.recovery_execution import restore_ballistic

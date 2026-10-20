@@ -23,7 +23,7 @@ from training.recovery_episode import make_training_env
 
 from experiments.ball_impact.privileged_ball_impact_search import step_legal
 from envs.outcomes.table_drop import latched
-from training.unified_k48 import load_trained_k48
+from training.pipeline import load_trained_k48
 
 OUT = ROOT / "results" / "diagnostics" / "airborne_recatch_search" / "raw"
 

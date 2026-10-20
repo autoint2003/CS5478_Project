@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from data_generation.ball_impact_dataset import (
+from data_generation.datasets.ball_impact import (
     RAW as RAW_V1,
     load_log as load_v1,
     physics_record,

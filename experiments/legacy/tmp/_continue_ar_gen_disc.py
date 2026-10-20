@@ -17,8 +17,8 @@ sys.path.insert(0, str(ROOT))
 
 from envs.outcomes.table_drop import latched
 from envs.step_legal import step_legal
-from evaluation.full_objective import U_TGT, P_TGT, contact_summary
-from evaluation.grasp_configuration import cylinder_axis_hand, measure as gmeasure
+from evaluation.success_criteria import U_TGT, P_TGT, contact_summary
+from evaluation.grasp_geometry import cylinder_axis_hand, measure as gmeasure
 from models.k48_checkpoint import load_trained_k48
 from scripts.generate_k49_sliding_recatch_dataset import CONFIG_ID, SFT, decode, write_csv, write_json
 from scripts.run_active_recatch_generalization_discretization import (

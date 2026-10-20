@@ -19,7 +19,7 @@ from envs.simulation.capture import restore_capture, take_capture
 
 from envs.outcomes.horizon_outcome import finish_recovery
 from envs.step_legal import step_legal
-from training.reward_v2 import reward_components
+from training.rewards import reward_components
 from envs.outcomes.table_drop import (
     BOUNCE_DV,
     SUPPORT_FRACTION,
@@ -125,7 +125,7 @@ def _load_case(index, case_id, strategy):
 
 
 def _verify(env, blob, actions):
-    import data_generation.rebuild_k48_recovery as rebuild
+    import data_generation.datasets.recovery_rebuild as rebuild
     out, _obs, _exe, _contacts, qpos_error, phase_ok = rebuild.legal_verify(env, blob, actions)
     return out, float(qpos_error), bool(phase_ok)
 
@@ -269,7 +269,7 @@ def main():
     _check("initial-grasp stepper does not monitor table drop", "observe(" not in text and "table_drop" not in text)
     import torch
     from training.recovery_episode import make_training_env
-    from training.unified_k48 import load_trained_k48
+    from training.pipeline import load_trained_k48
 
     device = torch.device("cpu")
     model, _saved = load_trained_k48(ROOT / "results/grpo/v2/checkpoint_u0783.pt", device)

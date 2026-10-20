@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT))
 
 from envs.outcomes.table_drop import latched
 from envs.step_legal import step_legal
-from evaluation.full_objective import contact_summary
+from evaluation.success_criteria import contact_summary
 from models.k48_checkpoint import load_trained_k48
 from scripts.generate_k49_sliding_recatch_dataset import SFT
 from scripts.run_freefall_recatch_collision_aware_feedback import (

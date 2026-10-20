@@ -28,7 +28,7 @@ from scripts.run_free_fall_cylinder_catching import (
 from training.action_vocab_k49 import build_k49_table
 from training.recovery_episode import make_training_env
 from envs.outcomes.nominal_pose import capture_ref
-from evaluation.full_objective import contact_summary as cs_fn
+from evaluation.success_criteria import contact_summary as cs_fn
 
 
 def prepare_scoop_ready(env, n=40):
@@ -64,7 +64,7 @@ def release_distal(env, level, root_id, height_m, offset_m, omega_norm=0.0):
     place_cylinder(sim, pos, quat, omega)
     sim.data.qpos[sim.ids.finger_jnt] = 0.04
     mujoco.mj_forward(sim.model, sim.data)
-    from evaluation.full_objective import contact_summary
+    from evaluation.success_criteria import contact_summary
     cs = contact_summary(sim)
     ok_init = int(cs["nL"]) + int(cs["nR"]) == 0 and float(obj_pos(sim)[2]) > 0.47
     z0 = float(obj_pos(sim)[2])

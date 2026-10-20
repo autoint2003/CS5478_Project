@@ -15,7 +15,7 @@ if str(ROOT) not in sys.path:
 
 from envs.outcomes.horizon_outcome import LOST_STEPS, NOMINAL_S, physical_reward
 from training.grpo_math import advantages
-from training.reward_v2 import (
+from training.rewards import (
     NominalHoldTrace,
     assert_reward_order,
     grpo_return,

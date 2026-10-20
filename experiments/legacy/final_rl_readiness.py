@@ -24,7 +24,7 @@ from envs.outcomes.nominal_pose import capture_ref, closed_grip, errors, hand_R,
 from controllers.cartesian.tracking import TRACK
 from envs.simulation.support_contacts import restore_supports, supports_of
 import experiments.recatch.natural_loss.natural_loss_recatch_data_scaling as scale
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 import envs.outcomes.recovery_success as success
 from controllers.recovery.geometry_switch import GeometrySwitch, hand_pose
 from controllers.recovery.action_map import AIRBORNE_V2, AIRBORNE_V3, normalize_action
@@ -41,7 +41,7 @@ from training.recovery_episode import (
     seat_base,
 )
 from experiments.legacy.autonomous_rl_sanity import reward_detail
-from data_generation.airborne_recatch_dataset import drop_supports, restore_to, step_mapped
+from data_generation.datasets.airborne_recatch import drop_supports, restore_to, step_mapped
 
 from experiments.legacy.nominal_grasp_restoration import act_of, pinch_error
 from experiments.legacy.nominal_pose_audit import until_impact

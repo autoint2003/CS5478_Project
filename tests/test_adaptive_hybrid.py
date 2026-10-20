@@ -156,7 +156,7 @@ class PrefixRestoreTest(unittest.TestCase):
     def test_saved_prefix_replays(self):
         import pickle
 
-        from training.prefix_rollout import restore_probe
+        from training.rollout import restore_probe
         from models.k48_checkpoint import load_trained_k48
         from training.k47_codebook import load_codebook
         from training.recovery_episode import make_training_env

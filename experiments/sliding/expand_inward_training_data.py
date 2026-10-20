@@ -17,7 +17,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from experiments.sliding.export_inward_training_data import DEST, save_pair
-from data_generation.strategies.k48_inward_sliding_search import (
+from data_generation.oracles.plan_a.inward_reseat import (
     OLD,
     SEEDS,
     _priority_cuts,
@@ -27,7 +27,7 @@ from data_generation.strategies.k48_inward_sliding_search import (
     rollout,
     row_snapshot,
 )
-from data_generation.rebuild_k48_recovery import _load_blob, _load_jsonl, _open_env
+from data_generation.datasets.recovery_rebuild import _load_blob, _load_jsonl, _open_env
 from training.k47_codebook import load_codebook
 
 TARGET = 50
@@ -136,10 +136,10 @@ def main():
             folder = DEST / split
             stem = f"{item['id']}__inward_reseat"
             tokens_note = outcome
-            from data_generation.rebuild_k48_recovery import legalize
+            from data_generation.datasets.recovery_rebuild import legalize
             tokens, residuals, decoded, packed = legalize(actions[: int(cut["end"])], book)
             out, observations, executed, contacts, qpos_error, phase_ok = __import__(
-                "data_generation.rebuild_k48_recovery", fromlist=["legal_verify"]
+                "data_generation.datasets.recovery_rebuild", fromlist=["legal_verify"]
             ).legal_verify(env, blob, decoded)
             if not (out.get("success") and qpos_error <= 1e-8 and phase_ok):
                 print("RECHECK_FAIL", item["id"], out.get("reason"), flush=True)

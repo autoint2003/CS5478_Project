@@ -14,10 +14,10 @@ sys.path.insert(0, str(ROOT))
 
 from envs.simulation.capture import restore_capture, take_capture
 from training.recovery_episode import make_training_env
-from data_generation.strategies.capture_geometry import capture_geometry
+from data_generation.oracles.plan_a.contact_geometry import capture_geometry
 
 from experiments.ball_impact.privileged_ball_impact_search import step_legal
-from training.unified_k48 import load_trained_k48
+from training.pipeline import load_trained_k48
 
 
 def qpos(sim):

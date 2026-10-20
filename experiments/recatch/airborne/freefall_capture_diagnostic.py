@@ -29,12 +29,12 @@ from experiments.legacy.demo.demonstrations.demo_grav_reposition_comparison impo
 from envs.simulation.grasp_quality import body_twist
 BALLISTIC = ROOT / "assets" / "scene_ballistic_impact.xml"
 from envs.simulation.mujoco_ids import resolve_ids
-from data_generation.strategies.capture_geometry import ENTRY_GAP, PINCH_HAND, capture_geometry, lead_action
+from data_generation.oracles.plan_a.contact_geometry import ENTRY_GAP, PINCH_HAND, capture_geometry, lead_action
 
 from visualization.impact_view import mjv_camera_from_preset
 from experiments.ball_impact.privileged_ball_impact_search import representability, step_legal
 from envs.outcomes.table_drop import latched
-from training.unified_k48 import load_trained_k48
+from training.pipeline import load_trained_k48
 
 OUT = ROOT / "results" / "diagnostics" / "freefall_capture"
 SNAP = ROOT / "data" / "snapshots" / "train" / "ball_train_v2_0051.pkl"

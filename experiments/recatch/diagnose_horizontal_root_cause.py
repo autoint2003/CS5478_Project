@@ -148,7 +148,7 @@ def main():
         "privileged_step_legal": "calls envs.step_legal.step_legal",
     })
 
-    from data_generation.strategies.recatch_oracle import _setup
+    from data_generation.oracles.plan_b.release_recatch import _setup
 
     _sim, _base, seated_ref, _target, _code = _setup()
     horizontal = prepare_horizontal(seated_ref)

@@ -16,14 +16,14 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from data_generation.strategies.recatch_oracle import _enable_supports
+from data_generation.oracles.plan_b.release_recatch import _enable_supports
 
 from controllers.recovery.action_map import AIRBORNE_V3, normalize_action
 from envs.observations.airborne_obs import relative_state
 from envs.simulation.grasp_quality import body_twist
-from data_generation.strategies.capture_geometry import capture_geometry
+from data_generation.oracles.plan_a.contact_geometry import capture_geometry
 from envs.ballistic_impact import assert_noslip, make_sim
-from data_generation.airborne_recatch_dataset import capture_nominal, capture_pads
+from data_generation.datasets.airborne_recatch import capture_nominal, capture_pads
 from experiments.recatch.airborne.horizontal_grasp_offset_freefall_recatch import DT, grasp_settled
 from experiments.ball_impact.privileged_ball_impact_search import step_legal
 from experiments.recatch.recatch_braking_optimization import (

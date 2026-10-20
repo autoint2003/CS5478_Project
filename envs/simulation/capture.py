@@ -121,7 +121,7 @@ def take_capture(env):
 def restore_capture(env, cap):
     global STATE_SPEC
     from envs.observations.observable_obs import ObservableObsState
-    from models.airborne_v3 import DT_POLICY
+    from models.transformer_policy import DT_POLICY
 
     if STATE_SPEC is None:
         STATE_SPEC = _state_spec()

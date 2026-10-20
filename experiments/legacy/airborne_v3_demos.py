@@ -44,7 +44,7 @@ from envs.simulation.grasp_quality import body_twist
 from envs.observations.observable_obs import ObservableObsState
 from envs.outcomes.physical_recovery import physical_pack
 from envs.ballistic_impact import assert_noslip, world
-from data_generation.airborne_recatch_dataset import (
+from data_generation.datasets.airborne_recatch import (
     begin,
     capture_nominal,
     capture_pads,
@@ -67,9 +67,9 @@ from training.recovery_execution import (
     stamp,
 )
 from envs.simulation.scene_state import park_impact_ball
-from data_generation.action_kmeans import kmeans
+from data_generation.datasets.action_kmeans import kmeans
 from envs.initialization.grasp_seat import target_hand
-from models.airborne_v3 import (
+from models.transformer_policy import (
     DT_POLICY,
     HOLD,
     K_INT,
@@ -379,7 +379,7 @@ def record_local(sim, name, actions, snap, nominal, pad_ids, pad_mu, mass):
 
 def record_air(sim, spec, snap, nominal, pads, pad_mu, rh0, split):
     """Recompute the v2 oracle under the v3 rebase stepper. Do not replay an integrated trace."""
-    from data_generation.airborne_recatch_dataset import oracle_action
+    from data_generation.datasets.airborne_recatch import oracle_action
 
     info = restore_to(sim, snap, nominal, pads, pad_mu)
     drop_supports(sim)

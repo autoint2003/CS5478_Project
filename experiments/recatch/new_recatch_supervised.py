@@ -23,9 +23,9 @@ if str(ROOT) not in sys.path:
 
 from controllers.cartesian.tracking import TRACK
 from envs.simulation.support_contacts import restore_supports, supports_of
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 import experiments.legacy.sac_dpo_grpo_selection as sel
-from data_generation.autonomous_episodes import _until_impact_entry
+from data_generation.datasets.autonomous_episodes import _until_impact_entry
 from training.recovery_episode import (
     T_TASK,
     Z_ABORT,
@@ -36,8 +36,8 @@ from training.recovery_episode import (
 )
 
 from experiments.legacy.balanced_unified_recovery import CKPT_39, EPOCHS, STEPS_PER_EPOCH
-from data_generation.airborne_recatch_dataset import drop_supports, restore_to, step_mapped
-from models.airborne_v3 import AIRBORNE_V2, build_model, load_airborne_policy
+from data_generation.datasets.airborne_recatch import drop_supports, restore_to, step_mapped
+from models.transformer_policy import AIRBORNE_V2, build_model, load_airborne_policy
 from controllers.recovery.geometry_switch import GeometrySwitch, hand_pose
 from controllers.recovery.action_map import normalize_action
 from envs.outcomes.physical_recovery import physical_pack

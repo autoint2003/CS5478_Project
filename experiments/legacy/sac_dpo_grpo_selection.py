@@ -29,11 +29,11 @@ from controllers.cartesian.tracking import TRACK
 from envs.simulation.support_contacts import restore_supports, supports_of
 import experiments.legacy.autonomous_rl_sanity as sanity
 import experiments.recatch.natural_loss.natural_loss_recatch_data_scaling as scale
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 from controllers.recovery.geometry_switch import GeometrySwitch, hand_pose
 from controllers.recovery.action_map import AIRBORNE_V2, normalize_action
 from envs.outcomes.physical_recovery import physical_pack
-from data_generation.autonomous_episodes import _until_impact_entry
+from data_generation.datasets.autonomous_episodes import _until_impact_entry
 from training.recovery_episode import (
     Z_ABORT,
     fresh_nominal_state,
@@ -60,9 +60,9 @@ from experiments.legacy.autonomous_rl_sanity import (
     sample_impact,
 )
 from experiments.legacy.balanced_unified_recovery import CKPT_39, EVAL_NATURAL, TRAIN_NATURAL
-from data_generation.airborne_recatch_dataset import restore_to, step_mapped
+from data_generation.datasets.airborne_recatch import restore_to, step_mapped
 
-from models.airborne_v3 import load_airborne_policy
+from models.transformer_policy import load_airborne_policy
 from training.recovery_execution import T_TASK
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "algorithm_selection"

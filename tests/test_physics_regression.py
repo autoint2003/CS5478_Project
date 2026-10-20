@@ -23,7 +23,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from envs.simulation.capture import restore_capture, take_capture
-from data_generation.strategies.vertical_recatch_search import load_blob, make_env
+from data_generation.oracles.plan_b.vertical_recatch import load_blob, make_env
 from envs.observations.airborne_obs import observe_airborne
 from envs.contacts.frames import extract_contacts
 from envs.outcomes.horizon_outcome import nominal_verify
@@ -334,7 +334,7 @@ def test_manifests():
 def test_checkpoint():
     import torch
     from models.k48_policy import build_policy
-    from training.unified_k48 import load_trained_k48
+    from training.pipeline import load_trained_k48
 
     candidates = [
         ROOT / "results/grpo/v2/checkpoint_u0783.pt",

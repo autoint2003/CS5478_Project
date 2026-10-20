@@ -33,12 +33,12 @@ from envs.outcomes.recovery_success import apply_handoff, nominal_step
 from envs.outcomes.table_drop import latched, object_vz, observe
 from envs.simulation.capture import restore_capture, take_capture
 from envs.step_legal import N_SUB, TRACK, step_legal
-from evaluation.grasp_configuration import measure
+from evaluation.grasp_geometry import measure
 from models.k48_checkpoint import load_trained_k48
 from training.k47_codebook import decode_action, load_codebook
 from training.recovery_episode import make_training_env
 from training.recovery_execution import _escaped
-from training.unified_k48 import HANDOFF
+from training.pipeline import HANDOFF
 
 OUT = ROOT / "results" / "diagnostics" / "large_tilt_eccentric_grasp_mining"
 SFT = ROOT / "results/sft/sliding_equal_weight/checkpoint_epoch_0040.pt"
@@ -110,7 +110,7 @@ def gravity_align(sim):
     rows, _ = extract_contacts(sim)
     pivot = np.mean([np.asarray(r["pos_w"], float) for r in rows], axis=0) if rows else ph + Rh @ np.array([0, 0, 0.105])
     tau_g_h = Rh.T @ np.cross(po - pivot, mass * g_w)
-    from evaluation.grasp_configuration import cylinder_axis_hand
+    from evaluation.grasp_geometry import cylinder_axis_hand
     u_c = cylinder_axis_hand(sim)
     u_t = U_TGT / max(float(np.linalg.norm(U_TGT)), 1e-12)
     u_c = u_c / max(float(np.linalg.norm(u_c)), 1e-12)

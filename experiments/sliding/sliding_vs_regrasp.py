@@ -26,7 +26,7 @@ from controllers.recovery.geometry_switch import hand_pose
 from controllers.recovery.action_map import AIRBORNE_V3, grip_tau, normalize_action
 from envs.outcomes.physical_recovery import physical_pack
 from training.recovery_episode import Z_ABORT, make_training_env
-from data_generation.ball_impact_dataset import grasp_sample, ids_for, label_states, load_episode
+from data_generation.datasets.ball_impact import grasp_sample, ids_for, label_states, load_episode
 
 
 from experiments.ball_impact.privileged_ball_impact_search import (
@@ -39,7 +39,7 @@ from experiments.ball_impact.privileged_ball_impact_search import (
 )
 from training.recovery_execution import _escaped
 import envs.outcomes.recovery_success as success
-from data_generation.strategies.recovery_laws import slide_action, wrist_return
+from data_generation.oracles.plan_a.recovery_laws import slide_action, wrist_return
 
 RAW = ROOT / "results" / "diagnostics" / "raw" / "sliding_vs_regrasp"
 LOG = RAW / "search_log.jsonl"

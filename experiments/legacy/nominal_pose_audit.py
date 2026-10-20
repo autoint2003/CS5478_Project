@@ -22,7 +22,7 @@ from envs.simulation.capture import restore_capture, take_capture
 from controllers.cartesian.tracking import TRACK
 from envs.simulation.support_contacts import restore_supports, supports_of
 from envs.initialization.grasp_seat import apply_spec
-import models.airborne_v3 as v3
+import models.transformer_policy as v3
 from controllers.recovery.geometry_switch import GeometrySwitch, hand_pose, relative_speed, rot_angle
 from controllers.recovery.action_map import AIRBORNE_V2, AIRBORNE_V3, normalize_action
 from envs.outcomes.physical_recovery import physical_pack
@@ -30,7 +30,7 @@ from training.recovery_episode import T_TASK, Z_ABORT, ball_substep, empty_ball,
 
 from envs.ballistic_impact import TAU_SEC, z_tgt_of
 from models.historical.k33_checkpoint import load_policy
-from data_generation.airborne_recatch_dataset import drop_supports, restore_to, step_mapped
+from data_generation.datasets.airborne_recatch import drop_supports, restore_to, step_mapped
 
 from controllers.recovery.skill_schedules import schedules
 from training.recovery_execution import TABLE_DROP, _escaped
