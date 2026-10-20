@@ -11,7 +11,11 @@ Canonical copy of `results/consolidation/FINAL_REPORT.md` (that path is gitignor
 
 ## 2–3. Integration
 
-Completed work from `cleanup/ground-scene-prep` (including Plan C ground recovery) is merged into `main`. Exact final `main` commit is recorded at merge time in git history.
+Completed work from `cleanup/ground-scene-prep` (including Plan C ground recovery) was fast-forwarded onto `main`.
+
+- Final `main` commit: `a54fe9dcb3dc2c3e6176247964b464b6b59cd773`
+- Archival tag still points at pre-cleanup source tip: `7db29b325202d04e7a2b774b79ea1178a368fc64`
+- No remote push performed.
 
 ## 4. Archived experiments
 
