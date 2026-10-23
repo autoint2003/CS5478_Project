@@ -143,7 +143,7 @@ def evaluate_handoff_with_axis(
 
     Does not alter SUCCESS_NEW computation: Euclidean WORKING_POS_MM still used for that flag.
     """
-    from data_generation.oracles.precision.primitives import _wrist
+    from data_generation.oracles.precision.corrections.contact_primitives import _wrist
 
     if hold_action_fn is None:
         hold_action_fn = lambda g=1.0: _wrist(0.0, 0.0, g)

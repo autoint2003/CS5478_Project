@@ -31,17 +31,17 @@ from data_generation.oracles.plan_b.vertical_recatch import (  # noqa: E402
 )
 from data_generation.oracles.plan_b.vertical_recatch import rollout as vb_rollout
 from data_generation.oracles.plan_b.vertical_recatch import specs as vb_specs
-from data_generation.oracles.precision.force_slip_control import sample_state  # noqa: E402
-from data_generation.oracles.precision.precision_goals import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import sample_state  # noqa: E402
+from data_generation.oracles.precision.entry_conditions import (
     assess_need,
     entry_gate,
-    measure_errors,
 )
-from data_generation.oracles.precision.precision_handoff import probe_direct_handoff  # noqa: E402
-from data_generation.oracles.precision.precision_types import PrecisionConfig  # noqa: E402
-from data_generation.oracles.precision.primitives import _wrist  # noqa: E402
-from data_generation.oracles.precision.stable_grasp import hold_and_confirm_stable  # noqa: E402
-from data_generation.oracles.precision.unified_precision_oracle import run_precision  # noqa: E402
+from data_generation.oracles.precision.residuals import measure_errors
+from data_generation.oracles.precision.handoff import probe_direct_handoff  # noqa: E402
+from data_generation.oracles.precision.state import PrecisionConfig  # noqa: E402
+from data_generation.oracles.precision.corrections.contact_primitives import _wrist  # noqa: E402
+from data_generation.oracles.precision.mechanics.grasp_stabilization import hold_and_confirm_stable  # noqa: E402
+from data_generation.oracles.precision.state_machine import run_precision  # noqa: E402
 from envs.observations.observable_obs import ObservableObsState  # noqa: E402
 from envs.outcomes.horizon_outcome import recovery_failed  # noqa: E402
 from envs.outcomes.support_drop import latched, terminal_reason  # noqa: E402

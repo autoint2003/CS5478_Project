@@ -856,7 +856,7 @@ def k49_project(actions: list[np.ndarray]) -> dict:
 
 
 def evaluate_k49_tokens(sim, snap, ref, tokens, table, book48) -> dict:
-    from experiments.audits.plan_a_mechanism_audit import decode_token
+    from training.action_vocab_k49 import decode_token
 
     restore_ballistic(sim, snap)
     restore_drop(sim, None)

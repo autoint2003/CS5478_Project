@@ -19,7 +19,7 @@ from envs.simulation.capture import restore_capture
 from envs.step_legal import step_legal
 from evaluation.grasp_geometry import measure
 from evaluation.success_criteria import P_TGT, U_TGT, contact_summary
-from scripts.generate_plan_c_experts import evaluate_handoff_from_state
+from evaluation.handoff_from_state import evaluate_handoff_from_state
 from training.action_vocab_k49 import build_k49_table, decode_action as decode_k49
 from training.k47_codebook import decode_action as decode_k48
 from training.k47_codebook import load_codebook

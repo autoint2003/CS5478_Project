@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.action_map import W_MAX, grip_action  # noqa: E402
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
-from data_generation.oracles.precision.primitives import (  # noqa: E402
+from data_generation.oracles.precision.corrections.contact_primitives import (  # noqa: E402
     _action_vw,
     _legal,
     _run,
@@ -30,7 +30,7 @@ from data_generation.oracles.precision.primitives import (  # noqa: E402
     pivot_segment_metrics,
     primitive_stabilize_handoff,
 )
-from data_generation.oracles.precision.stable_grasp import hold_and_confirm_stable  # noqa: E402
+from data_generation.oracles.precision.mechanics.grasp_stabilization import hold_and_confirm_stable  # noqa: E402
 from data_generation.oracles.plan_c.contact_surface import classify_contacts  # noqa: E402
 from envs.observations.observable_obs import ObservableObsState  # noqa: E402
 from envs.outcomes.physical_recovery import physical_pack  # noqa: E402
@@ -661,7 +661,7 @@ def main():
 
     ic_replay = None
     if any(h["handoff"].get("SUCCESS_NEW") for h in handoffs):
-        from scripts.generate_plan_c_experts import evaluate_handoff_from_state
+        from evaluation.handoff_from_state import evaluate_handoff_from_state
 
         best = next(h for h in handoffs if h["handoff"].get("SUCCESS_NEW"))
         acts = next(c["actions"] for c in cands if c["tag"] == best["tag"])

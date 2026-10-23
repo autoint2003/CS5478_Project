@@ -1,14 +1,24 @@
-# Minimal unified Transformer training configuration (DO NOT launch yet).
-# Rebuild dataset first: python -u scripts/build_expert_dataset.py
-# K49 audit: python -u scripts/audit_action_vocab.py
-# Golden replay: python -u scripts/replay_experts.py
+# Active training config for the regenerated six-branch experts_v2 dataset.
+# Do not launch SFT/GRPO until the experts_v2 generation and audit are complete.
+# Historical Precision tapes under data/unified_experts/ are excluded from training.
 
-schema_version: unified_experts_v1
+schema_version: experts_v2
+dataset_version: experts_v2
 dataset:
-  index: data/unified_experts/index.json
-  splits: data/unified_experts/splits.json
-  manifest: data/unified_experts/manifest.jsonl
-  heavy_records: data/unified_experts/records/
+  index: data/experts_v2/index.json
+  splits: data/experts_v2/splits.json
+  manifest: data/experts_v2/manifest.jsonl
+  root: data/experts_v2/
+  branches:
+    - A_STABLE_PRECISION
+    - B_STABLE_DIRECT_HANDOFF
+    - B_STABLE_PRECISION
+    - C_RECATCH_DIRECT_HANDOFF
+    - C_RECATCH_PRECISION
+    - D_PRECISION
+  # Historical namespace retained for reproducibility only; loaders must reject
+  # Precision rows that lack dataset_version=experts_v2.
+  legacy_unified_experts: data/unified_experts/
   legacy_supervised: data/supervised_targets_with_horizontal.jsonl
 
 observation:
@@ -19,10 +29,10 @@ observation:
 action:
   interface: legal_7d
   control_period_s: 0.02
-  vocab: K49
-  config_id: K49_tok48_wy0p25
+  # Continuous expert actions are authoritative. K49 quantization is a separate
+  # audit; do not silently replace continuous Oracle tapes with K49 nearest neighbors.
+  vocab: continuous_legal_7d
   handoff_token: 47
-  token_48: secure_slow_reverse_wrist
   remapping_allowed: false
 
 success:
@@ -30,17 +40,19 @@ success:
   also_track: SUCCESS_12S
 
 plans:
-  A: continuous_contact_sliding_pivot  # legacy elevated + Plan A mechanisms
-  B: legal_release_recatch             # legacy elevated
-  C: ground_ball_impact_full_detach_recatch
-  runtime_policy: single_transformer   # not three controllers
+  A_STABLE_PRECISION: plan_a_stable_grasp + precision_oracle
+  B_STABLE_DIRECT_HANDOFF: plan_b_stable_grasp + direct_handoff
+  B_STABLE_PRECISION: plan_b_stable_grasp + precision_oracle
+  C_RECATCH_DIRECT_HANDOFF: plan_c_recatch + direct_handoff
+  C_RECATCH_PRECISION: plan_c_recatch + precision_oracle
+  D_PRECISION: precision_oracle_only
+  runtime_policy: single_transformer
 
 training:
   status: not_started
   sft: false
   grpo: false
   notes: >
-    Plan C has only two SUCCESS_NEW roots (gbi_010, gbi_022); both are regression
-    fixtures. Do not treat them as a held-out generalization estimate.
-    Direct K49 nearest-neighbor quantization of Plan C continuous experts fails
-    physical replay early (see results/consolidation/K49_REPRESENTABILITY.md).
+    Regenerated Precision experts require dataset_version experts_v2 and
+    oracle_implementation precision_state_machine_v23. Do not mix with
+    historical unified_experts Precision rows.

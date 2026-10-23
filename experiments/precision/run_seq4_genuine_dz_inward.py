@@ -22,22 +22,22 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
-from data_generation.oracles.precision.contact_modes import classify_contact_mode  # noqa: E402
-from data_generation.oracles.precision.endpoint_only_axial_roll import gates  # noqa: E402
-from data_generation.oracles.precision.force_slip_control import DT  # noqa: E402
-from data_generation.oracles.precision.precision_dz import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.support_verification import classify_contact_mode  # noqa: E402
+from data_generation.oracles.precision.mechanics.open_axis import gates  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import DT  # noqa: E402
+from data_generation.oracles.precision.corrections.axial_inward import (
     check_dz_inward_entry,
     correct_dz_inward,
 )
-from data_generation.oracles.precision.precision_goals import measure_errors  # noqa: E402
-from data_generation.oracles.precision.precision_handoff import (  # noqa: E402
+from data_generation.oracles.precision.residuals import measure_errors
+from data_generation.oracles.precision.handoff import (  # noqa: E402
     posture_is_fingertips_down,
     run_final_down_handoff_gate,
 )
-from data_generation.oracles.precision.precision_types import PrecisionConfig  # noqa: E402
-from data_generation.oracles.precision.sign_aware_axial import select_axial_mode  # noqa: E402
-from data_generation.oracles.precision.stable_grasp import hold_and_confirm_stable  # noqa: E402
-from data_generation.oracles.precision.unified_precision_oracle import entry_gate  # noqa: E402
+from data_generation.oracles.precision.state import PrecisionConfig  # noqa: E402
+from data_generation.oracles.precision.corrections.axial_sign import select_axial_mode  # noqa: E402
+from data_generation.oracles.precision.mechanics.grasp_stabilization import hold_and_confirm_stable  # noqa: E402
+from data_generation.oracles.precision.state_machine import entry_gate  # noqa: E402
 from envs.observations.observable_obs import ObservableObsState  # noqa: E402
 from envs.simulation.capture import restore_capture, take_capture  # noqa: E402
 from envs.simulation.ground_sim import make_ground_sim  # noqa: E402
@@ -400,7 +400,7 @@ def execute_seq4(env, blob: dict, cfg: PrecisionConfig, ic_meta: dict) -> dict:
 
 def diagnose_vs_s1_reuse(env, blob: dict, cfg: PrecisionConfig, fail_rz: dict) -> dict:
     """Compare cold inward failure with DX6→inward reuse on same IC (diagnostic only)."""
-    from data_generation.oracles.precision.precision_dx_support_transfer import (
+    from data_generation.oracles.precision.mechanics.support_transfer import (
         correct_dx_support_transfer,
     )
 

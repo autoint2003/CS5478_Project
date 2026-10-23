@@ -20,19 +20,19 @@ sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
 from data_generation.oracles.plan_b.branch_compare import decode_tok, load_vocab  # noqa: E402
-from data_generation.oracles.precision import endpoint_only_axial_roll as eo  # noqa: E402
-from data_generation.oracles.precision.finger_surface_support import (  # noqa: E402
+from data_generation.oracles.precision.mechanics import open_axis as eo  # noqa: E402
+from data_generation.oracles.precision.mechanics.finger_surface import (  # noqa: E402
     support_force_decomposition,
 )
-from data_generation.oracles.precision.force_slip_control import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import (  # noqa: E402
     contact_forces,
     make_action,
     sample_state,
 )
-from data_generation.oracles.precision.orientation_planner import _height_hold_v_hand  # noqa: E402
-from data_generation.oracles.precision.primitives import _wrist  # noqa: E402
-from data_generation.oracles.precision.reverse_supported_rotation import HoldModeGrip  # noqa: E402
-from data_generation.oracles.precision.unified_precision_oracle import (  # noqa: E402
+from data_generation.oracles.precision.corrections.orientation import _height_hold_v_hand  # noqa: E402
+from data_generation.oracles.precision.corrections.contact_primitives import _wrist  # noqa: E402
+from data_generation.oracles.precision.mechanics.reverse_rotation import HoldModeGrip  # noqa: E402
+from data_generation.oracles.precision.state_machine import (  # noqa: E402
     FN_HOLD,
     PrecisionConfig,
     _horizontal_open_target,

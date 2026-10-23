@@ -21,9 +21,9 @@ sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
 from data_generation.oracles.plan_b.branch_compare import decode_tok, load_vocab  # noqa: E402
-from data_generation.oracles.precision.force_slip_control import make_action, sample_state  # noqa: E402
-from data_generation.oracles.precision.primitives import _wrist  # noqa: E402
-from data_generation.oracles.precision.unified_precision_oracle import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import make_action, sample_state  # noqa: E402
+from data_generation.oracles.precision.corrections.contact_primitives import _wrist  # noqa: E402
+from data_generation.oracles.precision.state_machine import (  # noqa: E402
     PrecisionConfig,
     measure_errors,
     run_precision,
@@ -401,7 +401,7 @@ def main():
 
     # ---- Outward dz: post-pivot Plan A (ez still negative) with tight ez_tol, skip dx ----
     print("=== CASE A_dz_outward (post-pivot, ez_tol=2, no dx) ===", flush=True)
-    from data_generation.oracles.precision.unified_precision_oracle import (
+    from data_generation.oracles.precision.state_machine import (
         correct_dtheta,
         PrecisionConfig as _PC,
     )
@@ -524,7 +524,7 @@ Wall: {time.time() - t0:.1f} s
 
 ## Verdict
 
-Shared Stage-2 controller: `data_generation/oracles/precision/unified_precision_oracle.py`  
+Shared Stage-2 controller: `data_generation/oracles/precision/state_machine.py`  
 Entry: `run_precision(env, stable_grasp_state, plan_id, PrecisionConfig)`.
 
 ## Case matrix

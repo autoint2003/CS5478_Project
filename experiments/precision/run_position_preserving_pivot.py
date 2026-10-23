@@ -28,7 +28,7 @@ from data_generation.oracles.precision import (  # noqa: E402
     primitive_axial_tail_slide,
     primitive_contact_pivot,
 )
-from data_generation.oracles.precision.primitives import (  # noqa: E402
+from data_generation.oracles.precision.corrections.contact_primitives import (  # noqa: E402
     MIN_THETA_IMPROVE_DEG,
     _action_vw,
     _wrist,
@@ -170,7 +170,7 @@ def render_video(env, blob, actions, dest: Path, title: str):
     t0 = float(env.sim.data.time)
 
     def grab(tag):
-        from data_generation.oracles.precision.primitives import relative_pose
+        from data_generation.oracles.precision.corrections.contact_primitives import relative_pose
 
         cam.lookat[:] = 0.5 * (
             np.asarray(env.sim.data.xpos[env.sim.ids.object_body], float)

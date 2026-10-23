@@ -215,11 +215,11 @@ def _compare_baseline(saved, prefix, obs, qpos, qvel, contacts, control):
     _check(prefix + "baseline w_cmd", np.allclose(np.stack(w_cmd), saved[prefix + "w_cmd"], atol=STATE_ATOL))
 
 
-def test_state_baseline(records):
+def check_state_baseline(records):
     """Compare with the saved state tape, or write it when explicitly requested.
 
     A missing fixture is not treated as proof that the current run matches the
-    pre-refactor controller.
+    pre-refactor controller. Invoked by ``main()`` and ``test_state_baseline``.
     """
     if os.environ.get("WRITE_PHYSICS_BASELINE") == "1":
         BASELINE.parent.mkdir(parents=True, exist_ok=True)
@@ -249,6 +249,13 @@ def test_state_baseline(records):
                     records[prefix + "w_cmd"],
                 )),
             )
+
+
+def test_state_baseline():
+    """Pytest entry: build tapes then compare against the fixture."""
+    records = test_other_tapes()
+    records.update(test_vertical())
+    check_state_baseline(records)
 
 
 def test_vertical():
@@ -371,7 +378,7 @@ def main():
     test_checkpoint()
     records = test_other_tapes()
     records.update(test_vertical())
-    test_state_baseline(records)
+    check_state_baseline(records)
     print("PHYSICS_REGRESSION_OK", flush=True)
 
 

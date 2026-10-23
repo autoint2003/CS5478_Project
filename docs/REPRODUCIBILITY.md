@@ -1,71 +1,105 @@
 # Reproducibility
 
-## Recoverable source checkpoint
+## Environment
 
-| Item | Value |
-|---|---|
-| Pre-cleanup branch | `cleanup/ground-scene-prep` |
-| Git archival branch | `archive/pre-consolidation-20261021` |
-| Git archival tag | `archive/pre-consolidation-20261021-src` |
-| Checkpoint note | `docs/PRE_CONSOLIDATION_CHECKPOINT.txt` |
+Commands run from the repository root on Windows, using the project Python environment with MuJoCo available. Robot XML comes from `assets/` and `mujoco_menagerie/` (do not edit the vendored menagerie). Active YAML lives in `config/`. Simulation timestep and the legal action interface stay at 20 ms and 7D.
+
+## Git checkpoints
+
+| Checkpoint | Commit | What it preserves |
+|---|---|---|
+| `main` before this refactor | `3c361e4bdc3d4a4e4a5531539cd45b9c1d001971` | Pre-refactor history on main |
+| `checkpoint/pre-six-branch-refactor-20261023` | `121324c9e57dde27c12fd220dfcb5517e22707ee` | Tree immediately before the six-branch reorganization, including the to_UP brake-before-vertical fix and removal of the erroneous root `datasets/` tree |
 
 ```powershell
-git checkout archive/pre-consolidation-20261021-src
+git checkout checkpoint/pre-six-branch-refactor-20261023
 ```
 
-There is **no** filesystem `archive/` directory. Historical **code** lives under `experiments/`. All **results** stay under `results/` in their original paths.
+Earlier consolidation tags remain `archive/pre-consolidation-20261021-src` and `refactor/pre-naming-20261021-src`. There is no filesystem `archive/` directory. Historical code is under `experiments/`. Results stay under `results/`.
 
-## Golden Plan C experts
+The file-move map for this reorganization is `experiments/repository_refactor_20261023/MOVE_MAP.md`.
 
-Leave these locations unchanged (do not move or copy):
+## Oracle regression
+
+Scheduler tests (existing initial conditions, no dataset write):
+
+```powershell
+python -u -m pytest -q tests/test_precision_oracle_v23_scheduler.py tests/test_expert_branch_dispatch.py
+```
+
+Import check:
+
+```powershell
+python -c "import data_generation.oracles.precision as p; from data_generation.oracles.precision.state_machine import run_precision; print(p.run_precision is run_precision)"
+```
+
+Branch list (does not simulate):
+
+```powershell
+python -u scripts/generate_experts.py --list-branches
+```
+
+The to_UP brake-before-vertical regression script is historical and lives at `experiments/precision/run_to_up_brake_before_vertical.py`. Its last recorded result is `results/diagnostics/seq4_to_up_brake_before_vertical/`. Re-running it replays the same Seq4 initial condition and writes a new diagnostic under that results tree; it is not part of dataset generation.
+
+## Six dataset branches
+
+Authoritative IC pool: `results/data_generation/stage2_abc_final_v2/` (post-Stage-1 `capture`+`ref`). Generation config: `config/generation/experts_v2.yaml`. Output: `data/experts_v2/` with `dataset_version=experts_v2`. Does not overwrite `data/unified_experts/`.
+
+```powershell
+python -u scripts/generate_experts.py --list-branches
+python -u scripts/generate_experts.py --list-ics
+# Smoke (temporary output, one IC per branch):
+python -u scripts/generate_experts.py --all-branches --limit 1 --output results/diagnostics/experts_v2_smoke_tmp
+# Production (resume-safe; SUCCESS_NEW required to admit):
+python -u scripts/generate_experts.py --all-branches
+# Or one branch:
+python -u scripts/generate_experts.py --branch B_STABLE_PRECISION
+python -u scripts/validate_dataset.py --manifest data/experts_v2/manifest.jsonl
+```
+
+Branch IDs: `A_STABLE_PRECISION`, `B_STABLE_DIRECT_HANDOFF`, `B_STABLE_PRECISION`, `C_RECATCH_DIRECT_HANDOFF`, `C_RECATCH_PRECISION`, `D_PRECISION`.
+
+## Historical Plan C golden experts
+
+Leave these pickles in place:
 
 - `results/diagnostics/ground_plan_c_final_success/raw/gbi_010__SUCCESS_NEW_expert.pkl`
 - `results/diagnostics/ground_plan_c_final_success/raw/gbi_022__SUCCESS_NEW_expert.pkl`
 
-Prefix tapes:
-
-- `results/diagnostics/ground_dynamic_catch_oracle/raw/{root}__catch_expert.pkl`
-- `results/diagnostics/ground_postcatch_endgrasp_recovery/raw/{root}__endgrasp_expert.pkl`
-
-### Validate
+Replay:
 
 ```powershell
 python -u scripts/replay_experts.py
-# expect gbi_010: 3/3 and gbi_022: 3/3
+python -u -m pytest -q tests/test_plan_c_golden_regression.py -m slow
 ```
 
-Or:
+Expected result is `gbi_010: 3/3` and `gbi_022: 3/3` SUCCESS_NEW. These fixtures are direct recatch-plus-handoff tapes. They are not `experts_v2` Precision rows.
+
+## Training and evaluation
+
+Existing trainers are unchanged and still read their current configs:
 
 ```powershell
-pytest -q tests/test_plan_c_golden_regression.py -m slow
+python -u scripts/train_policy.py --supervised --config config/training/sft.yaml
+python -u scripts/evaluate_policy.py --eval --config config/training/unified_transformer.yaml --checkpoint <ckpt>
+python -u scripts/render_trajectory.py
 ```
 
-### Rebuild unified dataset
+Do not point those commands at `data/unified_experts/` in order to train the regenerated Precision policy. After regeneration, build a manifest under `data/experts_v2/` and pass that path explicitly. `config/training/unified_plan_abc.yaml` documents the legacy `unified_experts_v1` layout and is not a loader for `experts_v2`.
 
-```powershell
-python -u scripts/build_expert_dataset.py
-```
+## Historical experiments
 
-Manifests + heavy records: `data/unified_experts/` (gitignored). Construction code: `data_generation/datasets/`.
+| Location | Contents |
+|---|---|
+| `experiments/stage2_mining/` | Stage-2 mining, pilots, and K49 dataset builders |
+| `experiments/plan_b_table_free/` | Table-free Plan B recovery and migration |
+| `experiments/plan_c_research/` | Plan C sidewall, post-lift, and expert-search scripts |
+| `experiments/precision/` | Precision Oracle development runs and frozen baselines |
+| `experiments/precision_probes/` | `_probe_*`, `_fixup_*`, and one-off audits |
+| `experiments/expert_freeze/` | Unified-expert freeze and K49 representability audit |
+| `experiments/rendering_comparisons/` | Comparison videos |
+| `experiments/docs_historical/` | Superseded architecture, schema, audit, and rename notes |
+| `experiments/config/` | Old training YAML |
+| `experiments/legacy/`, `experiments/diagnostics/`, `experiments/recatch/`, `experiments/sliding/` | Earlier recovery campaigns |
 
-### K49 audit
-
-```powershell
-python -u scripts/audit_action_vocab.py
-```
-
-Reports under `results/consolidation/` (new outputs only; do not alter prior diagnostics).
-
-## Constraints that must not change
-
-- Legal 7D action interface and 20 ms control period
-- 39D runtime observation (`obs_gt_airborne_39`)
-- SUCCESS_NEW / GROUND_DROP / nominal controller
-- Frozen K49 IDs 0–48, HANDOFF=47, token 48 slow reverse wrist
-- No privileged state in runtime Transformer observations
-- Do not rewrite verified experts with approximate invented actions
-- Do not reorganize or delete existing `results/` trees
-
-## Layout
-
-See `docs/ARCHIVE_MANIFEST.md` and `docs/MODULE_ORGANIZATION.md`.
+K49 codebook workflows in those folders are reproducible from their original entry scripts. They are not the command sequence for the current Oracle.

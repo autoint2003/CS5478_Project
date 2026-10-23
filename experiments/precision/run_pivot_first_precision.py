@@ -23,7 +23,7 @@ sys.path.insert(0, str(ROOT))
 from controllers.recovery.action_map import grip_action  # noqa: E402
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
 from data_generation.oracles.plan_b.branch_compare import decode_tok, load_vocab  # noqa: E402
-from data_generation.oracles.precision.primitives import (  # noqa: E402
+from data_generation.oracles.precision.corrections.contact_primitives import (  # noqa: E402
     _action_vw,
     _legal,
     _run,
@@ -32,7 +32,7 @@ from data_generation.oracles.precision.primitives import (  # noqa: E402
     pivot_segment_metrics,
     primitive_stabilize_handoff,
 )
-from data_generation.oracles.precision.stable_grasp import hold_and_confirm_stable  # noqa: E402
+from data_generation.oracles.precision.mechanics.grasp_stabilization import hold_and_confirm_stable  # noqa: E402
 from envs.observations.observable_obs import ObservableObsState  # noqa: E402
 from envs.simulation.capture import restore_capture, take_capture  # noqa: E402
 from envs.simulation.ground_sim import make_ground_sim  # noqa: E402
@@ -293,7 +293,7 @@ def stage_b_stabilize(env, blob, actions) -> dict:
 
 def replay_ic_full(env, case_id: str, stab_state: dict, precision_actions: list, table=None, book48=None) -> dict:
     """3× exact replay from original airborne IC through stab+precision+HANDOFF."""
-    from scripts.generate_plan_c_experts import evaluate_handoff_from_state
+    from evaluation.handoff_from_state import evaluate_handoff_from_state
 
     results = []
     for trial in range(3):

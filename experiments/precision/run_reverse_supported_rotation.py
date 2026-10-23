@@ -22,19 +22,19 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
-from data_generation.oracles.precision.finger_supported_vertical import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.finger_vertical import (  # noqa: E402
     U_OPEN_HAND,
     opening_alignment,
 )
-from data_generation.oracles.precision.force_slip_control import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import (  # noqa: E402
     DualLoopController,
     ForcePController,
     SlipOuterLoop,
     make_action,
     sample_state,
 )
-from data_generation.oracles.precision.orientation_planner import _height_hold_v_hand  # noqa: E402
-from data_generation.oracles.precision.reverse_supported_rotation import (  # noqa: E402
+from data_generation.oracles.precision.corrections.orientation import _height_hold_v_hand  # noqa: E402
+from data_generation.oracles.precision.mechanics.reverse_rotation import (  # noqa: E402
     HoldModeGrip,
     record_forward_with_waypoints,
     run_reverse_restore,
@@ -207,7 +207,7 @@ def run_slip_2_then_5(env, blob, vert_snap):
 
 
 def handoff_rich(env, capture, ref):
-    from data_generation.oracles.precision.primitives import _wrist
+    from data_generation.oracles.precision.corrections.contact_primitives import _wrist
 
     restore_capture(env, capture)
     for _ in range(8):

@@ -72,7 +72,7 @@ def _ground_env():
 
 
 def test_shared_action_decode_and_step_legal(expert):
-    from experiments.audits.plan_a_mechanism_audit import decode_token, load_vocab
+    from evaluation.plan_a_mechanism import decode_token, load_vocab
     from envs.step_legal import step_legal
 
     blob, tokens = expert
@@ -110,7 +110,7 @@ def test_compiled_model_support_only_diffs():
 
 def test_complete_transfer_initial_equivalence(expert):
     from envs.simulation.capture import restore_capture
-    from experiments.audits.plan_a_mechanism_audit import transfer_state_to_ground
+    from evaluation.plan_a_mechanism import transfer_state_to_ground
 
     blob, _ = expert
     elev = _elev_env()
@@ -131,7 +131,7 @@ def test_complete_transfer_initial_equivalence(expert):
 def test_paired_mechanism_gates_match(expert):
     from envs.simulation.capture import restore_capture
     from envs.step_legal import step_legal
-    from experiments.audits.plan_a_mechanism_audit import (
+    from evaluation.plan_a_mechanism import (
         analyze_mechanism,
         decode_token,
         load_vocab,
@@ -173,7 +173,7 @@ def test_paired_mechanism_gates_match(expert):
 
 def test_success_new_separated_from_mechanism(expert):
     """SUCCESS_NEW can pass while mechanism gates were historically failing; after fix both pass."""
-    from experiments.audits.plan_a_mechanism_audit import load_vocab, rollout_traced
+    from evaluation.plan_a_mechanism import load_vocab, rollout_traced
 
     blob, tokens = expert
     table, book48 = load_vocab()

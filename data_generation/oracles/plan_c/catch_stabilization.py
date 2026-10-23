@@ -29,7 +29,7 @@ from envs.simulation.ground_scene import CYL_HALF, CYL_REST_Z, GROUND_DROP_Z
 from envs.step_legal import step_legal
 from evaluation.success_criteria import P_TGT, U_TGT, contact_summary
 from evaluation.grasp_geometry import measure
-from experiments.audits.plan_a_mechanism_audit import sample_kinematics
+from evaluation.hand_frame_kinematics import sample_kinematics
 from training.recovery_execution import make_snap, restore_ballistic
 
 DT_POL = 0.02

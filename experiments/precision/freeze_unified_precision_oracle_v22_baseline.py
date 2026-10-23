@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
-from data_generation.oracles.precision.unified_precision_oracle import (  # noqa: E402
+from data_generation.oracles.precision.state_machine import (  # noqa: E402
     PrecisionConfig,
     correct_dz_inward,
     measure_errors,
@@ -36,7 +36,7 @@ from models.transformer_policy import DT_POLICY  # noqa: E402
 
 OUT = ROOT / "results/diagnostics/unified_precision_oracle_v23/baseline_v22"
 STATES = ROOT / "results/diagnostics/abc_precision_architecture/stable_states"
-SRC = ROOT / "data_generation/oracles/precision/unified_precision_oracle.py"
+SRC = ROOT / "data_generation/oracles/precision/state_machine.py"
 B_POST_LAT = ROOT / "results/diagnostics/axis_aware_precision/snapshots/B_post_lateral.pkl"
 POST_P5 = ROOT / "results/diagnostics/handoff_state_optimization/snapshots/post_P5.pkl"
 AXIS_PREFIX = ROOT / "results/diagnostics/axis_aware_precision/post_lateral_prefix_actions.npz"
@@ -317,7 +317,7 @@ def main():
 
     # 5. Outward C (pipeline already Direct_C; also freeze outward primitive alone)
     print("=== freeze Outward_C ===", flush=True)
-    from data_generation.oracles.precision.unified_precision_oracle import correct_dz_outward
+    from data_generation.oracles.precision.state_machine import correct_dz_outward
 
     restore_capture(env, st_c["capture"])
     e_out0 = measure_errors(env.sim)

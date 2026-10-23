@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
-from data_generation.oracles.precision.unified_precision_oracle import (  # noqa: E402
+from data_generation.oracles.precision.state_machine import (  # noqa: E402
     PrecisionConfig,
     assess_need,
     audit_action_capture_replay,
@@ -228,7 +228,7 @@ def run_golden_equivalence(env) -> dict:
 
     # Outward_C
     meta = json.loads((cases_dir / "Outward_C" / "meta.json").read_text(encoding="utf-8"))
-    from data_generation.oracles.precision.unified_precision_oracle import correct_dz_outward
+    from data_generation.oracles.precision.state_machine import correct_dz_outward
 
     rout = correct_dz_outward(env, {"capture": st_c["capture"], "ref": st_c["ref"]}, PrecisionConfig())
     base_acts = np.load(cases_dir / "Outward_C" / "actions.npz")["actions"]
@@ -465,14 +465,14 @@ def run_scheduler_tests(env) -> dict:
 
 def check_imports_and_cycles() -> dict:
     modules = [
-        "data_generation.oracles.precision.precision_types",
+        "data_generation.oracles.precision.state",
         "data_generation.oracles.precision.precision_goals",
-        "data_generation.oracles.precision.precision_audit",
-        "data_generation.oracles.precision.precision_slip",
-        "data_generation.oracles.precision.precision_dx",
+        "data_generation.oracles.precision.replay_audit",
+        "data_generation.oracles.precision.mechanics.axial_sliding",
+        "data_generation.oracles.precision.corrections.lateral",
         "data_generation.oracles.precision.precision_dz",
-        "data_generation.oracles.precision.precision_handoff",
-        "data_generation.oracles.precision.unified_precision_oracle",
+        "data_generation.oracles.precision.handoff",
+        "data_generation.oracles.precision.state_machine",
     ]
     loaded = {}
     errors = []
@@ -530,7 +530,7 @@ def check_imports_and_cycles() -> dict:
 
 def replay_ic(env, plan: str, state: dict, precision_actions: list) -> dict:
     from data_generation.oracles.plan_b.branch_compare import decode_tok, load_vocab
-    from data_generation.oracles.precision.primitives import _wrist
+    from data_generation.oracles.precision.corrections.contact_primitives import _wrist
     from evaluation.axis_aware_success import evaluate_handoff_with_axis
 
     table = book48 = None
@@ -608,7 +608,7 @@ def run_ic_replays(env) -> dict:
 def run_coverage(env) -> dict:
     """Paired Direct-HANDOFF vs Precision on a frozen unused IC set."""
     from evaluation.axis_aware_success import evaluate_handoff_with_axis
-    from data_generation.oracles.precision.primitives import _wrist
+    from data_generation.oracles.precision.corrections.contact_primitives import _wrist
 
     # Held-out snapshots spanning error axes (exclude the 7 golden regression fixtures).
     exclude = {

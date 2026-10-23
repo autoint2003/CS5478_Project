@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
-from data_generation.oracles.precision.force_slip_control import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import (  # noqa: E402
     DT,
     DualLoopController,
     ForcePController,
@@ -30,7 +30,7 @@ from data_generation.oracles.precision.force_slip_control import (  # noqa: E402
     tilt_actions,
     untilt_actions,
 )
-from data_generation.oracles.precision.primitives import (  # noqa: E402
+from data_generation.oracles.precision.corrections.contact_primitives import (  # noqa: E402
     _action_vw,
     _wrist,
     pivot_segment_metrics,
@@ -678,7 +678,7 @@ def render_video(env, tilt_blob, trial: dict, dest: Path, title: str):
         cam_h.elevation = float(np.degrees(np.arcsin(np.clip(vec[2] / max(dist, 1e-9), -1, 1))))
 
     def draw(scn):
-        from data_generation.oracles.precision.force_slip_control import contact_forces
+        from data_generation.oracles.precision.mechanics.dual_loop import contact_forces
 
         scn.ngeom = 0
         Rh = hand_R(env.sim)

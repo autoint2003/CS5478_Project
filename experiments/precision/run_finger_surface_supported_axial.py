@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
-from data_generation.oracles.precision.finger_surface_support import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.finger_surface import (  # noqa: E402
     REORI_DTHETA_DEG,
     REORI_DX_MM,
     finger_inner_normals_world,
@@ -30,19 +30,19 @@ from data_generation.oracles.precision.finger_surface_support import (  # noqa: 
     support_force_decomposition,
     waypoint_rotate_axis,
 )
-from data_generation.oracles.precision.force_slip_control import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import (  # noqa: E402
     DualLoopController,
     ForcePController,
     SlipOuterLoop,
     make_action,
     sample_state,
 )
-from data_generation.oracles.precision.orientation_planner import (  # noqa: E402
+from data_generation.oracles.precision.corrections.orientation import (  # noqa: E402
     _height_hold_v_hand,
     execute_restore_plan,
     plan_restore_orientation,
 )
-from data_generation.oracles.precision.sign_aware_axial import (  # noqa: E402
+from data_generation.oracles.precision.corrections.axial_sign import (  # noqa: E402
     desire_direction,
     opening_axis_hand,
 )
@@ -200,7 +200,7 @@ def run_axial_slip(env, blob, d, *, milestone_mm: float, z_ref: float, e_x0: flo
 
 
 def handoff_rich(env, capture, ref):
-    from data_generation.oracles.precision.primitives import _wrist
+    from data_generation.oracles.precision.corrections.contact_primitives import _wrist
 
     restore_capture(env, capture)
     for _ in range(8):

@@ -21,9 +21,9 @@ sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
 from data_generation.oracles.plan_b.branch_compare import decode_tok, load_vocab  # noqa: E402
-from data_generation.oracles.precision.endpoint_only_axial_roll import gates  # noqa: E402
-from data_generation.oracles.precision.primitives import _wrist  # noqa: E402
-from data_generation.oracles.precision.unified_precision_oracle import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.open_axis import gates  # noqa: E402
+from data_generation.oracles.precision.corrections.contact_primitives import _wrist  # noqa: E402
+from data_generation.oracles.precision.state_machine import (  # noqa: E402
     PrecisionConfig,
     correct_dtheta,
     correct_dx_horizontal_attempt,

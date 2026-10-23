@@ -21,16 +21,16 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
-from data_generation.oracles.precision.contact_modes import classify_contact_mode  # noqa: E402
-from data_generation.oracles.precision.force_slip_control import sample_state  # noqa: E402
-from data_generation.oracles.precision.precision_goals import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.support_verification import classify_contact_mode  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import sample_state  # noqa: E402
+from data_generation.oracles.precision.entry_conditions import (
     assess_need,
     entry_gate,
-    measure_errors,
 )
-from data_generation.oracles.precision.precision_types import PrecisionConfig  # noqa: E402
-from data_generation.oracles.precision.primitives import _wrist  # noqa: E402
-from data_generation.oracles.precision.stable_grasp import hold_and_confirm_stable  # noqa: E402
+from data_generation.oracles.precision.residuals import measure_errors
+from data_generation.oracles.precision.state import PrecisionConfig  # noqa: E402
+from data_generation.oracles.precision.corrections.contact_primitives import _wrist  # noqa: E402
+from data_generation.oracles.precision.mechanics.grasp_stabilization import hold_and_confirm_stable  # noqa: E402
 from envs.observations.observable_obs import ObservableObsState  # noqa: E402
 from envs.outcomes.support_drop import latched  # noqa: E402
 from envs.simulation.capture import restore_capture, take_capture  # noqa: E402
@@ -248,7 +248,7 @@ def main():
             "stage1_c": "scripts/generate_stage2_abc_recovery_fullchain_v1.py:run_stage1_c",
             "direct_vs_precision": "scripts/generate_stage2_abc_recovery_fullchain_v1.py:process_one ~601-632",
             "assess_need": "data_generation/oracles/precision/precision_goals.py:assess_need",
-            "probe_direct": "data_generation/oracles/precision/precision_handoff.py:probe_direct_handoff",
+            "probe_direct": "data_generation/oracles/precision/handoff.py:probe_direct_handoff",
             "entry_gate": "data_generation/oracles/precision/precision_goals.py:entry_gate",
         },
         "by_label": {},

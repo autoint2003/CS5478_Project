@@ -15,9 +15,9 @@ sys.path.insert(0, str(ROOT))
 
 from experiments.diagnostics import run_b_grpo_multistage_dataset as base  # noqa: E402
 
-from data_generation.oracles.precision.axis_aware import lateral_desire_direction  # noqa: E402
-from data_generation.oracles.precision.contact_modes import classify_contact_mode, make_s1_state  # noqa: E402
-from data_generation.oracles.precision.endpoint_only_axial_roll import (  # noqa: E402
+from data_generation.oracles.precision.corrections.residual_directions import lateral_desire_direction  # noqa: E402
+from data_generation.oracles.precision.mechanics.support_verification import classify_contact_mode, make_s1_state  # noqa: E402
+from data_generation.oracles.precision.mechanics.open_axis import (  # noqa: E402
     DOWN,
     choose_roll_sign_for_support,
     gates,
@@ -26,18 +26,18 @@ from data_generation.oracles.precision.endpoint_only_axial_roll import (  # noqa
     run_tilt_phase,
     u_open_world,
 )
-from data_generation.oracles.precision.force_slip_control import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import (  # noqa: E402
     contact_forces,
     sample_state,
 )
-from data_generation.oracles.precision.finger_surface_support import support_force_decomposition  # noqa: E402
-from data_generation.oracles.precision.precision_dx import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.finger_surface import support_force_decomposition  # noqa: E402
+from data_generation.oracles.precision.corrections.lateral import (  # noqa: E402
     _horizontal_open_target,
     _physical_finger_support,
 )
-from data_generation.oracles.precision.precision_goals import measure_errors  # noqa: E402
-from data_generation.oracles.precision.precision_types import FN_HOLD, PrecisionConfig  # noqa: E402
-from data_generation.oracles.precision.precision_dx_support_transfer import (  # noqa: E402
+from data_generation.oracles.precision.residuals import measure_errors
+from data_generation.oracles.precision.state import FN_HOLD, PrecisionConfig  # noqa: E402
+from data_generation.oracles.precision.mechanics.support_transfer import (  # noqa: E402
     correct_dx_support_transfer,
 )
 from envs.observations.observable_obs import ObservableObsState  # noqa: E402

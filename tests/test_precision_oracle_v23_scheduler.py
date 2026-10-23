@@ -13,9 +13,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch
-from data_generation.oracles.precision.precision_goals import evaluate_slip_goal, handoff_geometry_ready
-from data_generation.oracles.precision.precision_types import PrecisionConfig, SlipGoal, STOP_GOAL_REACHED
-from data_generation.oracles.precision.unified_precision_oracle import (
+from data_generation.oracles.precision.residuals import (
+    evaluate_slip_goal,
+    handoff_geometry_ready,
+)
+from data_generation.oracles.precision.state import PrecisionConfig, SlipGoal, STOP_GOAL_REACHED
+from data_generation.oracles.precision.state_machine import (
     measure_errors,
     probe_direct_handoff,
     run_precision,

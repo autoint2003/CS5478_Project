@@ -4,13 +4,13 @@ Plan A and Plan B only establish a stable grasp. Precision stages live here and
 are independent of which stabilizer produced the grasp.
 """
 
-from data_generation.oracles.precision.stable_grasp import (
+from data_generation.oracles.precision.mechanics.grasp_stabilization import (
     STABLE_THRESHOLDS,
     evaluate_stable_grasp,
     hold_and_confirm_stable,
     is_stable_grasp,
 )
-from data_generation.oracles.precision.primitives import (
+from data_generation.oracles.precision.corrections.contact_primitives import (
     MAX_DELTA_P_REL_MM,
     audit_grasp,
     classify_pivot_motion,
@@ -23,29 +23,29 @@ from data_generation.oracles.precision.primitives import (
     primitive_stabilize_handoff,
     relative_pose,
 )
-from data_generation.oracles.precision.force_slip_control import (
+from data_generation.oracles.precision.mechanics.dual_loop import (
     DualLoopController,
     ForcePController,
     SlipOuterLoop,
     contact_forces,
     sample_state,
 )
-from data_generation.oracles.precision.orientation_planner import (
+from data_generation.oracles.precision.corrections.orientation import (
     desired_correction_direction,
     plan_orientation,
     plan_restore_orientation,
 )
-from data_generation.oracles.precision.axis_aware import (
+from data_generation.oracles.precision.corrections.residual_directions import (
     axial_desire_direction,
     decide_precision,
     lateral_desire_direction,
 )
-from data_generation.oracles.precision.sign_aware_axial import (
+from data_generation.oracles.precision.corrections.axial_sign import (
     opening_axis_hand,
     select_axial_mode,
     signed_opening_error,
 )
-from data_generation.oracles.precision.unified_precision_oracle import (
+from data_generation.oracles.precision.state_machine import (
     PrecisionConfig,
     PrecisionResult,
     SlipGoal,

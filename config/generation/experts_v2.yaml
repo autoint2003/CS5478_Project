@@ -1,0 +1,38 @@
+# Authoritative six-branch expert generation for dataset_version experts_v2.
+# Source ICs are post-Stage-1 stable captures from stage2_abc_final_v2.
+# Do not import historical Precision action tapes.
+
+dataset_version: experts_v2
+oracle_implementation: precision_state_machine_v23
+success_criteria_version: SUCCESS_12S_and_SUCCESS_NEW_frozen
+config_id: experts_v2_stage2_final_v2_ics
+
+output_root: data/experts_v2
+source_manifest: results/data_generation/stage2_abc_final_v2/manifest.jsonl
+source_ics: results/data_generation/stage2_abc_final_v2/ics
+
+# Branch → plan_provenance filter on the source manifest.
+# Stage-1 search is not re-executed; ICs already hold capture+ref after Stage-1.
+branches:
+  A_STABLE_PRECISION:
+    plan_provenance: [A]
+    continuation: precision
+  B_STABLE_DIRECT_HANDOFF:
+    plan_provenance: [B]
+    continuation: direct_handoff
+  B_STABLE_PRECISION:
+    plan_provenance: [B]
+    continuation: precision
+  C_RECATCH_DIRECT_HANDOFF:
+    plan_provenance: [C]
+    continuation: direct_handoff
+  C_RECATCH_PRECISION:
+    plan_provenance: [C]
+    continuation: precision
+  D_PRECISION:
+    plan_provenance: [HARD_IC]
+    continuation: precision
+
+admit_success: SUCCESS_NEW
+track_success_12s: true
+seed: 0

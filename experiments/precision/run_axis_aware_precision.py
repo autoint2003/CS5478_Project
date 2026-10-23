@@ -22,12 +22,12 @@ sys.path.insert(0, str(ROOT))
 from controllers.recovery.action_map import W_MAX  # noqa: E402
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
 from data_generation.oracles.plan_b.branch_compare import decode_tok, load_vocab  # noqa: E402
-from data_generation.oracles.precision.axis_aware import (  # noqa: E402
+from data_generation.oracles.precision.corrections.residual_directions import (  # noqa: E402
     axial_desire_direction,
     decide_precision,
     lateral_desire_direction,
 )
-from data_generation.oracles.precision.force_slip_control import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import (  # noqa: E402
     DT,
     DualLoopController,
     ForcePController,
@@ -35,7 +35,7 @@ from data_generation.oracles.precision.force_slip_control import (  # noqa: E402
     make_action,
     sample_state,
 )
-from data_generation.oracles.precision.orientation_planner import (  # noqa: E402
+from data_generation.oracles.precision.corrections.orientation import (  # noqa: E402
     _height_hold_v_hand,
     execute_orientation_plan,
     execute_restore_plan,
@@ -43,12 +43,12 @@ from data_generation.oracles.precision.orientation_planner import (  # noqa: E40
     plan_restore_orientation,
     score_gravity_alignment,
 )
-from data_generation.oracles.precision.primitives import (  # noqa: E402
+from data_generation.oracles.precision.corrections.contact_primitives import (  # noqa: E402
     _action_vw,
     _wrist,
     pivot_segment_metrics,
 )
-from data_generation.oracles.precision.stable_grasp import hold_and_confirm_stable  # noqa: E402
+from data_generation.oracles.precision.mechanics.grasp_stabilization import hold_and_confirm_stable  # noqa: E402
 from envs.observations.airborne_obs import observe_airborne  # noqa: E402
 from envs.observations.observable_obs import ObservableObsState  # noqa: E402
 from envs.outcomes.horizon_outcome import recovery_failed  # noqa: E402

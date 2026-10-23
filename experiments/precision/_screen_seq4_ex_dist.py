@@ -12,13 +12,13 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch
-from data_generation.oracles.precision.precision_dz import check_dz_inward_entry
-from data_generation.oracles.precision.precision_goals import measure_errors
-from data_generation.oracles.precision.precision_handoff import posture_is_fingertips_down
-from data_generation.oracles.precision.precision_types import PrecisionConfig
-from data_generation.oracles.precision.sign_aware_axial import select_axial_mode
-from data_generation.oracles.precision.stable_grasp import hold_and_confirm_stable
-from data_generation.oracles.precision.unified_precision_oracle import entry_gate
+from data_generation.oracles.precision.corrections.axial_inward import check_dz_inward_entry
+from data_generation.oracles.precision.residuals import measure_errors
+from data_generation.oracles.precision.handoff import posture_is_fingertips_down
+from data_generation.oracles.precision.state import PrecisionConfig
+from data_generation.oracles.precision.corrections.axial_sign import select_axial_mode
+from data_generation.oracles.precision.mechanics.grasp_stabilization import hold_and_confirm_stable
+from data_generation.oracles.precision.state_machine import entry_gate
 from envs.observations.observable_obs import ObservableObsState
 from envs.simulation.capture import restore_capture
 from envs.simulation.ground_sim import make_ground_sim

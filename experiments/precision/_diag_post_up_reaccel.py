@@ -20,17 +20,17 @@ sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.action_map import W_MAX
 from controllers.recovery.geometry_switch import GeometrySwitch
-from data_generation.oracles.precision.contact_modes import classify_contact_mode
-from data_generation.oracles.precision.endpoint_only_axial_roll import gates, u_open_world
-from data_generation.oracles.precision.force_slip_control import DT
-from data_generation.oracles.precision.precision_dz import correct_dz_inward
-from data_generation.oracles.precision.precision_handoff import (
+from data_generation.oracles.precision.mechanics.support_verification import classify_contact_mode
+from data_generation.oracles.precision.mechanics.open_axis import gates, u_open_world
+from data_generation.oracles.precision.mechanics.dual_loop import DT
+from data_generation.oracles.precision.corrections.axial_inward import correct_dz_inward
+from data_generation.oracles.precision.handoff import (
     posture_is_fingertips_down,
     run_final_down_handoff_gate,
 )
-from data_generation.oracles.precision.precision_types import PrecisionConfig
-from data_generation.oracles.precision import precision_dz as pdz
-from data_generation.oracles.precision import support_aware_rotation as sar
+from data_generation.oracles.precision.state import PrecisionConfig
+from data_generation.oracles.precision.corrections import axial_inward as pdz
+from data_generation.oracles.precision.mechanics import protected_rotation as sar
 from envs.observations.observable_obs import ObservableObsState
 from envs.simulation.capture import restore_capture
 from envs.simulation.ground_sim import make_ground_sim
@@ -220,14 +220,14 @@ def main():
 
     # Patch step_legal in the modules that import it
     import envs.step_legal as step_mod
-    import data_generation.oracles.precision.support_aware_rotation as sar_mod
-    import data_generation.oracles.precision.precision_dz as pdz_mod
-    import data_generation.oracles.precision.force_slip_control as fsc_mod
-    import data_generation.oracles.precision.precision_handoff as ph_mod
+    import data_generation.oracles.precision.mechanics.protected_rotation as sar_mod
+    import data_generation.oracles.precision.corrections.axial_inward as pdz_mod
+    import data_generation.oracles.precision.mechanics.dual_loop as fsc_mod
+    import data_generation.oracles.precision.handoff as ph_mod
 
     # Also need slip module
     try:
-        import data_generation.oracles.precision.precision_slip as pslip_mod
+        import data_generation.oracles.precision.mechanics.axial_sliding as pslip_mod
     except Exception:
         pslip_mod = None
 
@@ -236,17 +236,17 @@ def main():
         targets.append(pslip_mod)
     # endpoint / reverse modules that step
     try:
-        import data_generation.oracles.precision.endpoint_only_axial_roll as ep_mod
+        import data_generation.oracles.precision.mechanics.open_axis as ep_mod
         targets.append(ep_mod)
     except Exception:
         pass
     try:
-        import data_generation.oracles.precision.reverse_supported_rotation as rev_mod
+        import data_generation.oracles.precision.mechanics.reverse_rotation as rev_mod
         targets.append(rev_mod)
     except Exception:
         pass
     try:
-        import data_generation.oracles.precision.precision_dx_support_transfer as dxst
+        import data_generation.oracles.precision.mechanics.support_transfer as dxst
         targets.append(dxst)
     except Exception:
         pass

@@ -182,6 +182,21 @@ def is_handoff(token: int) -> bool:
     return int(token) == HANDOFF
 
 
+def decode_token(table: np.ndarray, book48: np.ndarray, tok: int, residual: np.ndarray | None = None) -> np.ndarray:
+    """Frozen legal decode. Token 47 is HANDOFF (not a motion). Residuals default to 0."""
+    from training.k47_codebook import decode_action as decode_k48
+
+    tok = int(tok)
+    pre = np.zeros(7, np.float32) if residual is None else np.asarray(residual, np.float32)
+    if tok == HANDOFF:
+        raise RuntimeError("HANDOFF token must not be executed as a motion action")
+    if tok <= 46:
+        _residual, action = decode_k48(book48, tok, pre)
+        return np.asarray(action, np.float32)
+    _residual, action = decode_action(table, tok, pre)
+    return np.asarray(action, np.float32)
+
+
 def decode_action(table: np.ndarray, token: int, pre) -> tuple[np.ndarray, np.ndarray]:
     """Decode a motion token from a K49/K50 ID-indexed table.
 

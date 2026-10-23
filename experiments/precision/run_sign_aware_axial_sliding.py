@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
-from data_generation.oracles.precision.force_slip_control import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import (  # noqa: E402
     DT,
     DualLoopController,
     ForcePController,
@@ -28,12 +28,12 @@ from data_generation.oracles.precision.force_slip_control import (  # noqa: E402
     make_action,
     sample_state,
 )
-from data_generation.oracles.precision.orientation_planner import (  # noqa: E402
+from data_generation.oracles.precision.corrections.orientation import (  # noqa: E402
     _height_hold_v_hand,
     plan_restore_orientation,
     execute_restore_plan,
 )
-from data_generation.oracles.precision.sign_aware_axial import (  # noqa: E402
+from data_generation.oracles.precision.corrections.axial_sign import (  # noqa: E402
     G_AXIAL_USEFUL_MIN,
     REORI_DTHETA_DEG,
     REORI_DX_MM,
@@ -239,7 +239,7 @@ def run_axial_slip(
 
 
 def handoff_rich(env, capture, ref):
-    from data_generation.oracles.precision.primitives import _wrist
+    from data_generation.oracles.precision.corrections.contact_primitives import _wrist
 
     restore_capture(env, capture)
     for _ in range(8):
@@ -450,7 +450,7 @@ def main():
     # Mode A often already has g·d > 0 upright — check first
     d_a = desire_direction("A_outward", u_open)
     s_a0 = sample_state(env.sim)
-    from data_generation.oracles.precision.orientation_planner import score_gravity_alignment
+    from data_generation.oracles.precision.corrections.orientation import score_gravity_alignment
 
     g0_a = score_gravity_alignment(np.asarray(s_a0["g_h"], float), d_a)
     mode_results["A_outward"] = {

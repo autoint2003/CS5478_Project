@@ -14,24 +14,24 @@ sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.action_map import W_MAX
 from controllers.recovery.geometry_switch import GeometrySwitch
-from data_generation.oracles.precision.contact_modes import classify_contact_mode
-from data_generation.oracles.precision.endpoint_only_axial_roll import (
+from data_generation.oracles.precision.mechanics.support_verification import classify_contact_mode
+from data_generation.oracles.precision.mechanics.open_axis import (
     gates,
     project_out_roll,
     u_open_world,
     world_omega_to_body,
 )
-from data_generation.oracles.precision.finger_supported_vertical import Z_ABORT
-from data_generation.oracles.precision.force_slip_control import DT, make_action, sample_state
-from data_generation.oracles.precision.orientation_planner import _height_hold_v_hand
-from data_generation.oracles.precision.precision_dz import correct_dz_inward
-from data_generation.oracles.precision.precision_types import PrecisionConfig
-from data_generation.oracles.precision.reverse_supported_rotation import HoldModeGrip
-from data_generation.oracles.precision.rotation_speed_profile import (
+from data_generation.oracles.precision.mechanics.finger_vertical import Z_ABORT
+from data_generation.oracles.precision.mechanics.dual_loop import DT, make_action, sample_state
+from data_generation.oracles.precision.corrections.orientation import _height_hold_v_hand
+from data_generation.oracles.precision.corrections.axial_inward import correct_dz_inward
+from data_generation.oracles.precision.state import PrecisionConfig
+from data_generation.oracles.precision.mechanics.reverse_rotation import HoldModeGrip
+from data_generation.oracles.precision.mechanics.rotation_braking import (
     contact_rate_guard,
     scheduled_rate,
 )
-from data_generation.oracles.precision import support_aware_rotation as sar
+from data_generation.oracles.precision.mechanics import protected_rotation as sar
 from envs.observations.observable_obs import ObservableObsState
 from envs.outcomes.support_drop import latched
 from envs.simulation.capture import restore_capture, take_capture

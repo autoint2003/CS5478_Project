@@ -14,18 +14,18 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch
-from data_generation.oracles.precision.contact_modes import classify_contact_mode
-from data_generation.oracles.precision.endpoint_only_axial_roll import gates
-from data_generation.oracles.precision.force_slip_control import DT
-from data_generation.oracles.precision import precision_dz as pdz
-from data_generation.oracles.precision.precision_dz import correct_dz_inward
-from data_generation.oracles.precision.precision_goals import measure_errors
-from data_generation.oracles.precision.precision_handoff import (
+from data_generation.oracles.precision.mechanics.support_verification import classify_contact_mode
+from data_generation.oracles.precision.mechanics.open_axis import gates
+from data_generation.oracles.precision.mechanics.dual_loop import DT
+from data_generation.oracles.precision.corrections import axial_inward as pdz
+from data_generation.oracles.precision.corrections.axial_inward import correct_dz_inward
+from data_generation.oracles.precision.residuals import measure_errors
+from data_generation.oracles.precision.handoff import (
     posture_is_fingertips_down,
     run_final_down_handoff_gate,
 )
-from data_generation.oracles.precision.precision_types import PrecisionConfig
-from data_generation.oracles.precision import support_aware_rotation as sar
+from data_generation.oracles.precision.state import PrecisionConfig
+from data_generation.oracles.precision.mechanics import protected_rotation as sar
 from envs.observations.observable_obs import ObservableObsState
 from envs.simulation.capture import restore_capture
 from envs.simulation.ground_sim import make_ground_sim

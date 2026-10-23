@@ -368,3 +368,36 @@ Before nominal handoff (mandatory):
 - Redesigning the entire recovery stack.
 - Weakening SUCCESS_NEW / SUCCESS_12S.
 - Fabricating contact or force measurements in tests.
+
+The gap-audit notes that accompanied earlier drafts of this specification are historical and live in `experiments/docs_historical/`. This file remains the behavior contract. Where an earlier "proposed change" has already landed in the scheduler, the source map below names the module that implements it.
+
+## 11. Source modules
+
+The scheduler in `data_generation/oracles/precision/state_machine.py` (`run_precision`) is the single authoritative transition order. It still owns `correct_dtheta`, which calls fingertips-DOWN restoration and does not reintroduce a silent legacy lateral fallback. Sibling modules own the skills it calls. Thresholds, phase order, and success flags are unchanged by the file move.
+
+| Responsibility | Module |
+|---|---|
+| State-machine scheduling, dθ → dx → dz order, conditional skips, early/direct HANDOFF, frozen 12 s continuation | `data_generation/oracles/precision/state_machine.py` |
+| `PrecisionConfig`, `PrecisionResult`, slip-goal and failure codes | `data_generation/oracles/precision/state.py` |
+| Entry gate and residual classification (`entry_gate`, `assess_need`) | `data_generation/oracles/precision/entry_conditions.py` |
+| Error measurement, handoff-geometry test, slip-goal stop test | `data_generation/oracles/precision/residuals.py` |
+| Orientation-direction planning helpers | `data_generation/oracles/precision/corrections/orientation.py` |
+| Lateral residual direction | `data_generation/oracles/precision/corrections/residual_directions.py` |
+| Lateral dx attempt and verified horizontal correction | `data_generation/oracles/precision/corrections/lateral.py` |
+| Contact-pivot primitives | `data_generation/oracles/precision/corrections/contact_primitives.py` |
+| Axial sign and inward/outward mode choice | `data_generation/oracles/precision/corrections/axial_sign.py` |
+| Inward dz, cold-start S1, DX6 S1 reuse, return-to-DOWN | `data_generation/oracles/precision/corrections/axial_inward.py` |
+| Outward dz after fingertips-DOWN | `data_generation/oracles/precision/corrections/axial_outward.py` |
+| Shared axial helpers (not a separate skill) | `data_generation/oracles/precision/corrections/axial_common.py` |
+| DX support transfer and `restore_fingertips_down` | `data_generation/oracles/precision/mechanics/support_transfer.py` |
+| Contact-mode classification and S1 state | `data_generation/oracles/precision/mechanics/support_verification.py` |
+| Protected fixed-axis rotation, including to_UP brake-before-vertical | `data_generation/oracles/precision/mechanics/protected_rotation.py` |
+| Coast distance, latched zero rate, contact-rate guard | `data_generation/oracles/precision/mechanics/rotation_braking.py` |
+| Goal-aware and staged axial slip | `data_generation/oracles/precision/mechanics/axial_sliding.py` |
+| DualLoop force and slip controllers | `data_generation/oracles/precision/mechanics/dual_loop.py` |
+| Stable-grasp verification | `data_generation/oracles/precision/mechanics/grasp_stabilization.py` |
+| Direct HANDOFF probe, `FINAL_DOWN_GATE`, stable-handoff preparation | `data_generation/oracles/precision/handoff.py` |
+| Action/capture replay audit | `data_generation/oracles/precision/replay_audit.py` |
+| Nominal HANDOFF continuation used by direct and final gates | `evaluation/handoff_from_state.py`, `evaluation/axis_aware_success.py` |
+
+`SUCCESS_NEW` remains the expert-success flag inside `run_precision`. `SUCCESS_12S` is recorded separately and does not promote a trajectory whose status is `PRECISION_EXECUTED_HANDOFF_FAIL`.

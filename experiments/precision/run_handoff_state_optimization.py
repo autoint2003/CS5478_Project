@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch, rot_angle  # noqa: E402
-from data_generation.oracles.precision.endpoint_only_axial_roll import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.open_axis import (  # noqa: E402
     DOWN,
     UP,
     choose_roll_sign_for_support,
@@ -35,16 +35,16 @@ from data_generation.oracles.precision.endpoint_only_axial_roll import (  # noqa
     run_tilt_phase,
     u_open_world,
 )
-from data_generation.oracles.precision.finger_supported_vertical import U_OPEN_HAND  # noqa: E402
-from data_generation.oracles.precision.force_slip_control import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.finger_vertical import U_OPEN_HAND  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import (  # noqa: E402
     DualLoopController,
     ForcePController,
     SlipOuterLoop,
     make_action,
     sample_state,
 )
-from data_generation.oracles.precision.orientation_planner import _height_hold_v_hand  # noqa: E402
-from data_generation.oracles.precision.reverse_supported_rotation import HoldModeGrip  # noqa: E402
+from data_generation.oracles.precision.corrections.orientation import _height_hold_v_hand  # noqa: E402
+from data_generation.oracles.precision.mechanics.reverse_rotation import HoldModeGrip  # noqa: E402
 from envs.observations.observable_obs import ObservableObsState  # noqa: E402
 from envs.outcomes.horizon_outcome import (  # noqa: E402
     LOST_STEPS,

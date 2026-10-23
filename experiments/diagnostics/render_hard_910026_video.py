@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
-from data_generation.oracles.precision.precision_goals import measure_errors  # noqa: E402
+from data_generation.oracles.precision.residuals import measure_errors
 from envs.observations.observable_obs import ObservableObsState  # noqa: E402
 from envs.outcomes.recovery_success import apply_handoff, nominal_step  # noqa: E402
 from envs.simulation.capture import restore_capture  # noqa: E402

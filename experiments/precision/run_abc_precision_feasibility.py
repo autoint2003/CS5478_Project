@@ -30,7 +30,7 @@ from data_generation.oracles.precision import (  # noqa: E402
     primitive_gravity_reorient,
     primitive_stabilize_handoff,
 )
-from data_generation.oracles.precision.stable_grasp import STABLE_THRESHOLDS  # noqa: E402
+from data_generation.oracles.precision.mechanics.grasp_stabilization import STABLE_THRESHOLDS  # noqa: E402
 from envs.observations.observable_obs import ObservableObsState  # noqa: E402
 from envs.outcomes.ground_drop import arm, restore_state as restore_drop  # noqa: E402
 from envs.simulation.capture import restore_capture, take_capture  # noqa: E402

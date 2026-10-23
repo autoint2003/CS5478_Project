@@ -31,13 +31,11 @@ sys.path.insert(0, str(ROOT))
 
 from experiments.diagnostics import run_b_grpo_multistage_dataset as base  # noqa: E402
 
-from data_generation.oracles.precision.force_slip_control import sample_state  # noqa: E402
-from data_generation.oracles.precision.precision_goals import (  # noqa: E402
-    assess_need,
-    measure_errors,
-)
-from data_generation.oracles.precision.precision_types import PrecisionConfig  # noqa: E402
-from data_generation.oracles.precision.unified_precision_oracle import run_precision  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import sample_state  # noqa: E402
+from data_generation.oracles.precision.entry_conditions import assess_need
+from data_generation.oracles.precision.residuals import measure_errors
+from data_generation.oracles.precision.state import PrecisionConfig  # noqa: E402
+from data_generation.oracles.precision.state_machine import run_precision  # noqa: E402
 from envs.observations.observable_obs import ObservableObsState  # noqa: E402
 from envs.simulation.capture import restore_capture, take_capture  # noqa: E402
 from envs.step_legal import step_legal  # noqa: E402

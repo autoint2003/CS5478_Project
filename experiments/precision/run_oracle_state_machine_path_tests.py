@@ -24,20 +24,19 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
-from data_generation.oracles.precision.contact_modes import classify_contact_mode  # noqa: E402
-from data_generation.oracles.precision.endpoint_only_axial_roll import gates  # noqa: E402
-from data_generation.oracles.precision.force_slip_control import DT, sample_state  # noqa: E402
-from data_generation.oracles.precision.precision_dx_support_transfer import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.support_verification import classify_contact_mode  # noqa: E402
+from data_generation.oracles.precision.mechanics.open_axis import gates  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import DT, sample_state  # noqa: E402
+from data_generation.oracles.precision.mechanics.support_transfer import (  # noqa: E402
     correct_dx_support_transfer,
     restore_fingertips_down,
 )
-from data_generation.oracles.precision.precision_dz import (  # noqa: E402
-    correct_dz_inward,
-    correct_dz_outward,
-)
-from data_generation.oracles.precision.precision_goals import assess_need, measure_errors  # noqa: E402
-from data_generation.oracles.precision.precision_types import PrecisionConfig  # noqa: E402
-from data_generation.oracles.precision.unified_precision_oracle import (  # noqa: E402
+from data_generation.oracles.precision.corrections.axial_inward import correct_dz_inward
+from data_generation.oracles.precision.corrections.axial_outward import correct_dz_outward
+from data_generation.oracles.precision.entry_conditions import assess_need
+from data_generation.oracles.precision.residuals import measure_errors
+from data_generation.oracles.precision.state import PrecisionConfig  # noqa: E402
+from data_generation.oracles.precision.state_machine import (  # noqa: E402
     correct_dtheta,
     run_precision,
 )

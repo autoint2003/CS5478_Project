@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
-from data_generation.oracles.precision.force_slip_control import (  # noqa: E402
+from data_generation.oracles.precision.mechanics.dual_loop import (  # noqa: E402
     DT,
     DualLoopController,
     ForcePController,
@@ -30,7 +30,7 @@ from data_generation.oracles.precision.force_slip_control import (  # noqa: E402
     sample_state,
     tilt_actions,
 )
-from data_generation.oracles.precision.orientation_planner import (  # noqa: E402
+from data_generation.oracles.precision.corrections.orientation import (  # noqa: E402
     _height_hold_v_hand,
     desired_correction_direction,
     execute_orientation_plan,
@@ -38,7 +38,7 @@ from data_generation.oracles.precision.orientation_planner import (  # noqa: E40
     plan_orientation,
     plan_restore_orientation,
 )
-from data_generation.oracles.precision.primitives import (  # noqa: E402
+from data_generation.oracles.precision.corrections.contact_primitives import (  # noqa: E402
     _action_vw,
     _wrist,
     pivot_segment_metrics,
@@ -53,7 +53,7 @@ from envs.step_legal import step_legal  # noqa: E402
 from evaluation.grasp_geometry import cylinder_axis_world, hand_R  # noqa: E402
 from evaluation.success_criteria import P_TGT  # noqa: E402
 from models.transformer_policy import DT_POLICY  # noqa: E402
-from scripts.generate_plan_c_experts import evaluate_handoff_from_state  # noqa: E402
+from evaluation.handoff_from_state import evaluate_handoff_from_state  # noqa: E402
 from visualization.camera import mjv_camera_from_preset  # noqa: E402
 from visualization.impact_view import add_capsule, add_sphere  # noqa: E402
 from visualization.video_recorder import write_frames_mp4  # noqa: E402

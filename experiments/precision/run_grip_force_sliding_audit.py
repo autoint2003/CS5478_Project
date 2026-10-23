@@ -27,7 +27,7 @@ from controllers.recovery.action_map import (  # noqa: E402
     grip_tau,
 )
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
-from data_generation.oracles.precision.primitives import (  # noqa: E402
+from data_generation.oracles.precision.corrections.contact_primitives import (  # noqa: E402
     _action_vw,
     _wrist,
     pivot_segment_metrics,

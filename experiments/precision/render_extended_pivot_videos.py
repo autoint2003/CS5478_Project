@@ -20,7 +20,7 @@ sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.action_map import grip_action  # noqa: E402
 from controllers.recovery.geometry_switch import GeometrySwitch  # noqa: E402
-from data_generation.oracles.precision.primitives import (  # noqa: E402
+from data_generation.oracles.precision.corrections.contact_primitives import (  # noqa: E402
     _action_vw,
     _wrist,
     pivot_segment_metrics,

@@ -11,12 +11,12 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from controllers.recovery.geometry_switch import GeometrySwitch
-from data_generation.oracles.precision.precision_dx_support_transfer import (
+from data_generation.oracles.precision.mechanics.support_transfer import (
     correct_dx_support_transfer,
 )
-from data_generation.oracles.precision.precision_dz import correct_dz_inward
-from data_generation.oracles.precision.precision_types import PrecisionConfig
-from data_generation.oracles.precision.unified_precision_oracle import run_precision
+from data_generation.oracles.precision.corrections.axial_inward import correct_dz_inward
+from data_generation.oracles.precision.state import PrecisionConfig
+from data_generation.oracles.precision.state_machine import run_precision
 from envs.observations.observable_obs import ObservableObsState
 from envs.simulation.ground_sim import make_ground_sim
 from models.transformer_policy import DT_POLICY
