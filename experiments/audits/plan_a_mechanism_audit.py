@@ -457,66 +457,14 @@ def rollout_traced(
 
 
 def transfer_state_to_ground(elev_env, ground_env) -> dict[str, Any]:
-    """Copy live physical + controller state from elevated ballistic sim onto GROUND_SCENE.
+    """Copy live physical + controller state from elevated ballistic sim onto GROUND_SCENE."""
+    from envs.simulation.cross_scene_restore import transfer_live_state
 
-    Matches restore_capture physics fields that are layout-compatible (nq=23):
-    qpos/qvel/ctrl/time/act/qacc_warmstart, mocap/weld, and full FSM arrays
-    including v_des/w_des. Does not copy mjData contact caches; mj_forward after write.
-    """
-    from envs.simulation.scene_state import ball_is_parked, park_impact_ball
-
-    src, dst = elev_env.sim, ground_env.sim
-    diffs = {}
-    if src.model.nq != dst.model.nq:
-        raise RuntimeError("nq mismatch; cannot transfer")
-    dst.data.qpos[:] = src.data.qpos
-    dst.data.qvel[:] = src.data.qvel
-    dst.data.ctrl[:] = src.data.ctrl
-    dst.data.time = float(src.data.time)
-    dst.data.qacc_warmstart[:] = src.data.qacc_warmstart
-    if int(getattr(src.model, "na", 0) or 0) and int(getattr(dst.model, "na", 0) or 0):
-        dst.data.act[:] = src.data.act
-    # mocap / guide weld (name-resolved on each sim)
-    if hasattr(src, "guide_mocap") and hasattr(dst, "guide_mocap"):
-        dst.data.mocap_pos[dst.guide_mocap] = np.asarray(src.data.mocap_pos[src.guide_mocap], float)
-        dst.data.mocap_quat[dst.guide_mocap] = np.asarray(src.data.mocap_quat[src.guide_mocap], float)
-    if hasattr(src, "guide_eq") and hasattr(dst, "guide_eq") and hasattr(src, "eq_active"):
-        dst.set_guide_weld(bool(src.eq_active()))
-    # Ball: park if elevated is parked; otherwise free-joint qpos/qvel already copied by layout
-    if ball_is_parked(src):
-        park_impact_ball(dst)
-    # FSM (full controller desires used by step_legal / TRACK)
-    for name in (
-        "phase", "t_phase", "t_stable", "t_held", "lift_started", "success",
-        "grasp_z", "fg_cmd",
-    ):
-        setattr(dst.fsm, name, getattr(src.fsm, name))
-    for name in ("p_des", "r_des", "v_des", "w_des", "v_cmd", "w_cmd", "grasp_xy", "grasp_offset"):
-        val = getattr(src.fsm, name, None)
-        if val is None:
-            continue
-        setattr(dst.fsm, name, np.asarray(val, float).copy())
-    dst.captured = bool(getattr(src, "captured", False))
-    mujoco.mj_forward(dst.model, dst.data)
-    arm_recovery_drop(dst)
-    # Diff report
-    diffs["obj_z_src"] = float(src.data.xpos[src.ids.object_body][2])
-    diffs["obj_z_dst"] = float(dst.data.xpos[dst.ids.object_body][2])
-    diffs["hand_z_src"] = float(src.data.xpos[src.ids.hand_body][2])
-    diffs["hand_z_dst"] = float(dst.data.xpos[dst.ids.hand_body][2])
-    diffs["warmstart_max_abs_diff"] = float(
-        np.max(np.abs(np.asarray(src.data.qacc_warmstart) - np.asarray(dst.data.qacc_warmstart)))
-    )
-    cs_s = contact_summary(src)
-    cs_d = contact_summary(dst)
+    diffs = transfer_live_state(elev_env.sim, ground_env.sim)
+    cs_s = contact_summary(elev_env.sim)
+    cs_d = contact_summary(ground_env.sim)
     diffs["bilateral_src"] = int(cs_s["bilateral"])
     diffs["bilateral_dst"] = int(cs_d["bilateral"])
-    diffs["table_absent"] = int(
-        mujoco.mj_name2id(dst.model, mujoco.mjtObj.mjOBJ_GEOM, "table") < 0
-    )
-    diffs["ground_present"] = int(
-        mujoco.mj_name2id(dst.model, mujoco.mjtObj.mjOBJ_GEOM, "ground") >= 0
-    )
     return diffs
 
 

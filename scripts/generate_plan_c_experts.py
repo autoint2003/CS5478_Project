@@ -238,7 +238,8 @@ def evaluate_handoff_from_state(sim, ref, *, stabilize_n: int = 0) -> dict:
         if latched(sim):
             reason = "GROUND_DROP"
             break
-        if _dropped(mon) or _escaped(sim):
+        # Pass sim so GROUND_SCENE uses geometric ground drop, not TABLE_DROP=0.44.
+        if _dropped(mon, sim) or _escaped(sim):
             reason = "DROP_AFTER_HANDOFF"
             break
         lost = lost + 1 if not pb["bilateral"] else 0
@@ -268,7 +269,7 @@ def evaluate_handoff_from_state(sim, ref, *, stabilize_n: int = 0) -> dict:
         if latched(sim):
             reason = "GROUND_DROP"
             break
-        if _dropped(mon) or _escaped(sim):
+        if _dropped(mon, sim) or _escaped(sim):
             reason = "DROP_AFTER_HANDOFF"
             break
         lost = lost + 1 if not pb["bilateral"] else 0
@@ -277,7 +278,7 @@ def evaluate_handoff_from_state(sim, ref, *, stabilize_n: int = 0) -> dict:
             break
     if reason is None:
         mon = _monitor(sim)
-        if not _bilateral(mon) or _dropped(mon) or _escaped(sim):
+        if not _bilateral(mon) or _dropped(mon, sim) or _escaped(sim):
             reason = "LOST_GRASP"
         elif not lift_done:
             reason = "NOMINAL_LIFT_NOT_COMPLETED"

@@ -35,12 +35,16 @@ from training.recovery_execution import restore_ballistic  # noqa: E402
 
 SCHEMA_VERSION = "unified_experts_v1"
 OUT = ROOT / "data" / "unified_experts"
-TRACKED = ROOT / "datasets" / "unified_experts"
 RECORDS = OUT / "records"
 REPORT = ROOT / "results" / "consolidation" / "GOLDEN_REGRESSION.md"
 DT = 0.02
 
 PLAN_C_SRC = ROOT / "results" / "diagnostics" / "ground_plan_c_final_success" / "raw"
+PLAN_C_SCALE = ROOT / "results" / "diagnostics" / "ground_plan_c_scale50" / "raw" / "accepted"
+PLAN_C_SIDEWALL = (
+    ROOT / "results" / "diagnostics" / "ground_plan_c_sidewall_research" / "raw"
+)
+# Default regression fixtures; extended dynamically from scale50 accepted experts.
 PLAN_C_ROOTS = ["gbi_010", "gbi_022"]
 
 
@@ -65,13 +69,60 @@ def sha256_bytes(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
 
 
-def load_plan_c_expert(root_id: str) -> dict:
-    p = PLAN_C_SRC / f"{root_id}__SUCCESS_NEW_expert.pkl"
-    if not p.exists():
-        raise FileNotFoundError(
-            f"missing Plan C expert at {p} (results/ must remain in place; no archive fallback)"
-        )
-    return pickle.loads(p.read_bytes()), p
+def discover_plan_c_roots() -> list[tuple[str, Path]]:
+    """Scale50 accepted experts first; golden fixtures only if not already present."""
+    out: list[tuple[str, Path]] = []
+    seen_paths: set[str] = set()
+    seen_fps: set[str] = set()
+
+    def _fp_of(path: Path) -> str | None:
+        try:
+            blob = pickle.loads(path.read_bytes())
+            return blob.get("fingerprint")
+        except Exception:
+            return None
+
+    def _add(rid: str, path: Path):
+        if not path.exists():
+            return
+        rp = str(path.resolve())
+        if rp in seen_paths:
+            return
+        fp = _fp_of(path)
+        if fp and fp in seen_fps:
+            return
+        seen_paths.add(rp)
+        if fp:
+            seen_fps.add(fp)
+        out.append((rid, path))
+
+    # Prefer scale50 (fingerprint-unique filenames) when present.
+    scale_files = sorted(PLAN_C_SCALE.glob("*__SUCCESS_NEW_expert.pkl")) if PLAN_C_SCALE.is_dir() else []
+    if scale_files:
+        for p in scale_files:
+            stem = p.name[: -len("__SUCCESS_NEW_expert.pkl")]
+            _add(stem, p)
+        return out
+    # Fallback: golden / sidewall-only before scale campaign
+    for rid in PLAN_C_ROOTS:
+        _add(rid, PLAN_C_SRC / f"{rid}__SUCCESS_NEW_expert.pkl")
+    _add("gbi_014", PLAN_C_SIDEWALL / "gbi_014__SUCCESS_NEW_sidewall_expert.pkl")
+    return out
+
+
+def load_plan_c_expert(root_id: str, src: Path | None = None) -> tuple[dict, Path]:
+    if src is None:
+        pairs = {r: p for r, p in discover_plan_c_roots()}
+        if root_id not in pairs:
+            raise FileNotFoundError(f"missing Plan C expert for {root_id}")
+        src = pairs[root_id]
+    blob = pickle.loads(src.read_bytes())
+    # Normalize snap key for freeze replay
+    if "catch_snap" not in blob and "snap" in blob:
+        blob["catch_snap"] = blob["snap"]
+    if "actions" not in blob and "prefix_actions" in blob:
+        blob["actions"] = blob["prefix_actions"]
+    return blob, src
 
 
 def _obs(sim, hist) -> np.ndarray:
@@ -94,8 +145,8 @@ def evaluate_handoff(sim, ref) -> dict:
     return mod.evaluate_handoff_from_state(sim, ref, stabilize_n=0)
 
 
-def replay_plan_c(root_id: str, n_replay: int = 3) -> dict:
-    expert, src_path = load_plan_c_expert(root_id)
+def replay_plan_c(root_id: str, n_replay: int = 3, src: Path | None = None) -> dict:
+    expert, src_path = load_plan_c_expert(root_id, src=src)
     actions = np.asarray(expert["actions"], np.float32)
     snap = expert["catch_snap"]
     ref = expert["ref"]
@@ -148,11 +199,15 @@ def replay_plan_c(root_id: str, n_replay: int = 3) -> dict:
 
     n_ok = sum(int(r["SUCCESS_NEW"]) for r in replay_rows)
     handoff_meta = expert.get("handoff_meta") or {}
+    phys_id = expert.get("fingerprint") or root_id
+    # Prefer short config id when available for readability; fingerprint keeps uniqueness.
+    cfg_id = (expert.get("cfg") or {}).get("config_id") or expert.get("root_id") or root_id.split("__")[0]
+    expert_key = f"{cfg_id}_{str(phys_id)[:10]}"
     payload = {
         "schema_version": SCHEMA_VERSION,
-        "expert_id": f"plan_c__{root_id}",
+        "expert_id": f"plan_c__{expert_key}",
         "plan_family": "C",
-        "physical_root_id": root_id,
+        "physical_root_id": expert_key,
         "scene": "GROUND_SCENE",
         "environment_version": "ground_ballistic_v1",
         "initial_physical_state_ref": {
@@ -173,8 +228,10 @@ def replay_plan_c(root_id: str, n_replay: int = 3) -> dict:
         "SUCCESS_12S": bool(n_ok == n_replay),
         "SUCCESS_NEW": bool(n_ok == n_replay),
         "exact_replay": {"n": n_replay, "n_pass": n_ok, "rows": replay_rows},
-        "contact_grasp_mechanism": "FULL_DETACH_ACTIVE_RECATCH",
-        "source_experiment": "results/diagnostics/ground_plan_c_final_success",
+        "contact_grasp_mechanism": expert.get("mechanism") or "FULL_DETACH_ACTIVE_RECATCH",
+        "contact_surface": expert.get("surface_elev") or expert.get("grasp_kind"),
+        "physical_root_fingerprint": expert.get("fingerprint"),
+        "source_experiment": str(src_path.parent.relative_to(ROOT)).replace("\\", "/"),
         "provenance": {
             "expert_pkl": str(src_path.relative_to(ROOT)).replace("\\", "/"),
             "frozen_utc": datetime.now(timezone.utc).isoformat(),
@@ -313,26 +370,64 @@ def write_splits(records: list[dict]) -> dict:
         train = roots[n_test + n_val:]
         return {"train": train, "val": val, "test": test}
 
-    splits = {
-        "schema_version": SCHEMA_VERSION,
-        "split_rule": "by_physical_root_id",
-        "plan_C_limitation": (
-            "Only two independent Plan C SUCCESS_NEW roots (gbi_010, gbi_022). "
-            "Both are regression fixtures; they do not provide a statistically "
-            "meaningful held-out generalization estimate."
-        ),
-        "plan_C": {
-            "regression_fixtures": [r["physical_root_id"] for r in plan_c],
+    def _is_fixture(phys_id: str) -> bool:
+        return any(phys_id.startswith(x) or f"_{x}_" in f"_{phys_id}_" or phys_id.startswith(f"{x}_") for x in ("gbi_010", "gbi_022", "gbi_014"))
+
+    plan_c_roots = [r["physical_root_id"] for r in plan_c]
+    fixtures = [r for r in plan_c_roots if _is_fixture(r)]
+    # Keep at most one fixture entry per golden family
+    fixture_keep = []
+    seen_fam = set()
+    for pid in fixtures:
+        fam = "gbi_010" if "gbi_010" in pid else "gbi_022" if "gbi_022" in pid else "gbi_014" if "gbi_014" in pid else pid
+        if fam in seen_fam:
+            continue
+        seen_fam.add(fam)
+        fixture_keep.append(pid)
+    non_fix = [r for r in plan_c if r["physical_root_id"] not in fixture_keep]
+    if len(plan_c) < 10:
+        plan_c_split = {
+            "regression_fixtures": plan_c_roots,
             "train": [],
             "val": [],
             "test": [],
-        },
+            "note": "too_few_plan_c_roots_all_fixtures",
+        }
+        limitation = (
+            f"Only {len(plan_c)} independent Plan C SUCCESS_NEW roots. "
+            "Held as regression fixtures until ≥10 for root-level holdout."
+        )
+    else:
+        held = split_roots(non_fix, seed=3)
+        plan_c_split = {
+            "regression_fixtures": fixture_keep,
+            "train": held.get("train", []),
+            "val": held.get("val", []),
+            "test": held.get("test", []),
+        }
+        limitation = (
+            f"{len(plan_c)} independent Plan C SUCCESS_NEW roots; "
+            "gbi_010/022/014 remain regression fixtures; others split by physical root."
+        )
+
+    splits = {
+        "schema_version": SCHEMA_VERSION,
+        "split_rule": "by_physical_root_id",
+        "plan_C_limitation": limitation,
+        "plan_C": plan_c_split,
         "plan_A": split_roots(by_plan.get("A", []), seed=1),
         "plan_B": split_roots(by_plan.get("B", []), seed=2),
     }
     # Assign split labels
     def label_for(r):
         if r["plan_family"] == "C":
+            rid = r["physical_root_id"]
+            sp = splits["plan_C"]
+            if rid in sp.get("regression_fixtures", []):
+                return "regression_fixture"
+            for name in ("test", "val", "train"):
+                if rid in sp.get(name, []):
+                    return name
             return "regression_fixture"
         sp = splits[f"plan_{r['plan_family']}"]
         rid = r["physical_root_id"]
@@ -349,7 +444,6 @@ def write_splits(records: list[dict]) -> dict:
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    TRACKED.mkdir(parents=True, exist_ok=True)
     RECORDS.mkdir(parents=True, exist_ok=True)
     (ROOT / "results" / "consolidation").mkdir(parents=True, exist_ok=True)
 
@@ -365,9 +459,11 @@ def main():
         "|---|---:|---|",
     ]
 
-    for rid in PLAN_C_ROOTS:
-        print(f"Freezing Plan C {rid}...", flush=True)
-        payload, raw, replay_rows = replay_plan_c(rid, n_replay=3)
+    plan_c_pairs = discover_plan_c_roots()
+    print(f"Freezing {len(plan_c_pairs)} Plan C experts...", flush=True)
+    for rid, src in plan_c_pairs:
+        print(f"Freezing Plan C {rid} from {src.name}...", flush=True)
+        payload, raw, replay_rows = replay_plan_c(rid, n_replay=3, src=src)
         out_pkl = RECORDS / f"{payload['expert_id']}.pkl"
         out_pkl.write_bytes(raw)
         meta = {k: v for k, v in payload.items() if k not in ("actions_7d", "observations_39d")}
@@ -410,12 +506,11 @@ def main():
             for r in records
         ],
     }
-    for dest in (OUT, TRACKED):
-        (dest / "index.json").write_text(json.dumps(jsafe(index), indent=2), encoding="utf-8")
-        (dest / "splits.json").write_text(json.dumps(jsafe(splits), indent=2), encoding="utf-8")
-        with (dest / "manifest.jsonl").open("w", encoding="utf-8") as f:
-            for r in records:
-                f.write(json.dumps(jsafe(r)) + "\n")
+    (OUT / "index.json").write_text(json.dumps(jsafe(index), indent=2), encoding="utf-8")
+    (OUT / "splits.json").write_text(json.dumps(jsafe(splits), indent=2), encoding="utf-8")
+    with (OUT / "manifest.jsonl").open("w", encoding="utf-8") as f:
+        for r in records:
+            f.write(json.dumps(jsafe(r)) + "\n")
 
     regression_lines += [
         "",
@@ -425,12 +520,12 @@ def main():
         "These retain legacy elevated-table scene provenance. Continuous 7D tapes are used only when present;",
         "tokenized experts keep K49 token sequences without inventing continuous actions.",
         "",
-        f"Tracked index: `datasets/unified_experts/index.json`",
+        f"Manifest index: `data/unified_experts/index.json`",
         f"Heavy records (gitignored): `data/unified_experts/records/`",
         "",
     ]
     REPORT.write_text("\n".join(regression_lines), encoding="utf-8")
-    print(f"Wrote {TRACKED / 'index.json'} and {REPORT}")
+    print(f"Wrote {OUT / 'index.json'} and {REPORT}")
 
 
 if __name__ == "__main__":

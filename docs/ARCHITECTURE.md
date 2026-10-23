@@ -6,7 +6,7 @@
 |---|---|
 | `experiments/` | Historical experimental **code** only |
 | `results/` | Diagnostics and outputs — **do not reorganize** |
-| `datasets/` | Tracked unified expert manifests (contents preserved) |
+| `data/unified_experts/` | Unified expert manifests + records (gitignored) |
 | Active packages | Responsibility-named modules for Plan A/B/C + training |
 
 Source checkpoint before this naming refactor: git tag `refactor/pre-naming-20261021-src`.

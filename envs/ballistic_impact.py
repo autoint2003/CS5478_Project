@@ -176,12 +176,20 @@ class BallisticSim(GraspSim):
         assert_noslip(self)
 
 
-def make_sim() -> tuple[BallisticSim, dict]:
+def make_elevated_sim() -> tuple[BallisticSim, dict]:
+    """Historical elevated-table ballistic sim (reproducibility / experiments only)."""
     cfg = merge_sim_config(load_yaml(ROOT / "config" / "simulation" / "nominal.yaml"))
     sim = BallisticSim(cfg)
     sim.reset()
     assert_noslip(sim)
     return sim, cfg
+
+
+def make_sim() -> tuple:
+    """Active recovery sim: canonical GROUND_SCENE (no table)."""
+    from envs.simulation.ground_sim import make_ground_sim
+
+    return make_ground_sim()
 
 
 def z_tgt_of(sim) -> float:
@@ -274,15 +282,22 @@ def pack_row(sim, tau: float) -> dict:
     }
 
 
-def world():
-    """Ballistic scene plus the nominal grasp and finger-pad records."""
+def elevated_world():
+    """Historical elevated-table world (experiments / paired regression only)."""
     from controllers.cartesian.jacobian import gains_from_cfg
     from envs.simulation.object_dynamics import finger_pad_geom_ids
     from training.recovery_execution import capture_nominal, capture_pads
 
-    sim, cfg = make_sim()
+    sim, cfg = make_elevated_sim()
     gains = gains_from_cfg(cfg)
     nominal = capture_nominal(sim)
     pad_ids, pad_mu = capture_pads(sim)
     pads_l, pads_r = finger_pad_geom_ids(sim.model, sim.ids)
     return sim, gains, nominal, pad_ids, pad_mu, pads_l, pads_r
+
+
+def world():
+    """Active recovery world: GROUND_SCENE plus nominal grasp and finger-pad records."""
+    from envs.simulation.ground_sim import ground_world
+
+    return ground_world()

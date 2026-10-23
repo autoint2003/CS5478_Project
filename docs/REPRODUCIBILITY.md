@@ -46,7 +46,7 @@ pytest -q tests/test_plan_c_golden_regression.py -m slow
 python -u scripts/build_expert_dataset.py
 ```
 
-Tracked manifests: `datasets/unified_experts/`. Heavy records: `data/unified_experts/records/` (gitignored).
+Manifests + heavy records: `data/unified_experts/` (gitignored). Construction code: `data_generation/datasets/`.
 
 ### K49 audit
 

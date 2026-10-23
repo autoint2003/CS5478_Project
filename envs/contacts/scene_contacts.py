@@ -33,6 +33,7 @@ def scene_contacts(sim) -> list[dict]:
     ids = sim.ids
     table = mujoco.mj_name2id(sim.model, mujoco.mjtObj.mjOBJ_GEOM, "table")
     floor = mujoco.mj_name2id(sim.model, mujoco.mjtObj.mjOBJ_GEOM, "floor")
+    ground = mujoco.mj_name2id(sim.model, mujoco.mjtObj.mjOBJ_GEOM, "ground")
     rows = []
     for i in range(int(sim.data.ncon)):
         c = sim.data.contact[i]
@@ -41,10 +42,12 @@ def scene_contacts(sim) -> list[dict]:
         wr = np.zeros(6)
         mujoco.mj_contactForce(sim.model, sim.data, i, wr)
         kind = None
-        if ids.object_geom in pair and table in pair:
+        if ids.object_geom in pair and table >= 0 and table in pair:
             kind = "object_table"
-        elif ids.object_geom in pair and floor in pair:
+        elif ids.object_geom in pair and floor >= 0 and floor in pair:
             kind = "object_floor"
+        elif ids.object_geom in pair and ground >= 0 and ground in pair:
+            kind = "object_ground"
         if kind is None:
             continue
         rows.append({"kind": kind, "g1": geom_name(sim.model, g1), "g2": geom_name(sim.model, g2), "fn": abs(float(wr[0]))})
@@ -54,6 +57,8 @@ def scene_contacts(sim) -> list[dict]:
 def disable_object_table(sim) -> dict:
     table = mujoco.mj_name2id(sim.model, mujoco.mjtObj.mjOBJ_GEOM, "table")
     obj = int(sim.ids.object_geom)
+    if table < 0:
+        return {"before": None, "table_id": -1, "obj_id": obj, "skipped": True}
     fingers = [g for g in range(sim.model.ngeom)
                if int(sim.model.geom_bodyid[g]) in (sim.ids.left_body, sim.ids.right_body)]
     before = {
@@ -67,7 +72,6 @@ def disable_object_table(sim) -> dict:
     sim.model.geom_conaffinity[obj] = 2
     mujoco.mj_forward(sim.model, sim.data)
     return {"before": before, "table_id": int(table), "obj_id": obj}
-
 
 def isolate_ball_object_only(sim) -> dict:
     ball = int(sim.ball_geom)
@@ -84,6 +88,7 @@ def raw_object_contacts(sim) -> list[dict]:
     model, data, ids = sim.model, sim.data, sim.ids
     table = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "table")
     floor = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "floor")
+    ground = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "ground")
     out = []
     for i in range(int(data.ncon)):
         c = data.contact[i]
@@ -101,10 +106,12 @@ def raw_object_contacts(sim) -> list[dict]:
             kind = "object-right_finger"
         elif other_b == ids.hand_body:
             kind = "object-palm_hand"
-        elif other_g == table:
+        elif table >= 0 and other_g == table:
             kind = "object-table"
-        elif other_g == floor:
+        elif floor >= 0 and other_g == floor:
             kind = "object-floor"
+        elif ground >= 0 and other_g == ground:
+            kind = "object-ground"
         wr = np.zeros(6)
         mujoco.mj_contactForce(model, data, i, wr)
         out.append({"kind": kind, "fn": float(wr[0]), "g1": geom_name(model, g1), "g2": geom_name(model, g2)})

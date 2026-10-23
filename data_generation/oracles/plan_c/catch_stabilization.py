@@ -183,6 +183,66 @@ def _world_up_to_action(sim, vz_up: float, w_body=None, grip: float = 1.0) -> np
     return a
 
 
+def fast_world_lift_sequence(
+    sim,
+    snap,
+    *,
+    vz_up: float = 0.12,
+    target_z: float = 0.55,
+    max_s: float = 8.0,
+    grip: float = 1.0,
+) -> dict:
+    """World-+z lift via legal 7D (verified path for low-altitude sidewall catches).
+
+    Prefer this when ``slow_lift_sequence`` stalls near the ground. Does not change
+    physics; commands world-up velocity through ``_action_from``.
+    """
+    restore_ballistic(sim, snap)
+    restore_drop(sim, None)
+    arm(sim)
+    g0 = grasp_geometry(sim)
+    actions: list[np.ndarray] = []
+    bil = empty_bilateral_stats()
+    t0 = float(sim.data.time)
+    reached = False
+    while float(sim.data.time) - t0 < max_s - 1e-9:
+        geo = grasp_geometry(sim)
+        if geo["obj_z"] >= target_z - 0.02 and pad_bilateral(sim)["bilateral"]:
+            reached = True
+            break
+        a = _action_from(sim, np.array([0.0, 0.0, float(vz_up)], float), np.zeros(3), TAU_SECURE)
+        a[6] = float(np.clip(grip, -1.0, 1.0))
+        actions.append(a.copy())
+        step_legal(sim, a)
+        pb = pad_bilateral(sim)
+        update_bilateral_stats(bil, bool(pb["bilateral"]), float(sim.data.time) - t0, DT_POL)
+        if latched(sim) or not pb["bilateral"]:
+            break
+    for _ in range(12):
+        actions.append(hold_action(1.0))
+        step_legal(sim, hold_action(1.0))
+        pb = pad_bilateral(sim)
+        update_bilateral_stats(bil, bool(pb["bilateral"]), float(sim.data.time) - t0, DT_POL)
+        if latched(sim) or not pb["bilateral"]:
+            break
+    g1 = grasp_geometry(sim)
+    return {
+        "actions": actions,
+        "end_snap": make_snap(sim),
+        "reached_target_z": int(reached),
+        "obj_z_end": float(g1["obj_z"]),
+        "hand_z_end": float(g1["hand_z"]),
+        "end_bilateral": int(g1["bilateral"]),
+        "continuous_150": bool(bil.get("continuous_ge_150ms_at_end")),
+        "max_consec_bil": float(bil.get("max_consecutive_bil_s") or 0),
+        "ground_drop": int(latched(sim)),
+        "g0": g0,
+        "g1": g1,
+        "vz_up": float(vz_up),
+        "target_z": float(target_z),
+    }
+
+
 def slow_lift_sequence(sim, snap, params: LiftParams, *, target_z: float) -> dict:
     """Branch A: maintain grip, slow world-up lift toward reference height."""
     restore_ballistic(sim, snap)

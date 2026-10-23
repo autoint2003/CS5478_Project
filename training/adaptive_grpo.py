@@ -90,7 +90,7 @@ def adaptive_resume_plan(checkpoint, out, init_checkpoint=None, allow_nonempty_o
     historical Tree80 SFT path. Independent-G passes the equal-weight SFT explicitly.
 
     Fresh starts refuse existing ``checkpoint_epoch_*.pt`` / ``ic_log.jsonl`` markers.
-    Sibling folders (e.g. ``datasets/``) do not block a fresh Independent-G run.
+    Sibling folders do not block a fresh Independent-G run.
     ``allow_nonempty_out`` is retained for API compatibility and currently unused.
     """
     del allow_nonempty_out  # API compatibility with callers; markers gate overwrites.

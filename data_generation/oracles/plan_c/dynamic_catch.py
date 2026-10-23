@@ -46,11 +46,13 @@ from data_generation.oracles.plan_c.future_trajectory import (
     update_bilateral_stats,
 )
 from data_generation.oracles.plan_b.release_recatch import _action_from
+from data_generation.oracles.plan_c.contact_surface import classify_contacts
 from envs.contacts.frames import extract_contacts
 from envs.outcomes.ground_drop import arm, latched, restore_state as restore_drop
 from envs.simulation.ground_scene import CYL_HALF, CYL_R
 from envs.step_legal import step_legal
-from evaluation.success_criteria import contact_summary
+from evaluation.grasp_geometry import measure
+from evaluation.success_criteria import P_TGT, U_TGT, contact_summary
 from training.recovery_execution import restore_ballistic
 
 DT_POL = 0.02
@@ -381,19 +383,32 @@ def dynamic_catch_sequence(
         else:
             v_cmd = float(params.approach_gain) * (err / remain) + float(params.match) * v_tgt
 
-        # Wrist: align hand -z toward -u (cylinder axis into jaw)
+        # Wrist: align hand -z with cylinder axis (prefer sidewall, avoid end-face)
+        # Axis-reversal symmetric: pick the closer of ±u to hand -z.
         z_h = Rh[:, 2]
-        axis = np.cross(z_h, -u)
+        u_n = u / max(float(np.linalg.norm(u)), 1e-12)
+        if float(np.dot(z_h, -u_n)) >= float(np.dot(z_h, u_n)):
+            u_align = -u_n
+        else:
+            u_align = u_n
+        axis = np.cross(z_h, u_align)
         ang = float(np.linalg.norm(axis))
+        # Cap uses legal W_MAX; higher wrist_gain for large misalignment (end-face risk).
+        w_cap = float(W_MAX)
         if ang > 1e-8:
             axis = axis / ang
-            w_world = axis * min(ang * float(params.wrist_gain), 2.5)
+            w_world = axis * min(ang * float(params.wrist_gain), w_cap)
             w_body = Rh.T @ w_world
         else:
             w_body = np.zeros(3)
         # Match object spin lightly while open/closing
         if not brake_active:
             w_body = w_body + 0.25 * (Rh.T @ k["w_obj"])
+        # While still open and badly misaligned, prioritize wrist over translation.
+        align = abs(float(np.dot(z_h, u_align)))
+        if (not closing) and align < 0.55:
+            w_body = w_body * 1.25
+            v_cmd = 0.55 * v_cmd
 
         a = _action_from(sim, v_cmd, w_body, tau)
         a[6] = grip_a
@@ -458,6 +473,14 @@ def dynamic_catch_sequence(
             success_meta = {"SUCCESS_NEW": False, "reason": "lost_before_pose_correct"}
 
     js_end = jaw_state(sim)
+    surface_end = classify_contacts(sim) if end_bil else {
+        "grasp_kind": "no_pad_contact",
+        "opposing_sidewall": 0,
+        "n_sidewall": 0,
+        "n_end_face": 0,
+        "contact_s_mean": float("nan"),
+    }
+    m_end = measure(sim, U_TGT, P_TGT)
     return {
         "actions": actions,
         "capture_actions": actions[:n_capture],
@@ -490,11 +513,30 @@ def dynamic_catch_sequence(
         "g0_opening": float(g0["opening_m"]),
         "g0_axial": float(g0["axial_from_pinch"]),
         "g0_vrel": float(g0["v_rel_norm"]),
+        "surface_end": {
+            "grasp_kind": surface_end.get("grasp_kind"),
+            "opposing_sidewall": int(surface_end.get("opposing_sidewall") or 0),
+            "n_sidewall": int(surface_end.get("n_sidewall") or 0),
+            "n_end_face": int(surface_end.get("n_end_face") or 0),
+            "n_edge": int(surface_end.get("n_edge") or 0),
+            "maj_L": surface_end.get("maj_L"),
+            "maj_R": surface_end.get("maj_R"),
+            "contact_s_mean": surface_end.get("contact_s_mean"),
+            "normal_dot_LR": surface_end.get("normal_dot_LR"),
+        },
+        "grasp_kind": surface_end.get("grasp_kind"),
+        "opposing_sidewall": int(surface_end.get("opposing_sidewall") or 0),
+        "e_theta_end": float(m_end["e_theta_deg"]),
+        "e_pos_end_mm": float(m_end["e_pos_mm"]),
     }
 
 
 def catch_param_grid(rng: np.random.Generator, cands: list[dict]) -> list[tuple[CatchParams, dict]]:
-    """Joint (params, interception candidate) grid; shuffled."""
+    """Joint (params, interception candidate) grid; shuffled.
+
+    Prefer mid-body axial targets and stronger wrist gains so search can escape
+    end-face pinches without requiring exact final pose at first contact.
+    """
     pairs: list[tuple[CatchParams, dict]] = []
     open_opts = (2, 3, 4, 6, 8, 10)
     match_opts = (0.7, 0.9, 1.05, 1.2)
@@ -502,11 +544,15 @@ def catch_param_grid(rng: np.random.Generator, cands: list[dict]) -> list[tuple[
     brake_opts = (0.3, 0.55, 0.75)
     close_v_opts = (0.35, 0.55, 0.80)
     force_close_opts = (0.16, 0.22, 0.30, 0.40)
+    wrist_opts = (4.0, 7.0, 10.0)
     if not cands:
         cands = [{"t_c": 0.12, "s": 0.0, "p_grasp": np.zeros(3), "v_grasp": np.zeros(3), "u": np.array([1.0, 0, 0])}]
-    # Prefer mid-horizon intercepts
-    cands_sorted = sorted(cands, key=lambda c: abs(float(c["t_c"]) - 0.12))
-    use_cands = cands_sorted[: max(12, len(cands_sorted) // 2)]
+    # Prefer mid-horizon + mid-body axial (sidewall-friendly)
+    cands_sorted = sorted(
+        cands,
+        key=lambda c: abs(float(c["t_c"]) - 0.12) + 0.35 * abs(float(c.get("s", 0.0))) / max(CYL_HALF, 1e-6),
+    )
+    use_cands = cands_sorted[: max(16, len(cands_sorted) // 2)]
     for cand in use_cands:
         for open_steps in open_opts:
             for match in match_opts:
@@ -514,17 +560,19 @@ def catch_param_grid(rng: np.random.Generator, cands: list[dict]) -> list[tuple[
                     for brake in brake_opts:
                         for cv in close_v_opts:
                             for fc in force_close_opts:
-                                p = CatchParams(
-                                    open_steps=int(open_steps),
-                                    match=float(match),
-                                    approach_gain=float(gain),
-                                    brake=float(brake),
-                                    close_vrel_max=float(cv),
-                                    force_close_after_s=float(fc),
-                                    t_c=float(cand["t_c"]),
-                                    s_axial=float(cand["s"]),
-                                )
-                                pairs.append((p, cand))
+                                for wg in wrist_opts:
+                                    p = CatchParams(
+                                        open_steps=int(open_steps),
+                                        match=float(match),
+                                        approach_gain=float(gain),
+                                        brake=float(brake),
+                                        close_vrel_max=float(cv),
+                                        force_close_after_s=float(fc),
+                                        wrist_gain=float(wg),
+                                        t_c=float(cand["t_c"]),
+                                        s_axial=float(cand["s"]),
+                                    )
+                                    pairs.append((p, cand))
     rng.shuffle(pairs)
     return pairs
 

@@ -28,7 +28,7 @@ python -u scripts/evaluate_policy.py --eval --config config/training/unified_tra
 python -u scripts/render_trajectory.py
 ```
 
-Tracked dataset manifests: `datasets/unified_experts/` (unchanged contents). Heavy tapes: `data/unified_experts/` (gitignored).  
+Unified expert manifests + heavy tapes: `data/unified_experts/` (gitignored). Dataset construction code: `data_generation/datasets/`.  
 Historical **code** → `experiments/`. Leave `results/` untouched. Rename map: `docs/RENAME_MAP.md`.  
 Checkpoints: `archive/pre-consolidation-20261021-src`, `refactor/pre-naming-20261021-src`.
 
@@ -49,7 +49,6 @@ Run commands from the repository root.
 | `evaluation/` | Success criteria, handoff validation, policy evaluation, grasp geometry |
 | `visualization/` | Rendering / video |
 | `experiments/` | Historical experimental code + archived configs/docs/diagnostics |
-| `datasets/` | Tracked unified expert manifests |
 | `scripts/` | Minimal user-facing entry points |
 | `tests/` | Regression tests |
 | `data/` | Local manifests / snapshots (gitignored) |

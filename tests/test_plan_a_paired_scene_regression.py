@@ -37,13 +37,13 @@ def expert():
 
 def _elev_env():
     from controllers.recovery.geometry_switch import GeometrySwitch
-    from envs.ballistic_impact import world
+    from envs.ballistic_impact import elevated_world
 
     class E:
         pass
 
     env = E()
-    env.sim, env.gains, env.nominal, env.pads, env.pad_mu, env.pads_l, env.pads_r = world()
+    env.sim, env.gains, env.nominal, env.pads, env.pad_mu, env.pads_l, env.pads_r = elevated_world()
     env.switch = GeometrySwitch()
     env._hist = None
     env._prev = np.zeros(7, np.float32)

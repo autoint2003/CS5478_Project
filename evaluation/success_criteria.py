@@ -13,7 +13,7 @@ import numpy as np
 from envs.ballistic_impact import z_tgt_of
 from envs.outcomes.horizon_outcome import LOST_STEPS, NOMINAL_S, _bilateral, _dropped, _monitor
 from envs.outcomes.recovery_success import apply_handoff, nominal_step
-from envs.outcomes.table_drop import latched
+from envs.outcomes.support_drop import latched, terminal_reason as support_terminal_reason
 from envs.simulation.capture import restore_capture
 from envs.step_legal import step_legal
 from evaluation.grasp_geometry import measure, success_new_components
@@ -210,7 +210,7 @@ def evaluate_tokens(
     samples = []
     next_sample = 0.0
     if latched(env.sim):
-        reason = "TABLE_DROP"
+        reason = support_terminal_reason(env.sim, default="TABLE_DROP")
     while reason is None and float(env.sim.data.time) - t_h < float(NOMINAL_S) - 1e-9:
         nominal_step(env.sim)
         t_rel = float(env.sim.data.time) - t_h
@@ -234,9 +234,9 @@ def evaluate_tokens(
         if bilateral and float(env.sim.fsm.p_des[2]) >= target - 1e-9:
             lift_done = True
         if latched(env.sim):
-            reason = "TABLE_DROP"
+            reason = support_terminal_reason(env.sim, default="TABLE_DROP")
             break
-        if _dropped(row) or _escaped(env.sim):
+        if _dropped(row, env.sim) or _escaped(env.sim):
             reason = "DROP_AFTER_HANDOFF"
             break
         lost = lost + 1 if not bilateral else 0
@@ -244,7 +244,7 @@ def evaluate_tokens(
             reason = "LOST_GRASP"
             break
     if reason is None:
-        if end_row is None or not _bilateral(end_row) or _dropped(end_row) or _escaped(env.sim):
+        if end_row is None or not _bilateral(end_row) or _dropped(end_row, env.sim) or _escaped(env.sim):
             reason = "LOST_GRASP"
         elif not lift_done:
             reason = "NOMINAL_LIFT_NOT_COMPLETED"

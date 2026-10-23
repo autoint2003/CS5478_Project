@@ -5,9 +5,9 @@
 
 schema_version: unified_experts_v1
 dataset:
-  tracked_index: datasets/unified_experts/index.json
-  tracked_splits: datasets/unified_experts/splits.json
-  tracked_manifest: datasets/unified_experts/manifest.jsonl
+  index: data/unified_experts/index.json
+  splits: data/unified_experts/splits.json
+  manifest: data/unified_experts/manifest.jsonl
   heavy_records: data/unified_experts/records/
   legacy_supervised: data/supervised_targets_with_horizontal.jsonl
 

@@ -121,27 +121,37 @@ def take_capture(env):
 def restore_capture(env, cap):
     global STATE_SPEC
     from envs.observations.observable_obs import ObservableObsState
+    from envs.outcomes.ground_drop import restore_state as restore_ground_drop
+    from envs.outcomes.support_drop import arm_recovery_drop, is_ground_scene
+    from envs.outcomes.table_drop import restore_state as restore_table_drop
+    from envs.simulation.cross_scene_restore import apply_physics_identity, needs_identity_restore
     from models.transformer_policy import DT_POLICY
 
     if STATE_SPEC is None:
         STATE_SPEC = _state_spec()
     sim = env.sim
     physics = cap["physics"]
-    mujoco.mj_setState(sim.model, sim.data, physics["state"], STATE_SPEC)
-    sim.data.qpos[:] = physics["qpos"]
-    sim.data.qvel[:] = physics["qvel"]
-    sim.data.ctrl[:] = physics["ctrl"]
-    sim.data.time = physics["time"]
-    sim.data.qacc_warmstart[:] = physics["qacc_warmstart"]
-    if "act" in physics and int(sim.model.na):
-        sim.data.act[:] = physics["act"]
-    if "eq_model" in physics:
-        sim.model.eq_active0[sim.guide_eq] = physics["eq_model"]
-        if physics["eq_data"] is not None and hasattr(sim.data, "eq_active"):
-            sim.data.eq_active[sim.guide_eq] = physics["eq_data"]
-        sim.data.mocap_pos[sim.guide_mocap] = physics["mocap_pos"]
-        sim.data.mocap_quat[sim.guide_mocap] = physics["mocap_quat"]
-    restore_supports(sim, cap["supports"])
+    identity = needs_identity_restore(sim, cap)
+    if identity:
+        # Cross-scene: joint layout matches; geom IDs / mjSTATE packing do not.
+        apply_physics_identity(sim, physics)
+    else:
+        mujoco.mj_setState(sim.model, sim.data, physics["state"], STATE_SPEC)
+        sim.data.qpos[:] = physics["qpos"]
+        sim.data.qvel[:] = physics["qvel"]
+        sim.data.ctrl[:] = physics["ctrl"]
+        sim.data.time = physics["time"]
+        sim.data.qacc_warmstart[:] = physics["qacc_warmstart"]
+        if "act" in physics and int(sim.model.na):
+            sim.data.act[:] = physics["act"]
+        if "eq_model" in physics:
+            sim.model.eq_active0[sim.guide_eq] = physics["eq_model"]
+            if physics["eq_data"] is not None and hasattr(sim.data, "eq_active"):
+                sim.data.eq_active[sim.guide_eq] = physics["eq_data"]
+            sim.data.mocap_pos[sim.guide_mocap] = physics["mocap_pos"]
+            sim.data.mocap_quat[sim.guide_mocap] = physics["mocap_quat"]
+        restore_supports(sim, cap.get("supports") or [])
+        sim.captured = physics["captured"]
     fsm = sim.fsm
     blob = cap["fsm"]
     fsm.phase = blob["phase"]
@@ -175,24 +185,26 @@ def restore_capture(env, cap):
     env._obs_seq = [x.copy() for x in cap["obs_seq"]]
     env._prev_seq = [x.copy() for x in cap["prev_seq"]]
     env._prev = cap["prev"].copy()
-    sim.captured = physics["captured"]
+    if not identity:
+        sim.captured = physics["captured"]
     mujoco.mj_forward(sim.model, sim.data)
-    from envs.outcomes.ground_drop import restore_state as restore_ground_drop
-    from envs.outcomes.support_drop import is_ground_scene
-    from envs.outcomes.table_drop import restore_state as restore_table_drop
 
     # Legacy contract: a capture missing the elevated ``table_drop`` key restores
     # as not dropped. GROUND_SCENE uses ``ground_drop`` the same way.
     if is_ground_scene(sim):
-        restore_ground_drop(sim, cap["ground_drop"] if "ground_drop" in cap else None)
+        # Elevated→ground migration: do not import a table_drop latch as ground_drop.
+        if identity:
+            restore_ground_drop(sim, None)
+        else:
+            restore_ground_drop(sim, cap["ground_drop"] if "ground_drop" in cap else None)
         restore_table_drop(sim, None)
+        arm_recovery_drop(sim)
     else:
         restore_table_drop(sim, cap["table_drop"] if "table_drop" in cap else None)
         restore_ground_drop(sim, None)
     err = float(np.max(np.abs(np.array(sim.data.qpos, float) - physics["qpos"])))
     if err > 1e-6:
         raise RuntimeError(f"qpos restore error {err}")
-
 
 def take_snapshot(env):
     """Controller capture plus a full MjData copy.

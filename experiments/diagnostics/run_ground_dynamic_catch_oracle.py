@@ -148,17 +148,10 @@ def load_root(root_id: str, kind: str) -> dict:
 
 
 def score_out(out: dict) -> float:
-    return (
-        100 * int(out.get("SUCCESS_NEW") or 0)
-        + 45 * int(out.get("mechanism") == FULL_DETACH_ACTIVE_RECATCH)
-        + 30 * int(out.get("mechanism") == PARTIAL_SLIP_RECOVERY)
-        + 25 * int(out.get("mechanism") == POST_IMPACT_GRASP_PRESERVATION)
-        + 20 * int(out.get("continuous_150") or 0)
-        + 10 * int(out.get("continuous_60") or 0)
-        + 8 * int(out.get("jaw_entered") or 0)
-        + float(out.get("max_consec_bil") or 0)
-        - 5 * int(out.get("ground_drop") or 0)
-    )
+    # Prefer opposing sidewall + orientation; do not reward bil-duration alone.
+    from data_generation.oracles.plan_c.contact_surface import score_catch_out
+
+    return score_catch_out(out)
 
 
 def main():

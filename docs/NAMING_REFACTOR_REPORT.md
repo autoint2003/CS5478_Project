@@ -9,7 +9,7 @@ Checkpoint: git tag `refactor/pre-naming-20261021-src` / branch `refactor/pre-na
 | A Imports | Pass — Plan A/B/C oracles, datasets, transformer policy, pipeline, evaluation |
 | B Physics invariants | Unchanged by design (moves/renames only; no algorithm edits) |
 | C Plan C golden | `gbi_010` 3/3, `gbi_022` 3/3 (`scripts/replay_experts.py`) |
-| D Dataset | `datasets/unified_experts/index.json` unchanged census A=84 B=121 C=2 |
+| D Dataset | `data/unified_experts/index.json` census A=84 B=121 C=2 (root `datasets/` removed; code stays in `data_generation/datasets/`) |
 | E K49 | 49×7 table, HANDOFF=47, config `K49_tok48_wy0p25` |
 
 ## Unresolved / intentional leftovers

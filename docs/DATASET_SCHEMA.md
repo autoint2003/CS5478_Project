@@ -4,11 +4,12 @@
 
 | Path | Tracked? | Role |
 |---|---|---|
-| `datasets/unified_experts/index.json` | yes | Expert census |
-| `datasets/unified_experts/splits.json` | yes | Root-level splits |
-| `datasets/unified_experts/manifest.jsonl` | yes | One metadata row per expert |
+| `data/unified_experts/index.json` | no | Expert census |
+| `data/unified_experts/splits.json` | no | Root-level splits |
+| `data/unified_experts/manifest.jsonl` | no | One metadata row per expert |
 | `data/unified_experts/records/*.pkl` | no | Plan C action/obs tensors + snaps |
 | `data/supervised_targets_with_horizontal.jsonl` | no* | Legacy Plan A/B source (*under `data/`) |
+| `data_generation/datasets/` | yes | Dataset construction **code** (not manifests) |
 
 ## Record fields
 
