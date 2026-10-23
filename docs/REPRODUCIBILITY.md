@@ -9,7 +9,8 @@ Commands run from the repository root on Windows, using the project Python envir
 | Checkpoint | Commit | What it preserves |
 |---|---|---|
 | `main` before this refactor | `3c361e4bdc3d4a4e4a5531539cd45b9c1d001971` | Pre-refactor history on main |
-| `checkpoint/pre-six-branch-refactor-20261023` | `121324c9e57dde27c12fd220dfcb5517e22707ee` | Tree immediately before the six-branch reorganization, including the to_UP brake-before-vertical fix and removal of the erroneous root `datasets/` tree |
+| Pre-refactor freeze on `checkpoint/pre-six-branch-refactor-20261023` | `121324c9e57dde27c12fd220dfcb5517e22707ee` | Tree immediately before the six-branch reorganization, including the to_UP brake-before-vertical fix and removal of the erroneous root `datasets/` tree |
+| Refactor merge on `main` | `2b140f9431b118b2d210668359c17e41fb2eab7a` | Precision module split, six-branch `experts_v2` pipeline, docs reduced to three active files. Checkpoint branch tip matches this commit; `121324c` remains reachable |
 
 ```powershell
 git checkout checkpoint/pre-six-branch-refactor-20261023
@@ -58,6 +59,8 @@ python -u scripts/validate_dataset.py --manifest data/experts_v2/manifest.jsonl
 ```
 
 Branch IDs: `A_STABLE_PRECISION`, `B_STABLE_DIRECT_HANDOFF`, `B_STABLE_PRECISION`, `C_RECATCH_DIRECT_HANDOFF`, `C_RECATCH_PRECISION`, `D_PRECISION`.
+
+First production generation (git `2b140f9`): 122 accepted experts under `data/experts_v2/` (A:0, B_direct:16, B_precision:21, C_direct:40, C_precision:42, D:3). Reports: `results/diagnostics/experts_v2_generation/GENERATION_REPORT.json` and `AUDIT_REPORT.json`. Historical `data/unified_experts/` was not overwritten.
 
 ## Historical Plan C golden experts
 
