@@ -235,9 +235,23 @@ def evaluate_handoff_with_axis(
     )
     success_axis = bool(s12 and axis_default["SUCCESS_AXIS_V1_hold"])
 
+    # P9 dual θ metrics (do not redefine SUCCESS_NEW). STRICT≡historical NEW.
+    from data_generation.oracles.precision.success_versions import annotate_dual_theta_success
+
+    base = {
+        "SUCCESS_12S": s12,
+        "SUCCESS_NEW": success_new,
+        "SUCCESS_AXIS_V1": success_axis,
+        "window": win,
+        "samples": samples,
+    }
+    dual = annotate_dual_theta_success(base)
+
     return {
         "SUCCESS_12S": s12,
         "SUCCESS_NEW": success_new,
+        "SUCCESS_STRICT_10DEG": dual.get("SUCCESS_STRICT_10DEG"),
+        "SUCCESS_RELAXED_15DEG": dual.get("SUCCESS_RELAXED_15DEG"),
         "SUCCESS_AXIS_V1": success_axis,
         "SUCCESS_AXIS_V1_provisional": True,
         "reason": reason,

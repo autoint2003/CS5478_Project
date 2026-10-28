@@ -18,6 +18,14 @@ from data_generation.oracles.precision.state_machine import run_precision
 _PRECISION_SUCCESS = {"PRECISION_EXECUTED_SUCCESS", "PRECISION_SKIPPED_DIRECT_SUCCESS"}
 
 
+def _admit_key_from_cfg(precision_config: PrecisionConfig | dict | None) -> str:
+    if precision_config is None:
+        return "SUCCESS_NEW"
+    if isinstance(precision_config, dict):
+        return str(precision_config.get("admit_success_key") or "SUCCESS_NEW")
+    return str(getattr(precision_config, "admit_success_key", None) or "SUCCESS_NEW")
+
+
 def _result_payload(result: PrecisionResult) -> dict[str, Any]:
     payload = result.to_dict()
     payload["status"] = result.status
@@ -33,6 +41,10 @@ def _result_payload(result: PrecisionResult) -> dict[str, Any]:
     if result.handoff:
         payload["SUCCESS_NEW"] = bool(result.handoff.get("SUCCESS_NEW"))
         payload["SUCCESS_12S"] = bool(result.handoff.get("SUCCESS_12S"))
+        payload["SUCCESS_STRICT_10DEG"] = bool(
+            result.handoff.get("SUCCESS_STRICT_10DEG") or result.handoff.get("SUCCESS_NEW")
+        )
+        payload["SUCCESS_RELAXED_15DEG"] = bool(result.handoff.get("SUCCESS_RELAXED_15DEG"))
     return payload
 
 
@@ -46,21 +58,32 @@ def run_continuation(
 
     ``state`` must contain ``capture`` and ``ref``. A failed continuation is
     returned with ``expert`` set to None and is never stamped as successful.
-    Precision success follows the Oracle status, which requires SUCCESS_NEW.
-    Direct HANDOFF requires SUCCESS_NEW from the frozen nominal continuation.
+    Admission follows ``admit_success_key`` on PrecisionConfig (default
+    SUCCESS_NEW ≡ STRICT 10°). Dual STRICT/RELAXED flags are always recorded.
     """
     branch = select_branch(branch_id)
     if "capture" not in state or "ref" not in state:
         raise KeyError("continuation state requires capture and ref")
+    admit_key = _admit_key_from_cfg(precision_config)
     actions: list = []
     if branch.continuation == "precision":
         result = run_precision(env, state, branch.branch_id, precision_config)
         payload = _result_payload(result)
-        ok = result.status in _PRECISION_SUCCESS
+        hand = result.handoff or {}
+        if admit_key == "SUCCESS_NEW":
+            ok = result.status in _PRECISION_SUCCESS
+        else:
+            ok = bool(hand.get(admit_key) and hand.get("SUCCESS_12S"))
+            # Also accept classical Precision success under STRICT
+            ok = ok or result.status in _PRECISION_SUCCESS
         actions = list(result.actions or [])
     elif branch.continuation == "direct_handoff":
         payload = probe_direct_handoff(env, state["capture"], state["ref"])
-        ok = bool(payload.get("SUCCESS_NEW"))
+        if admit_key == "SUCCESS_NEW":
+            ok = bool(payload.get("SUCCESS_NEW"))
+        else:
+            ok = bool(payload.get(admit_key) and payload.get("SUCCESS_12S"))
+            ok = ok or bool(payload.get("SUCCESS_NEW"))
         actions = []
     else:
         raise RuntimeError(f"unsupported continuation {branch.continuation}")

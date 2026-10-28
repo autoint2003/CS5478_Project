@@ -26,6 +26,9 @@ from training.k47_codebook import load_codebook
 
 CONFIG_ID = "K49_tok48_wy0p25"
 HANDOFF = 47
+# Established physical definitions (match Plan C: ≥1 legal step contact-free).
+MIN_CONTACT_FREE_STEPS = 1
+BILATERAL_PERSIST_STEPS = 3
 
 
 def load_vocab():
@@ -56,14 +59,31 @@ def sample_contact(sim) -> dict:
     }
 
 
+def _is_both_off(row: dict) -> bool:
+    return int(row["nL"]) == 0 and int(row["nR"]) == 0
+
+
 def run_tokens(env, blob, table, book48, tokens, *, trace=None) -> tuple[bool, str | None]:
+    """Execute Recovery tokens.
+
+    Contact trace semantics (action-boundary robust):
+    - One ``pre`` sample before any token (initial contact).
+    - One ``post`` sample after each token (true post-action contact).
+    Event detectors must not invent transitions; they only read these samples.
+    """
     lost = 0
+    if trace is not None:
+        row = sample_contact(env.sim)
+        row["tok"] = None
+        row["phase"] = "pre"
+        trace.append(row)
     for tok in tokens:
+        step_legal(env.sim, decode_tok(table, book48, tok))
         if trace is not None:
             row = sample_contact(env.sim)
             row["tok"] = int(tok)
+            row["phase"] = "post"
             trace.append(row)
-        step_legal(env.sim, decode_tok(table, book48, tok))
         failed, lost = recovery_failed(env.sim, blob["ref"], lost)
         if failed:
             return False, terminal_reason(env.sim) or "DROP_DURING_RECOVERY"
@@ -71,20 +91,22 @@ def run_tokens(env, blob, table, book48, tokens, *, trace=None) -> tuple[bool, s
 
 
 def first_both_off(trace: list[dict], start_i: int = 0) -> int | None:
+    """First full-detach sample index (legacy helper; prefer detect_active_recatch)."""
     for i in range(start_i, len(trace)):
-        if int(trace[i]["nL"]) == 0 and int(trace[i]["nR"]) == 0:
+        if _is_both_off(trace[i]):
             return i
     return None
 
 
-def first_bilateral_after(trace: list[dict], start_i: int = 0, persist: int = 3) -> int | None:
+def first_bilateral_after(trace: list[dict], start_i: int = 0, persist: int = BILATERAL_PERSIST_STEPS) -> int | None:
+    """First persistent bilateral start index ≥ start_i (legacy helper)."""
     run = 0
     first = None
     for i in range(start_i, len(trace)):
         if trace[i]["bilateral"]:
             run += 1
             if run >= persist:
-                return i - persist + 1 if first is None else first
+                return first if first is not None else i - persist + 1
             if first is None:
                 first = i
         else:
@@ -93,14 +115,100 @@ def first_bilateral_after(trace: list[dict], start_i: int = 0, persist: int = 3)
     return None
 
 
-def classify_recatch_controller(trace_recovery: list[dict], prefix_len: int, post_handoff_bilateral_t) -> str:
-    """Return who restored bilateral grasp: recovery | nominal | never | retained."""
-    off = first_both_off(trace_recovery, 0)
-    bil = first_bilateral_after(trace_recovery, prefix_len)
-    if off is None and any(r["bilateral"] for r in trace_recovery):
-        return "retained_or_partial"
-    if bil is not None:
+def detect_active_recatch(
+    trace: list[dict],
+    *,
+    persist: int = BILATERAL_PERSIST_STEPS,
+    min_contact_free: int = MIN_CONTACT_FREE_STEPS,
+) -> dict[str, Any]:
+    """Event-order-aware active recatch: release → contact-free → bilateral.
+
+    Valid only when a measured full-detach contact-free interval is followed by
+    persistent bilateral reacquisition still inside the Recovery trace
+    (i.e. before HANDOFF, which is evaluated separately after ``run_tokens``).
+
+    Does not credit retained bilateral contact or post-HANDOFF nominal recovery.
+    """
+    empty = {
+        "genuine_release": False,
+        "active_recatch": False,
+        "off_i": None,
+        "contact_free_end_i": None,
+        "contact_free_steps": 0,
+        "bil_i": None,
+        "retained_bilateral": False,
+        "reason": "NO_FULL_RELEASE",
+    }
+    if not trace:
+        return empty
+
+    # Locate first full-detach run with measured contact-free length.
+    i = 0
+    off_i = None
+    contact_free_end_i = None
+    contact_free_steps = 0
+    while i < len(trace):
+        if not _is_both_off(trace[i]):
+            i += 1
+            continue
+        start = i
+        while i < len(trace) and _is_both_off(trace[i]):
+            i += 1
+        run_len = i - start
+        if run_len >= int(min_contact_free):
+            off_i = start
+            contact_free_end_i = i - 1
+            contact_free_steps = run_len
+            break
+    if off_i is None:
+        retained = any(bool(r.get("bilateral")) for r in trace)
+        out = dict(empty)
+        out["retained_bilateral"] = bool(retained)
+        out["reason"] = "RETAINED_OR_PARTIAL" if retained else "NO_FULL_RELEASE"
+        return out
+
+    # Persistent bilateral strictly after the contact-free interval.
+    search_from = int(contact_free_end_i) + 1
+    bil_i = first_bilateral_after(trace, search_from, persist=persist)
+    if bil_i is None:
+        return {
+            "genuine_release": True,
+            "active_recatch": False,
+            "off_i": int(off_i),
+            "contact_free_end_i": int(contact_free_end_i),
+            "contact_free_steps": int(contact_free_steps),
+            "bil_i": None,
+            "retained_bilateral": False,
+            "reason": "RELEASE_WITHOUT_REACQUISITION",
+        }
+    return {
+        "genuine_release": True,
+        "active_recatch": True,
+        "off_i": int(off_i),
+        "contact_free_end_i": int(contact_free_end_i),
+        "contact_free_steps": int(contact_free_steps),
+        "bil_i": int(bil_i),
+        "retained_bilateral": False,
+        "reason": None,
+    }
+
+
+def classify_recatch_controller(
+    trace_recovery: list[dict],
+    prefix_len: int,
+    post_handoff_bilateral_t,
+) -> str:
+    """Return who restored bilateral grasp: recovery | nominal | never | retained_or_partial.
+
+    ``prefix_len`` is retained for API compatibility; chronology uses the full
+    Recovery trace with ``detect_active_recatch`` (order-aware).
+    """
+    del prefix_len  # chronology is event-order-aware; open-prefix length is not a gate
+    det = detect_active_recatch(trace_recovery)
+    if det["active_recatch"]:
         return "recovery"
+    if det.get("retained_bilateral"):
+        return "retained_or_partial"
     if post_handoff_bilateral_t is not None:
         return "nominal"
     return "never"
@@ -242,22 +350,23 @@ def eval_branch(
             "trace_recovery": trace,
         }
 
-    off_i = first_both_off(trace, 0)
-    bil_i = first_bilateral_after(trace, prefix_len)
+    det = detect_active_recatch(trace)
+    off_i = det["off_i"]
+    bil_i = det["bil_i"]
     pre = sample_contact(env.sim)
     t_handoff = float(env.sim.data.time)
-    # Nominal after HANDOFF
+    # Nominal after HANDOFF (Recovery trace ends before this; post-HANDOFF bil ≠ active recatch)
     meta = evaluate_handoff_from_state(env.sim, blob["ref"], stabilize_n=0)
     post = sample_contact(env.sim)
     # Infer post-handoff first bilateral from meta / final state only
     post_bil_t = None
-    if bil_i is None and post["bilateral"]:
+    if not det["active_recatch"] and post["bilateral"]:
         # Nominal restored contact sometime during 12s (exact time not in meta)
         post_bil_t = float(post["t"] - t0)
     controller = classify_recatch_controller(trace, prefix_len, post_bil_t)
-    # Strict B1/B2: must have genuine both-off and pre-HANDOFF bilateral
-    genuine_release = off_i is not None
-    active_recatch = bil_i is not None and genuine_release
+    # Strict B1/B2: release → contact-free → persistent bilateral before HANDOFF
+    genuine_release = bool(det["genuine_release"])
+    active_recatch = bool(det["active_recatch"])
     if branch in ("B1", "B2") and not active_recatch:
         # Do not credit nominal-only regrasp as active
         return {
@@ -270,6 +379,7 @@ def eval_branch(
             "SUCCESS_NEW": False,
             "rejected_as": "NO_ACTIVE_RECATCH_BEFORE_HANDOFF",
             "recatch_controller": controller,
+            "recatch_detect": det,
             "t_grasp_loss": None if off_i is None else float(trace[off_i]["t"] - t0),
             "t_active_recatch": None,
             "t_handoff": float(t_handoff - t0),
@@ -307,6 +417,7 @@ def eval_branch(
         "recatch_controller": controller,
         "genuine_release": bool(genuine_release),
         "active_recatch_before_handoff": bool(active_recatch),
+        "recatch_detect": det,
         "t_grasp_loss": None if off_i is None else float(trace[off_i]["t"] - t0),
         "t_active_recatch": None if bil_i is None else float(trace[bil_i]["t"] - t0),
         "t_handoff": float(t_handoff - t0),
@@ -337,21 +448,24 @@ SCREEN_POS_MM = 28.0
 
 
 def _recovery_only(env, blob, table, book48, tokens: list[int], prefix_len: int) -> dict | None:
-    """Stage B cheap filter: Recovery tokens only; require release+bilateral before HANDOFF."""
+    """Stage B cheap filter: Recovery tokens only; require ordered release→recatch before HANDOFF."""
+    del prefix_len  # open length is not a chronology gate; detect_active_recatch is.
     restore_capture(env, blob["capture"])
     t0 = float(env.sim.data.time)
     trace: list[dict] = []
     ok, fail = run_tokens(env, blob, table, book48, tokens, trace=trace)
     if not ok:
         return None
-    off_i = first_both_off(trace, 0)
-    bil_i = first_bilateral_after(trace, prefix_len)
-    if off_i is None or bil_i is None:
+    det = detect_active_recatch(trace)
+    if not det["active_recatch"]:
         return None
+    off_i = int(det["off_i"])
+    bil_i = int(det["bil_i"])
     pre = sample_contact(env.sim)
     return {
         "tokens": list(tokens),
         "trace": trace,
+        "recatch_detect": det,
         "t_grasp_loss": float(trace[off_i]["t"] - t0),
         "t_active_recatch": float(trace[bil_i]["t"] - t0),
         "pre": pre,

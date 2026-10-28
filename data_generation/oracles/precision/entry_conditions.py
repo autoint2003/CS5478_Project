@@ -83,7 +83,11 @@ from data_generation.oracles.precision.residuals import (
 )
 
 def entry_gate(env, *, thresholds: dict | None = None) -> dict[str, Any]:
-    """150 ms stable-grasp gate before any precision work."""
+    """Short bilateral contact safety check (~150–200 ms).
+
+    This is **not** Stage-1 success. Stage-1 requires ``SUCCESS_12S`` via
+    ``stage1_eligibility.check_stage1_eligible`` / ``stage1_12s_gate``.
+    """
     stab = hold_and_confirm_stable(env, hold_s=0.20, thresholds=thresholds)
     err = measure_errors(env.sim)
     return {
@@ -91,6 +95,22 @@ def entry_gate(env, *, thresholds: dict | None = None) -> dict[str, Any]:
         "stability": {k: stab[k] for k in ("stable", "reasons", "consecutive_bil_s_at_end", "e_theta_deg", "e_pos_mm", "e_signed_mm")},
         "errors": err,
         "thresholds": {**(STABLE_THRESHOLDS), **(thresholds or {})},
+        "is_stage1_success": False,
+        "note": "Contact safety only; does not satisfy Stage-1 SUCCESS_12S.",
+    }
+
+
+def stage1_12s_gate(env, blob: dict, **kwargs) -> dict[str, Any]:
+    """Authoritative Stage-1 eligibility wrapper (SUCCESS_12S on exact snapshot)."""
+    from data_generation.oracles.precision.stage1_eligibility import check_stage1_eligible
+
+    res = check_stage1_eligible(env, blob, **kwargs)
+    return {
+        "ok": bool(res.eligible),
+        "status": res.status,
+        "reason": res.reason,
+        "eligibility": res.to_dict(),
+        "is_stage1_success": bool(res.eligible),
     }
 
 
@@ -119,11 +139,49 @@ def assess_need(errors: dict, cfg: PrecisionConfig) -> dict[str, Any]:
     axial = select_axial_mode(float(e[2]), axial_tol_mm=cfg.ez_tol_mm)
     dx_needed = abs(float(e[0])) > cfg.ex_tol_mm
     dz_needed = abs(float(e[2])) > cfg.ez_tol_mm
+    # P15 forced-Precision generation: tighter experimental need bands (off by default).
+    force_prec = bool(getattr(cfg, "force_precision", False))
+    force_skill = str(getattr(cfg, "force_skill", None) or "").strip().lower() or None
+    if force_prec:
+        fex = getattr(cfg, "force_ex_tol_mm", None)
+        fez = getattr(cfg, "force_ez_tol_mm", None)
+        ex_f = float(fex) if fex is not None else float(cfg.ex_tol_mm)
+        ez_f = float(fez) if fez is not None else float(cfg.ez_tol_mm)
+        if force_skill in (None, "dx", "coupled"):
+            if abs(float(e[0])) > ex_f:
+                dx_needed = True
+        if force_skill in (None, "dz", "coupled"):
+            if abs(float(e[2])) > ez_f:
+                dz_needed = True
+        if force_skill == "dx":
+            # DX-only demos: do not schedule DZ from e_pos residual heuristics below.
+            dz_needed = False
+            if abs(float(e[0])) > ex_f:
+                dx_needed = True
+        if force_skill == "dz":
+            # DZ-only demos: do not schedule DX from e_pos residual heuristics below.
+            dx_needed = False
+            if abs(float(e[2])) > ez_f:
+                dz_needed = True
+                axial = select_axial_mode(
+                    float(e[2]), axial_tol_mm=min(ez_f, max(abs(float(e[2])) - 0.1, 0.5))
+                )
     # SUCCESS_NEW uses Euclidean e_pos≤12 mm. AXIS_V1 may leave |ez|≤20 with e_pos>12;
     # request correction along the dominant residual so Direct/HANDOFF readiness matches SUCCESS_NEW.
     e_pos = float(errors.get("e_pos_mm") or 0.0)
     residual_note = None
-    if cfg.require_success_new_pose and e_pos > cfg.working_pos_mm and not dtheta_needed:
+    if force_prec and force_skill == "dx":
+        residual_note = "force_precision_dx"
+    elif force_prec and force_skill == "dz":
+        residual_note = "force_precision_dz"
+    elif force_prec and force_skill == "coupled":
+        residual_note = "force_precision_coupled"
+    if (
+        (not force_prec or force_skill not in ("dx", "dz", "coupled"))
+        and cfg.require_success_new_pose
+        and e_pos > cfg.working_pos_mm
+        and not dtheta_needed
+    ):
         if not dx_needed and not dz_needed:
             if abs(float(e[2])) >= abs(float(e[0])):
                 dz_needed = True
@@ -139,7 +197,12 @@ def assess_need(errors: dict, cfg: PrecisionConfig) -> dict[str, Any]:
     # band, schedule dx first — otherwise the scheduler aborts with DZ_UNSAFE_ENTRY
     # and zero actions (dominant PRECISION_PRIMITIVE_FAILED mode on hard B exits).
     dz_safe_ex = float(getattr(cfg, "dz_safe_ex_mm", 6.0) or 6.0)
-    if dz_needed and abs(float(e[0])) > dz_safe_ex and not dx_needed:
+    if (
+        (not force_prec or force_skill not in ("dx", "dz"))
+        and dz_needed
+        and abs(float(e[0])) > dz_safe_ex
+        and not dx_needed
+    ):
         dx_needed = True
         residual_note = residual_note or "dz_requires_prior_dx_safe_band"
     # Recompute axial mode if we newly requested dz

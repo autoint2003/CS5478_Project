@@ -55,7 +55,7 @@ def main(argv: list[str] | None = None) -> int:
         "n_rejected_admission": len(rejected),
         "legacy_manifest_present": LEGACY_MANIFEST.is_file(),
         "legacy_namespace": "data/unified_experts",
-        "active_namespace": "data/experts_v2",
+        "active_namespace": "data/experts_v2_official",
         "audit": audit,
         "sample_loaded": loaded,
         "load_errors": errors,

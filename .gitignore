@@ -50,6 +50,11 @@ wandb/
 *.mp4
 **/_frames_*/
 
+# Local archives / editor backups (source trees are versioned instead)
+*.zip
+*.bak
+*.bak_*
+
 # MuJoCo
 *.mjb
 MUJOCO_LOG.TXT

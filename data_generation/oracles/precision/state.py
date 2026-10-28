@@ -221,6 +221,30 @@ class PrecisionConfig:
     dz_up_tol_deg: float = 12.0
     dz_up_g_useful_min: float = 6.0  # m/s² along inward desire
     dz_return_pre_lift_s: float = 0.25
+    # P9 explicit FSM (Case 1–4 ordering). When False, legacy dθ→dx→dz priority.
+    use_explicit_fsm: bool = True
+    max_reconfigure_attempts: int = 1
+    max_dtheta_attempts: int = 1  # bounded; do not loop unsuccessful θ after P7/P8
+    # Mid-Precision A/B/C reconfigure (Case 3). Off by default until production hooks land;
+    # when False, Case 3 falls through to larger-error-first sequential correction.
+    allow_mid_precision_reconfigure: bool = False
+    # Admission key on the handoff dict. Historical default SUCCESS_NEW ≡ STRICT 10°.
+    # After P10 validation, generation may set SUCCESS_RELAXED_15DEG without mutating
+    # SUCCESS_NEW / SUCCESS_STRICT_10DEG labels.
+    admit_success_key: str = "SUCCESS_NEW"
+    # --- P15 experimental forced-Precision generation (OFF by default) ---
+    # Dataset-generation intervention only. Does not change production FSM defaults.
+    # When force_precision=True: bypass PRECISION_SKIPPED / entry threshold and enter
+    # the requested skill. force_skill: "dx" | "coupled" | None.
+    force_precision: bool = False
+    force_skill: str | None = None
+    # Tighter experimental need/stop bands used only when force_precision=True.
+    # None → fall back to production ex_tol / ez_tol / lateral_axis_tol.
+    force_ex_tol_mm: float | None = 1.0
+    force_ez_tol_mm: float | None = 1.0
+    force_lateral_axis_tol_mm: float | None = 1.0
+    # Minimum |Δ residual| (mm) to count a correction as meaningful (diagnostics).
+    force_min_meaningful_mm: float = 0.5
 
 
 @dataclass

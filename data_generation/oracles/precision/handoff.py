@@ -210,9 +210,14 @@ def probe_direct_handoff(env, capture, ref, *, stabilize_n: int = 8) -> dict[str
         "pre": pre,
         "SUCCESS_NEW": bool(h.get("SUCCESS_NEW")),
         "SUCCESS_12S": bool(h.get("SUCCESS_12S")),
+        "SUCCESS_STRICT_10DEG": bool(h.get("SUCCESS_STRICT_10DEG")),
+        "SUCCESS_RELAXED_15DEG": bool(h.get("SUCCESS_RELAXED_15DEG")),
         "SUCCESS_AXIS_V1": bool(h.get("SUCCESS_AXIS_V1")),
         "reason": h.get("std_reason") or h.get("reason"),
         "handoff": {k: v for k, v in h.items() if k not in ("series", "samples", "trace")},
+        "window": h.get("window") or h.get("window_SUCCESS_NEW"),
+        "pre_theta": h.get("pre_theta"),
+        "pre_pos_mm": h.get("pre_pos_mm"),
     }
     restore_capture(env, capture)
     return out

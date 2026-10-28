@@ -164,6 +164,9 @@ def restore_capture(env, cap):
     fsm.fg_cmd = blob["fg_cmd"]
     for name, value in blob["arrays"].items():
         setattr(fsm, name, None if value is None else np.array(value, float).copy())
+    # Clear post-HANDOFF contract flags (not part of frozen IC snapshots).
+    setattr(fsm, "handoff_active", False)
+    setattr(fsm, "r_des_target", None)
     sw = env.switch
     sb = cap["switch"]
     sw.p0 = None if sb["p0"] is None else np.array(sb["p0"], float).copy()

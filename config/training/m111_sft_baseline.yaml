@@ -1,0 +1,24 @@
+# P20 M111 SFT baselines (shared architecture; differ only in sample weighting).
+dataset_manifest: results/diagnostics/p19_sft_packaging/SFT_DATASET_MANIFEST.json
+m111_meta: results/diagnostics/skill_aware_action_vocab_design/artifacts/SELECTED_skill_aware_hybrid_meta.json
+output_root: results/diagnostics/p20_m111_sft_baseline
+device: cuda
+seed: 20
+epochs: 25
+batch_size: 8
+lr: 0.0003
+window: 160
+max_policy_steps: 2500
+stabilize_n: 8
+# Closed-loop eval: all val trajectories (lineage-held-out).
+eval_split: val
+# Video: up to N representative rollouts per condition.
+n_videos: 4
+
+baselines:
+  A_natural:
+    name: A_natural
+    weight_scheme: natural
+  B_lineage_length:
+    name: B_lineage_length
+    weight_scheme: lineage_length

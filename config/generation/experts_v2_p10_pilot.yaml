@@ -1,0 +1,62 @@
+# P10 bounded coverage pilot — does not overwrite production experts_v2_official.
+# D2: Stage-1 registry waived at discovery; live d2_eligibility at generate time.
+# Dual STRICT/RELAXED metrics always recorded. Admit remains SUCCESS_NEW (STRICT);
+# 15° not promoted (P10 found 0 position-valid newly-admitted under RELAXED).
+dataset_version: experts_v2_p10_pilot
+oracle_implementation: precision_state_machine_v23_fsm_p9
+success_criteria_version: SUCCESS_STRICT_10DEG_v1_plus_dual_theta_diagnostic
+config_id: experts_v2_p10_coverage_pilot
+
+output_root: results/diagnostics/p10_dataset_coverage/generation_pilot
+source_manifest: results/data_generation/stage2_abc_final_v2/manifest.jsonl
+source_ics: results/data_generation/stage2_abc_final_v2/ics
+
+branches:
+  A_STABLE_DIRECT_HANDOFF:
+    plan_provenance: [A_STAGE1]
+    continuation: direct_handoff
+    source_manifest: results/data_generation/plan_a_stage1_terminals_v1/manifest.jsonl
+    source_ics: results/data_generation/plan_a_stage1_terminals_v1/ics
+  A_STABLE_PRECISION:
+    plan_provenance: [A]
+    continuation: precision
+    precision_config:
+      use_verified_lateral_fallback: false
+      use_explicit_fsm: true
+      max_dtheta_attempts: 1
+      admit_success_key: SUCCESS_NEW
+  B_STABLE_DIRECT_HANDOFF:
+    plan_provenance: [B]
+    continuation: direct_handoff
+  B_STABLE_PRECISION:
+    plan_provenance: [B]
+    continuation: precision
+    precision_config:
+      use_verified_lateral_fallback: false
+      use_explicit_fsm: true
+      max_dtheta_attempts: 1
+      admit_success_key: SUCCESS_NEW
+  C_RECATCH_DIRECT_HANDOFF:
+    plan_provenance: [C]
+    continuation: direct_handoff
+  C_RECATCH_PRECISION:
+    plan_provenance: [C]
+    continuation: precision
+    precision_config:
+      use_verified_lateral_fallback: false
+      use_explicit_fsm: true
+      max_dtheta_attempts: 1
+      admit_success_key: SUCCESS_NEW
+  D_PRECISION:
+    plan_provenance: [HARD_IC]
+    continuation: precision
+    precision_config:
+      use_verified_lateral_fallback: false
+      use_explicit_fsm: true
+      max_dtheta_attempts: 1
+      admit_success_key: SUCCESS_NEW
+
+admit_success: SUCCESS_NEW
+track_success_12s: true
+seed: 0
+require_stage1_evidence: true

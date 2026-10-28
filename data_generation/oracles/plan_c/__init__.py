@@ -22,6 +22,7 @@ from data_generation.oracles.plan_c.expert_search import (
     lift_and_validate,
     pack_expert,
     physical_root_fingerprint,
+    run_stage1_catch_and_lift,
     search_catch,
 )
 from data_generation.oracles.plan_c.catch_stabilization import (
@@ -42,6 +43,7 @@ __all__ = [
     "pack_expert",
     "physical_root_fingerprint",
     "propose_catch_interceptions",
+    "run_stage1_catch_and_lift",
     "score_catch_out",
     "search_catch",
     "slow_lift_sequence",

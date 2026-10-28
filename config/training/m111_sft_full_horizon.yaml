@@ -1,0 +1,25 @@
+# P22 — Full-horizon multi-skill recovery SFT (P21 corpus).
+dataset_manifest: results/diagnostics/p21_full_stage1_experts/SFT_FULL_HORIZON_MANIFEST.json
+dataset_root: results/diagnostics/p21_full_stage1_experts
+m111_meta: results/diagnostics/skill_aware_action_vocab_design/artifacts/SELECTED_skill_aware_hybrid_meta.json
+output_root: results/diagnostics/p22_full_horizon_sft
+device: cuda
+seed: 22
+epochs: 25
+batch_size: 8
+lr: 0.0003
+window: 160
+max_policy_steps: 800
+stabilize_n: 8
+init: scratch
+# Do not load collapsed P20 always-HANDOFF checkpoint.
+refuse_p20_init: true
+n_videos: 4
+
+baselines:
+  A_natural:
+    name: A_natural
+    weight_scheme: natural
+  B_lineage_skill:
+    name: B_lineage_skill
+    weight_scheme: lineage_skill

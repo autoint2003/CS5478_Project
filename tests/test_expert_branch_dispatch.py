@@ -9,8 +9,9 @@ from data_generation.expert_pipeline.provenance import (
 )
 
 
-def test_six_branch_ids():
+def test_seven_branch_ids():
     assert set(BRANCHES) == {
+        "A_STABLE_DIRECT_HANDOFF",
         "A_STABLE_PRECISION",
         "B_STABLE_DIRECT_HANDOFF",
         "B_STABLE_PRECISION",
@@ -19,6 +20,7 @@ def test_six_branch_ids():
         "D_PRECISION",
     }
     assert select_branch("D_PRECISION").stage1 is None
+    assert select_branch("A_STABLE_DIRECT_HANDOFF").continuation == "direct_handoff"
     assert select_branch("B_STABLE_DIRECT_HANDOFF").continuation == "direct_handoff"
     assert select_branch("C_RECATCH_PRECISION").continuation == "precision"
 
@@ -66,7 +68,7 @@ def test_stamped_precision_row_admitted():
         }
     )
     assert stamp["dataset_version"] == DATASET_VERSION
-    assert stamp["output_namespace"] == "data/experts_v2"
+    assert stamp["output_namespace"] == "data/experts_v2_official"
     assert row_allowed_for_training(stamp) is True
 
 

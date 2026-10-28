@@ -104,12 +104,24 @@ def _monitor(sim):
 
 
 def _dropped(row, sim=None):
+    """Height/geometry abort for an *unsupported* object.
+
+    P40/P41: a securely finger-contacted cylinder below ``Z_ABORT`` (e.g. mid
+    Stage-1 lift on GROUND_SCENE) is **not** a drop. Absolute-height gates apply
+    only when finger-object contacts are gone. Irreversible ground collision is
+    reported via ``latched(sim)`` / ``GROUND_DROP`` elsewhere — not here.
+    """
     z = float(row["z"])
+    n_contact = int(row.get("nL", 0)) + int(row.get("nR", 0))
     if sim is not None:
+        if n_contact > 0:
+            return False
         return below_geometric_drop(sim, z) or z < Z_ABORT
     # Legacy elevated-table callers without a live sim.
     from envs.outcomes.physical_recovery import TABLE_DROP
 
+    if n_contact > 0:
+        return False
     return z < TABLE_DROP or z < Z_ABORT
 
 

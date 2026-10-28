@@ -18,6 +18,7 @@ from data_generation.oracles.precision.mechanics.support_verification import (
     make_s1_state,
 )
 from data_generation.oracles.precision.mechanics.open_axis import (
+    ALPHA_DOWN_GATE_DEG,
     DOWN,
     UP,
     choose_roll_sign_for_support,
@@ -205,20 +206,27 @@ def correct_dx_support_transfer(env, blob, cfg: PrecisionConfig) -> dict[str, An
     s1_roll_deg = float(getattr(cfg, "dx_s1_roll_deg", 12.0) or 12.0)
 
     # --- DX-1: establish preparatory one-sided support bias (modest roll at DOWN) ---
+    # Tilt ang_tol must match ALPHA_DOWN_GATE_DEG (175° ⇒ 5° from DOWN). A looser
+    # 6° stop previously returned ok at α≈174.7° while fingertips_down stayed False,
+    # aborting Plan A support-transfer as DX1_prep_down with reason "ok".
     t0 = time.time()
+    down_ang_tol = max(1.0, 180.0 - float(ALPHA_DOWN_GATE_DEG))
     if not gates(env.sim)["fingertips_down"]:
         p0 = run_tilt_phase(
             env, cur, target_dir_w=DOWN, phase="dxST_P0", rate_scale=rate_s1, fn_hold=FN_HOLD,
-            ang_tol_deg=6.0, y0_w=y0, e_ref=e_ref, allow_roll=False, contact_aware=True, max_time_s=10.0,
+            ang_tol_deg=down_ang_tol, y0_w=y0, e_ref=e_ref, allow_roll=False, contact_aware=True, max_time_s=10.0,
         )
         actions += p0.get("actions") or []
-        if not (p0.get("ok") and gates(env.sim)["fingertips_down"]):
+        g1 = gates(env.sim)
+        if not (p0.get("ok") and g1["fingertips_down"]):
             return {
                 "ok": False,
                 "mechanism": "support_transfer_dx",
                 "phase": "DX1_prep_down",
                 "failure_code": FAIL_SUPPORT_ROLL,
-                "reason": p0.get("reason"),
+                "reason": p0.get("reason") or p0.get("stop_reason") or "down_gate_not_met",
+                "alpha_up_deg": g1.get("alpha_up_deg"),
+                "down_ang_tol_deg": down_ang_tol,
                 "actions": actions,
                 "capture": p0.get("capture") or cur["capture"],
             }

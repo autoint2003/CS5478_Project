@@ -418,8 +418,13 @@ def run_sequence(
     lift: LiftParams,
     slide: SlideParams,
     clearance_lift_z: float = 0.08,
+    include_pose_handoff: bool = True,
 ) -> dict:
-    """A1 / B1 / B2 composite sequences from the same brake-complete snapshot."""
+    """Historical composite sequences (A1/B1/B2 naming is local, not Plan A/B).
+
+    When ``include_pose_handoff=False``, stops at Stage-1 exit after lift/slide
+    (no ``pose_correct_and_handoff``). Default True preserves historical search.
+    """
     actions_all: list[np.ndarray] = []
     stages = []
     snap = brake_snap
@@ -467,14 +472,17 @@ def run_sequence(
     else:
         raise ValueError(order)
 
-    # Pose recovery + handoff if elevated and bilateral
+    # Stage-1 exit geometry (before optional historical pose+handoff)
     restore_ballistic(sim, snap)
     restore_drop(sim, None)
     arm(sim)
     geo = grasp_geometry(sim)
+    stage1_actions = list(actions_all)
+    stage1_snap = make_snap(sim)
     pose_meta = {"SUCCESS_NEW": False, "reason": "not_attempted"}
     pose_ok = False
-    if geo["bilateral"] and geo["obj_z"] >= min(target_z - 0.05, 0.35) and not latched(sim):
+    pose_correct_called = False
+    if include_pose_handoff and geo["bilateral"] and geo["obj_z"] >= min(target_z - 0.05, 0.35) and not latched(sim):
         # Brief secure hold
         for _ in range(5):
             actions_all.append(hold_action(1.0))
@@ -485,13 +493,17 @@ def run_sequence(
             pose_acts, pose_meta = pose_correct_and_handoff(sim, ref, max_s=3.5)
             actions_all.extend(pose_acts)
             pose_ok = bool(pose_meta.get("SUCCESS_NEW"))
+            pose_correct_called = True
             m = measure(sim, U_TGT, P_TGT)
             pose_meta = {**pose_meta, "e_theta_deg": m["e_theta_deg"], "e_pos_mm": m["e_pos_mm"],
                          "obj_z": float(sample_kin(sim)["obj_z"])}
+    elif not include_pose_handoff:
+        pose_meta = {"SUCCESS_NEW": False, "reason": "STAGE1_ONLY_NO_POSE_CORRECT"}
 
     return {
         "order": order,
         "actions": actions_all,
+        "stage1_actions": stage1_actions,
         "stages": stages,
         "lift": lift_out,
         "slide": slide_out,
@@ -506,6 +518,9 @@ def run_sequence(
         "end_bilateral": int(geo["bilateral"]),
         "ground_drop": int(latched(sim)),
         "final_snap": make_snap(sim),
+        "stage1_snap": stage1_snap,
+        "pose_correct_called": pose_correct_called,
+        "include_pose_handoff": bool(include_pose_handoff),
     }
 
 

@@ -684,12 +684,10 @@ def chase_sequence(
     return actions, info
 
 
-def pose_correct_and_handoff(sim, ref, *, max_s: float = 2.5) -> tuple[list[np.ndarray], dict]:
-    """After stable bilateral, reduce pose error then HANDOFF + SUCCESS_NEW nominal.
+def pose_correct_actions_only(sim, *, max_s: float = 2.5) -> tuple[list[np.ndarray], dict]:
+    """Pose-correction segment only (no HANDOFF). Used by historical wrappers.
 
-    Sign convention (verified by finite difference): for approximately stationary
-    object, Δp_rel ≈ -R_hand.T @ v_hand, so commanding v_hand = -R @ err_p
-    increases p_rel toward P_TGT when err_p = P_TGT - p_rel.
+    Not a Stage-1 controller. Stage-1 catch/lift must stop before calling this.
     """
     actions = []
     t0 = float(sim.data.time)
@@ -719,6 +717,23 @@ def pose_correct_and_handoff(sim, ref, *, max_s: float = 2.5) -> tuple[list[np.n
         if latched(sim) or not pad_bilateral(sim)["bilateral"]:
             break
     m_hand = measure(sim, U_TGT, P_TGT)
+    return actions, {
+        "m_handoff": {k: m_hand[k] for k in ("e_theta_deg", "e_pos_mm", "obj_z")},
+        "n_pose_actions": len(actions),
+    }
+
+
+def pose_correct_and_handoff(sim, ref, *, max_s: float = 2.5) -> tuple[list[np.ndarray], dict]:
+    """Historical combined path: pose correction then HANDOFF + SUCCESS_NEW nominal.
+
+    Sign convention (verified by finite difference): for approximately stationary
+    object, Δp_rel ≈ -R_hand.T @ v_hand, so commanding v_hand = -R @ err_p
+    increases p_rel toward P_TGT when err_p = P_TGT - p_rel.
+
+    Not Stage-1. For C2 generation use ``run_stage1_catch_and_lift`` instead.
+    """
+    actions, pose_info = pose_correct_actions_only(sim, max_s=max_s)
+    m_hand = pose_info["m_handoff"]
     apply_handoff(sim, ref)
     t_h = float(sim.data.time)
     reason = None

@@ -75,6 +75,7 @@ from data_generation.oracles.precision.state import (
     FAIL_REGRIP,
     FAIL_SLIP_CONTACT,
     FAIL_SLIP_TARGET,
+    FAIL_SLIP_WRONG_DIR,
     FINGERTIP_MARGIN_MIN_MM,
     FN_BRAKE,
     FN_HOLD,

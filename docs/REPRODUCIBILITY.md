@@ -58,9 +58,13 @@ python -u scripts/generate_experts.py --branch B_STABLE_PRECISION
 python -u scripts/validate_dataset.py --manifest data/experts_v2/manifest.jsonl
 ```
 
-Branch IDs: `A_STABLE_PRECISION`, `B_STABLE_DIRECT_HANDOFF`, `B_STABLE_PRECISION`, `C_RECATCH_DIRECT_HANDOFF`, `C_RECATCH_PRECISION`, `D_PRECISION`.
+Branch IDs: `A_STABLE_DIRECT_HANDOFF`, `A_STABLE_PRECISION`, `B_STABLE_DIRECT_HANDOFF`, `B_STABLE_PRECISION`, `C_RECATCH_DIRECT_HANDOFF`, `C_RECATCH_PRECISION`, `D_PRECISION`.
 
 First production generation (git `2b140f9`): 122 accepted experts under `data/experts_v2/` (A:0, B_direct:16, B_precision:21, C_direct:40, C_precision:42, D:3). Reports: `results/diagnostics/experts_v2_generation/GENERATION_REPORT.json` and `AUDIT_REPORT.json`. Historical `data/unified_experts/` was not overwritten.
+
+**Official Oracle restore:** DX1 DOWN `ang_tol` remains aligned to `ALPHA_DOWN_GATE_DEG`. Production `use_verified_lateral_fallback` is **false** on all Precision branches (generation also forces it off). The fallback-enabled recovery set `data/experts_v2_recovered/` (169) is retained as diagnostics only and must not be admitted as production. Official seven-branch output: `data/experts_v2_official/` (196 accepted; nontrivial Precision skills 13; fallback 0). Full deliverables: `results/diagnostics/official_oracle_restore/FINAL_REPORT.md`. Plan A Stage-1 terminals: `results/data_generation/plan_a_stage1_terminals_v1/`.
+
+**Precision candidate audit:** Eligibility classification of 241 post-Stage-1 ICs shows 56/69 official Precision accepts are actually `DIRECT_ELIGIBLE` skips; only 13 ICs are true ST nontrivial successes; 70 Precision-required failures have videos under `results/diagnostics/precision_candidate_audit/` (`FINAL_REPORT.md`, `VIDEOS/`).
 
 ## Historical Plan C golden experts
 

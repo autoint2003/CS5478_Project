@@ -44,6 +44,13 @@ from data_generation.oracles.precision.entry_conditions import (
     assess_need,
     entry_gate,
 )
+from data_generation.oracles.precision.fsm import (  # noqa: E402
+    PrecisionState,
+    assess_and_plan,
+    classify_case,
+    next_skill_from_plan,
+    select_reconfigure_family,
+)
 from data_generation.oracles.precision.residuals import (
     evaluate_slip_goal,
     handoff_geometry_ready,
@@ -290,11 +297,25 @@ def run_precision(
     """
     cfg = precision_config if isinstance(precision_config, PrecisionConfig) else PrecisionConfig(**(precision_config or {}))
     blob0 = {"capture": stable_grasp_state["capture"], "ref": stable_grasp_state["ref"]}
+    # Preserve optional sample_id for evidence recording / diagnostics
+    if stable_grasp_state.get("sample_id") or stable_grasp_state.get("ic_id"):
+        blob0["sample_id"] = stable_grasp_state.get("sample_id") or stable_grasp_state.get("ic_id")
     plan_id = str(plan_id)
     actions: list = []
     phases: list[str] = []
     logs: dict[str, Any] = {}
     failures: list[str] = []
+
+    # --- Authoritative Stage-1 SUCCESS_12S gate (short entry_gate is not enough) ---
+    from data_generation.oracles.precision.stage1_eligibility import (
+        check_stage1_eligible,
+        stage1_ineligible_precision_result,
+    )
+
+    elig = check_stage1_eligible(env, blob0, allow_live_verify=True, record_live=False)
+    logs["stage1_eligibility"] = elig.to_dict()
+    if not elig.eligible:
+        return stage1_ineligible_precision_result(plan_id, elig, blob0)
 
     restore_capture(env, blob0["capture"])
     gate = entry_gate(env)
@@ -370,8 +391,30 @@ def run_precision(
     logs["decision"] = decision
     cur = dict(blob0)
 
+    # P15: forced Precision generation — bypass skip / entry threshold (experimental).
+    force_prec = bool(getattr(cfg, "force_precision", False))
+    force_skill = str(getattr(cfg, "force_skill", None) or "").strip().lower() or None
+    if force_prec:
+        phases.append("FORCE_PRECISION")
+        logs["force_precision"] = {
+            "force_precision": True,
+            "force_skill": force_skill,
+            "force_ex_tol_mm": getattr(cfg, "force_ex_tol_mm", None),
+            "force_ez_tol_mm": getattr(cfg, "force_ez_tol_mm", None),
+            "force_lateral_axis_tol_mm": getattr(cfg, "force_lateral_axis_tol_mm", None),
+            "note": "Dataset-generation intervention; not a production FSM default.",
+        }
+        # Optional tighter stop band for DX support-transfer (production lateral_axis_tol unchanged).
+        flat = getattr(cfg, "force_lateral_axis_tol_mm", None)
+        if flat is not None and force_skill in (None, "dx", "coupled"):
+            cfg.lateral_axis_tol_mm = float(flat)
+
     direct_probe = None
-    if cfg.try_direct_handoff and decision["ready_for_direct_handoff_assessment"]:
+    if (
+        (not force_prec)
+        and cfg.try_direct_handoff
+        and decision["ready_for_direct_handoff_assessment"]
+    ):
         phases.append("direct_handoff_probe")
         # Direct skip only when already fingertips-DOWN (final HANDOFF invariant).
         if not posture_is_fingertips_down(env.sim):
@@ -435,8 +478,16 @@ def run_precision(
     done_dtheta = False
     done_dx = False
     done_dz = False
+    reconfigure_done = False
+    dtheta_attempts = 0
+    reconfigure_attempts = 0
     theta_after_pivot: float | None = None
     s1_state: dict | None = None  # verified support handoff dx → dz
+    fsm_planned: list[str] = []
+    fsm_executed: list[str] = []
+    use_fsm = bool(getattr(cfg, "use_explicit_fsm", True))
+    max_dtheta_attempts = int(getattr(cfg, "max_dtheta_attempts", 1) or 1)
+    max_reconfig = int(getattr(cfg, "max_reconfigure_attempts", 1) or 1)
 
     def _sig(err: dict) -> tuple:
         e = np.asarray(err["e_signed_mm"], float)
@@ -450,7 +501,26 @@ def run_precision(
         restore_capture(env, cur["capture"])
         err_now = measure_errors(env.sim)
         need = assess_need(err_now, cfg)
-        cycle_row = {"cycle": cycle, "errors": err_now, "need": {k: need[k] for k in need if k != "axis_decision"}}
+        fsm_plan = classify_case(err_now, cfg) if use_fsm else None
+        if fsm_plan is not None and not fsm_planned:
+            fsm_planned = list(fsm_plan.planned_skills)
+            logs["fsm_initial_plan"] = {
+                "case": fsm_plan.case,
+                "planned_skills": fsm_planned,
+                "note": fsm_plan.note,
+                "dx_mm": fsm_plan.dx_mm,
+                "dz_mm": fsm_plan.dz_mm,
+                "dtheta_deg": fsm_plan.dtheta_deg,
+            }
+            phases.append(f"FSM_{fsm_plan.case}")
+        cycle_row = {
+            "cycle": cycle,
+            "errors": err_now,
+            "need": {k: need[k] for k in need if k != "axis_decision"},
+            "fsm_case": None if fsm_plan is None else fsm_plan.case,
+            "fsm_planned": list(fsm_planned),
+            "fsm_executed": list(fsm_executed),
+        }
         phases.append(f"reassess_c{cycle}")
 
         # Intermediate geometry readiness ≠ final HANDOFF eligibility.
@@ -560,9 +630,158 @@ def run_precision(
             cycle_log.append(cycle_row)
             break
 
-        # Select one necessary correction from current state (dtheta → dx → dz).
-        if need["dtheta_needed"] and not done_dtheta:
+        # ---- P9 FSM skill selection (or legacy dθ→dx→dz) ----
+        skill: str | None = None
+        # P15/P16 forced skill: enter requested primitive below production threshold.
+        if force_prec and force_skill == "dx" and not done_dx and need.get("dx_needed"):
+            skill = PrecisionState.CORRECT_DX.value
+            cycle_row["fsm_next_skill"] = skill
+            cycle_row["forced_skill"] = "dx"
+        elif force_prec and force_skill == "dx" and not done_dx and not need.get("dx_needed"):
+            # Residual already inside experimental force_ex_tol — do not manufacture motion.
+            phases.append("FORCE_DX_NO_ACTION_NEEDED")
+            logs["force_dx_no_action"] = {
+                "dx_mm": float(np.asarray(err_now["e_signed_mm"], float)[0]),
+                "force_ex_tol_mm": getattr(cfg, "force_ex_tol_mm", None),
+            }
+            done_dx = True
+            cycle_row["primitive"] = "NO_ACTION_NEEDED"
+            cycle_row["ok"] = True
+            cycle_log.append(cycle_row)
+            continue
+        elif force_prec and force_skill == "dz" and not done_dz and need.get("dz_needed"):
+            skill = PrecisionState.CORRECT_DZ.value
+            cycle_row["fsm_next_skill"] = skill
+            cycle_row["forced_skill"] = "dz"
+        elif force_prec and force_skill == "dz" and not done_dz and not need.get("dz_needed"):
+            phases.append("FORCE_DZ_NO_ACTION_NEEDED")
+            logs["force_dz_no_action"] = {
+                "dz_mm": float(np.asarray(err_now["e_signed_mm"], float)[2]),
+                "force_ez_tol_mm": getattr(cfg, "force_ez_tol_mm", None),
+            }
+            done_dz = True
+            cycle_row["primitive"] = "NO_ACTION_NEEDED"
+            cycle_row["ok"] = True
+            cycle_log.append(cycle_row)
+            continue
+        elif use_fsm and fsm_plan is not None:
+            # Re-plan when residuals cross case boundaries (meaningful state change).
+            fsm_plan = classify_case(err_now, cfg)
+            cycle_row["fsm_case"] = fsm_plan.case
+            cycle_row["fsm_plan_now"] = list(fsm_plan.planned_skills)
+            if fsm_plan.case == "CASE3_BOTH_LARGE" and not reconfigure_done:
+                phases.append("RECONFIGURE_REQUESTED")
+                logs.setdefault("reconfigure_events", []).append(
+                    {
+                        "event": "RECONFIGURE_REQUESTED",
+                        "dx_mm": fsm_plan.dx_mm,
+                        "dz_mm": fsm_plan.dz_mm,
+                        "attempt": reconfigure_attempts,
+                    }
+                )
+                if reconfigure_attempts < max_reconfig and bool(
+                    getattr(cfg, "allow_mid_precision_reconfigure", False)
+                ):
+                    # Preconditions / skill selection would go here; production hooks unset.
+                    phases.append("RECONFIGURE_PRECONDITIONS_NOT_SATISFIED")
+                    logs["reconfigure_events"].append(
+                        {
+                            "event": "PRECONDITIONS_NOT_SATISFIED",
+                            "reason": "mid_precision_abc_hooks_not_wired",
+                        }
+                    )
+                    skill = PrecisionState.RECONFIGURE_C.value
+                else:
+                    # Explicit fallthrough — not a reconfiguration failure (never executed).
+                    reconfigure_done = True
+                    phases.append("RECONFIGURE_FALLTHROUGH_LARGER_ERROR_FIRST")
+                    fallthrough_skill = (
+                        "CORRECT_DZ"
+                        if abs(fsm_plan.dz_mm) >= abs(fsm_plan.dx_mm)
+                        else "CORRECT_DX"
+                    )
+                    logs["reconfigure_skipped"] = {
+                        "reason": "allow_mid_precision_reconfigure=False_or_budget",
+                        "dx_mm": fsm_plan.dx_mm,
+                        "dz_mm": fsm_plan.dz_mm,
+                        "fallthrough_skill": fallthrough_skill,
+                        "note": "Not RECONFIGURE_FAILED — branch was not executed",
+                    }
+                    logs["reconfigure_events"].append(
+                        {
+                            "event": "FALLTHROUGH_LARGER_ERROR_FIRST",
+                            "fallthrough_skill": fallthrough_skill,
+                            "dx_mm": fsm_plan.dx_mm,
+                            "dz_mm": fsm_plan.dz_mm,
+                        }
+                    )
+                    fsm_executed.append(f"RECONFIGURE_FALLTHROUGH:{fallthrough_skill}")
+                    if abs(fsm_plan.dz_mm) >= abs(fsm_plan.dx_mm):
+                        if need["dz_needed"] and not done_dz:
+                            skill = PrecisionState.CORRECT_DZ.value
+                        elif need["dx_needed"] and not done_dx:
+                            skill = PrecisionState.CORRECT_DX.value
+                    else:
+                        if need["dx_needed"] and not done_dx:
+                            skill = PrecisionState.CORRECT_DX.value
+                        elif need["dz_needed"] and not done_dz:
+                            skill = PrecisionState.CORRECT_DZ.value
+            else:
+                nxt = next_skill_from_plan(
+                    fsm_plan,
+                    done_dx=done_dx,
+                    done_dz=done_dz,
+                    done_dtheta=done_dtheta,
+                    reconfigure_done=reconfigure_done,
+                    need=need,
+                    max_dtheta_attempts=max_dtheta_attempts,
+                    dtheta_attempts=dtheta_attempts,
+                )
+                skill = None if nxt is None else nxt.value
+                if skill == PrecisionState.FINAL_VERIFY.value:
+                    skill = None  # fall through to geometry-ready / NO_REMAINING below
+                if skill == PrecisionState.ASSESS.value:
+                    cycle_row["primitive"] = "fsm_reassess"
+                    cycle_log.append(cycle_row)
+                    continue
+            cycle_row["fsm_next_skill"] = skill
+        else:
+            # Legacy priority: dtheta → dx → dz
+            if need["dtheta_needed"] and not done_dtheta:
+                skill = PrecisionState.CORRECT_DTHETA.value
+            elif need["dx_needed"] and not done_dx:
+                skill = PrecisionState.CORRECT_DX.value
+            elif need["dz_needed"] and not done_dz:
+                skill = PrecisionState.CORRECT_DZ.value
+
+        if skill in (
+            PrecisionState.RECONFIGURE_A.value,
+            PrecisionState.RECONFIGURE_B.value,
+            PrecisionState.RECONFIGURE_C.value,
+        ):
+            phases.append(skill)
+            reconfigure_attempts += 1
+            # Not executed — do not call this RECONFIGURE_FAILED.
+            phases.append("RECONFIGURE_APPLICABLE_SKILL_NOT_FOUND")
+            fsm_executed.append(f"{skill}:NOT_EXECUTED_NO_HOOK")
+            logs.setdefault("reconfigure_events", []).append(
+                {
+                    "event": "APPLICABLE_SKILL_NOT_FOUND",
+                    "requested": skill,
+                    "note": "Hooks not wired; not a physical reconfiguration failure",
+                }
+            )
+            reconfigure_done = True
+            cycle_row["primitive"] = skill
+            cycle_row["ok"] = False
+            cycle_row["reconfigure_executed"] = False
+            cycle_log.append(cycle_row)
+            continue
+
+        if skill == PrecisionState.CORRECT_DTHETA.value and need["dtheta_needed"] and not done_dtheta:
             phases.append("correct_dtheta")
+            fsm_executed.append("CORRECT_DTHETA")
+            dtheta_attempts += 1
             r = correct_dtheta(env, cur, cfg, plan_id)
             logs["dtheta"] = {k: v for k, v in r.items() if k not in ("actions", "capture")}
             actions.extend(r.get("actions") or [])
@@ -596,8 +815,9 @@ def run_precision(
             cycle_log.append(cycle_row)
             continue
 
-        if need["dx_needed"] and not done_dx:
+        if skill == PrecisionState.CORRECT_DX.value and need["dx_needed"] and not done_dx:
             phases.append("correct_dx")
+            fsm_executed.append("CORRECT_DX")
             dx_ok = False
             err_before = err_now
             # --- Flowchart primary: support-transfer gravity-assisted dx ---
@@ -752,10 +972,22 @@ def run_precision(
             cycle_log.append(cycle_row)
             continue
 
-        if need["dz_needed"] and not done_dz:
+        if skill == PrecisionState.CORRECT_DZ.value and need["dz_needed"] and not done_dz:
+            phases.append("correct_dz")
+            fsm_executed.append("CORRECT_DZ")
+            # Forced DZ: use experimental force_ez band for axial mode (inward/outward).
+            _ez_mode = float(cfg.ez_tol_mm)
+            if force_prec and force_skill == "dz":
+                fez = getattr(cfg, "force_ez_tol_mm", None)
+                if fez is not None:
+                    _ez_mode = float(fez)
             mode = need.get("dz_mode") or select_axial_mode(
-                float(err_now["dz_mm"]), axial_tol_mm=cfg.ez_tol_mm
+                float(err_now["dz_mm"]), axial_tol_mm=_ez_mode
             )["mode"]
+            if force_prec and force_skill == "dz" and mode == "none":
+                # Sign-based fallback so small residuals still select a branch.
+                mode = "B_inward" if float(err_now["dz_mm"]) > 0 else "A_outward"
+                logs["force_dz_mode_fallback"] = mode
             dz_s1 = s1_state
             if mode == "B_inward":
                 # Preserve DX6 → DZ inward S1 reuse (do NOT restore DOWN between).
@@ -1016,6 +1248,10 @@ def run_precision(
     logs["cycles"] = cycle_log
     logs["s1_state"] = s1_state
     logs["theta_after_pivot"] = theta_after_pivot
+    logs["fsm_planned_skills"] = list(fsm_planned)
+    logs["fsm_executed_skills"] = list(fsm_executed)
+    logs["fsm_reconfigure_attempts"] = reconfigure_attempts
+    logs["fsm_dtheta_attempts"] = dtheta_attempts
 
     # ---- Mandatory FINAL_DOWN_GATE then frozen HANDOFF ----
     phases.append("final_down_gate")
@@ -1055,15 +1291,28 @@ def run_precision(
         handoff = evaluate_handoff_with_axis(env.sim, cur["ref"], stabilize_n=cfg.stabilize_handoff_n)
         restore_capture(env, cur["capture"])
 
-    success = bool(handoff and handoff.get("SUCCESS_NEW")) if cfg.evaluate_handoff else bool(gate_f.get("ok"))
-    if cfg.evaluate_handoff and handoff and not handoff.get("SUCCESS_NEW"):
-        failures.append(
-            f"handoff_NEW_fail:12S={handoff.get('SUCCESS_12S')}:reason={handoff.get('std_reason') or handoff.get('reason')}"
-        )
+    admit_key = str(getattr(cfg, "admit_success_key", None) or "SUCCESS_NEW")
+    if cfg.evaluate_handoff:
+        success = bool(handoff and handoff.get(admit_key))
+        # Always keep STRICT available; SUCCESS_NEW remains historical 10° label.
+        if handoff and not handoff.get("SUCCESS_NEW"):
+            failures.append(
+                f"handoff_NEW_fail:12S={handoff.get('SUCCESS_12S')}:reason={handoff.get('std_reason') or handoff.get('reason')}"
+            )
+        if admit_key != "SUCCESS_NEW" and handoff and not handoff.get(admit_key):
+            failures.append(
+                f"handoff_{admit_key}_fail:12S={handoff.get('SUCCESS_12S')}"
+            )
+    else:
+        success = bool(gate_f.get("ok"))
 
     status = "PRECISION_EXECUTED_SUCCESS" if success else "PRECISION_EXECUTED_HANDOFF_FAIL"
     if not actions and success:
         status = "PRECISION_SKIPPED_DIRECT_SUCCESS"
+    logs["admit_success_key"] = admit_key
+    if handoff:
+        logs["SUCCESS_STRICT_10DEG"] = bool(handoff.get("SUCCESS_STRICT_10DEG") or handoff.get("SUCCESS_NEW"))
+        logs["SUCCESS_RELAXED_15DEG"] = bool(handoff.get("SUCCESS_RELAXED_15DEG"))
 
     logs["task_outcomes"] = _build_task_outcomes(
         logs,

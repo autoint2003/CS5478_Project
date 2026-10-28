@@ -1,4 +1,4 @@
-"""Generate experts_v2 trajectories for one or all six branches."""
+"""Generate experts_v2 trajectories for one or all seven branches."""
 
 from __future__ import annotations
 
@@ -124,24 +124,90 @@ def run_one(
         }
     try:
         state = load_ic_state(src)
+        branch = select_branch(src.branch_id)
+        blob_ad = {
+            "capture": state["capture"],
+            "ref": state["ref"],
+            "sample_id": src.source_ic_id,
+        }
+        # D2: independent IC gate (no Stage-1 A/B/C evidence). A/B/C: Stage-1 gate.
+        if branch.stage1 is None:
+            from data_generation.oracles.precision.d2_eligibility import check_d2_eligible
+
+            elig = check_d2_eligible(env, blob_ad, cfg=precision_config)
+            if not elig.eligible:
+                record = {
+                    "branch_id": src.branch_id,
+                    "stage1": None,
+                    "continuation": branch.continuation,
+                    "source_ic_id": src.source_ic_id,
+                    "source_ic_path": _relpath(src.ic_path),
+                    "plan_provenance": src.plan_provenance,
+                    "physical_success": False,
+                    "SUCCESS_NEW": False,
+                    "SUCCESS_12S": bool(elig.SUCCESS_12S),
+                    "status": elig.status,
+                    "rejected_reason": f"D2_INELIGIBLE:{elig.reason}",
+                    "d2_eligibility": elig.to_dict(),
+                    "result": {},
+                    "actions": [],
+                    "n_actions": 0,
+                    "config_id": cfg.get("config_id"),
+                }
+                saved = writer.write_failure(record)
+                return {**record, "saved": saved, "accepted": False}
+            elig_meta = {"d2_eligibility": elig.to_dict()}
+        else:
+            from data_generation.oracles.precision.stage1_eligibility import check_stage1_eligible
+
+            elig = check_stage1_eligible(env, blob_ad, allow_live_verify=True, record_live=False)
+            if not elig.eligible:
+                record = {
+                    "branch_id": src.branch_id,
+                    "stage1": branch.stage1,
+                    "continuation": branch.continuation,
+                    "source_ic_id": src.source_ic_id,
+                    "source_ic_path": _relpath(src.ic_path),
+                    "plan_provenance": src.plan_provenance,
+                    "physical_success": False,
+                    "SUCCESS_NEW": False,
+                    "SUCCESS_12S": False,
+                    "status": "STAGE1_INELIGIBLE",
+                    "rejected_reason": f"STAGE1_INELIGIBLE:{elig.reason}",
+                    "stage1_eligibility": elig.to_dict(),
+                    "result": {},
+                    "actions": [],
+                    "n_actions": 0,
+                    "config_id": cfg.get("config_id"),
+                }
+                saved = writer.write_failure(record)
+                return {**record, "saved": saved, "accepted": False}
+            elig_meta = {"stage1_eligibility": elig.to_dict()}
+
         cont = run_continuation(
             env,
-            {"capture": state["capture"], "ref": state["ref"]},
+            {"capture": state["capture"], "ref": state["ref"], "sample_id": src.source_ic_id},
             src.branch_id,
             precision_config,
         )
-        # Preserve full action list from PrecisionResult before to_dict stripped it
-        if cont.get("continuation") == "precision" and cont.get("physical_success"):
-            # re-fetch actions: dispatch already stored them when ok
-            pass
-        elif cont.get("continuation") == "precision" and not cont.get("physical_success"):
-            # dispatch currently clears actions on failure — re-run is expensive;
-            # store whatever is present
-            pass
         record = _enrich_from_continuation(cont, src, cfg)
         record["capture"] = state["capture"]
         record["ref"] = state["ref"]
-        if record["physical_success"] and record["SUCCESS_NEW"]:
+        record.update(elig_meta)
+        admit_key = str(cfg.get("admit_success") or "SUCCESS_NEW")
+        hand = record.get("handoff") or {}
+        if cont.get("continuation") == "direct_handoff":
+            hand = cont.get("result") or hand
+        record["SUCCESS_STRICT_10DEG"] = bool(
+            hand.get("SUCCESS_STRICT_10DEG") or hand.get("SUCCESS_NEW") or record.get("SUCCESS_NEW")
+        )
+        record["SUCCESS_RELAXED_15DEG"] = bool(hand.get("SUCCESS_RELAXED_15DEG"))
+        record["admit_success_key"] = admit_key
+        record["success_criteria_version"] = cfg.get("success_criteria_version")
+        # dispatch already applied admit_success_key → physical_success
+        admit_ok = bool(cont.get("physical_success"))
+        if admit_ok:
+            record["physical_success"] = True
             saved = writer.write_success(record)
             return {**record, "saved": saved, "accepted": True}
         saved = writer.write_failure(record)
@@ -168,6 +234,22 @@ def run_one(
         return {**record, "saved": saved, "accepted": False}
 
 
+def precision_config_for_branch(branch_id: str, cfg: dict[str, Any]) -> PrecisionConfig:
+    """Build PrecisionConfig from optional per-branch YAML overrides.
+
+    Production generation always disables verified_lateral fallback. The flag may
+    still be set True only by explicit experimental callers that construct
+    PrecisionConfig themselves (see experiments/).
+    """
+    spec = (cfg.get("branches") or {}).get(branch_id) or {}
+    overrides = dict(spec.get("precision_config") or {})
+    overrides["use_verified_lateral_fallback"] = False
+    admit = str(cfg.get("admit_success") or "SUCCESS_NEW")
+    if "admit_success_key" not in overrides:
+        overrides["admit_success_key"] = admit
+    return PrecisionConfig(**overrides)
+
+
 def generate_branch(
     branch_id: str,
     *,
@@ -175,13 +257,17 @@ def generate_branch(
     config_path: Path | None = None,
     limit: int | None = None,
     precision_config: PrecisionConfig | None = None,
+    force: bool = False,
 ) -> dict[str, Any]:
     cfg = load_generation_config(config_path)
     sources = discover_branch_ics(branch_id, cfg)
     if limit is not None:
         sources = sources[: max(0, int(limit))]
-    out_root = Path(output_root) if output_root else ROOT / cfg.get("output_root", "data/experts_v2")
+    out_root = Path(output_root) if output_root else ROOT / cfg.get("output_root", "data/experts_v2_official")
     writer = DatasetWriter(out_root, config_id=cfg.get("config_id"))
+    if force:
+        writer.clear_branch_attempts(branch_id)
+    pcfg = precision_config if precision_config is not None else precision_config_for_branch(branch_id, cfg)
     env = make_env()
     stats = {
         "branch_id": branch_id,
@@ -194,9 +280,12 @@ def generate_branch(
         "SUCCESS_12S": 0,
         "failure_classes": {},
         "skill_sequences": {},
+        "precision_config": {
+            "use_verified_lateral_fallback": bool(getattr(pcfg, "use_verified_lateral_fallback", False)),
+        },
     }
     for src in sources:
-        row = run_one(env, src, writer, cfg, precision_config=precision_config)
+        row = run_one(env, src, writer, cfg, precision_config=pcfg)
         if row.get("skipped"):
             stats["skipped_resume"] += 1
             continue
@@ -228,13 +317,17 @@ def generate_all(
     output_root: Path | None = None,
     config_path: Path | None = None,
     limit_per_branch: int | None = None,
+    force: bool = False,
+    only_branches: list[str] | None = None,
 ) -> dict[str, Any]:
     summary = {}
-    for bid in BRANCHES:
+    targets = only_branches or list(BRANCHES)
+    for bid in targets:
         summary[bid] = generate_branch(
             bid,
             output_root=output_root,
             config_path=config_path,
             limit=limit_per_branch,
+            force=force,
         )
     return summary

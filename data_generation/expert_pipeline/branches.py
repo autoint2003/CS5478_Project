@@ -1,4 +1,4 @@
-"""The six expert-generation branches. Identifiers are stable dataset metadata."""
+"""The seven expert-generation branches. Identifiers are stable dataset metadata."""
 
 from __future__ import annotations
 
@@ -14,6 +14,12 @@ class Branch:
 
 
 BRANCHES: dict[str, Branch] = {
+    "A_STABLE_DIRECT_HANDOFF": Branch(
+        "A_STABLE_DIRECT_HANDOFF",
+        "plan_a_stable_grasp",
+        "direct_handoff",
+        "Plan A stable grasp, then direct nominal HANDOFF (no Precision).",
+    ),
     "A_STABLE_PRECISION": Branch(
         "A_STABLE_PRECISION",
         "plan_a_stable_grasp",
@@ -57,6 +63,18 @@ STAGE1_MODULES = {
     "plan_b_stable_grasp": "data_generation.oracles.plan_b",
     "plan_c_recatch": "data_generation.oracles.plan_c",
 }
+
+# Short class labels used in dataset coverage reports (P9).
+CLASS_ALIASES = {
+    "A1": "A_STABLE_DIRECT_HANDOFF",
+    "A2": "A_STABLE_PRECISION",
+    "B1": "B_STABLE_DIRECT_HANDOFF",
+    "B2": "B_STABLE_PRECISION",
+    "C1": "C_RECATCH_DIRECT_HANDOFF",
+    "C2": "C_RECATCH_PRECISION",
+    "D2": "D_PRECISION",
+}
+BRANCH_TO_CLASS = {v: k for k, v in CLASS_ALIASES.items()}
 
 
 def select_branch(branch_id: str) -> Branch:

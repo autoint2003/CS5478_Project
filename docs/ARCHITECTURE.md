@@ -30,16 +30,19 @@ Active code generates and evaluates six expert branches on the current Precision
 
 `data_generation/oracles/precision/state_machine.py` is the only scheduler. Correction skills and contact mechanics are the modules listed in `docs/ORACLE_STATE_MACHINE_SPEC.md` section 11. Plan A, B, and C stage-1 search stays in `data_generation/oracles/plan_a/`, `plan_b/`, and `plan_c/`.
 
-## Six expert branches
+## Seven expert branches
 
 | Branch id | Stage 1 | Continuation |
 |---|---|---|
+| `A_STABLE_DIRECT_HANDOFF` | Plan A stable grasp | Direct nominal HANDOFF |
 | `A_STABLE_PRECISION` | Plan A stable grasp | Precision Oracle |
 | `B_STABLE_DIRECT_HANDOFF` | Plan B stable grasp | Direct nominal HANDOFF |
 | `B_STABLE_PRECISION` | Plan B stable grasp | Precision Oracle |
 | `C_RECATCH_DIRECT_HANDOFF` | Plan C recatch | Direct nominal HANDOFF |
 | `C_RECATCH_PRECISION` | Plan C recatch | Precision Oracle |
 | `D_PRECISION` | none | Precision Oracle |
+
+Production Precision always uses support-transfer DX with `use_verified_lateral_fallback=false`. Trajectories that entered verified_lateral fallback are not production experts.
 
 Selection and provenance live in `data_generation/expert_pipeline/`. Continuation dispatch calls `run_precision` or `probe_direct_handoff`. It does not implement a second scheduler and does not write a dataset on import. A continuation that is not physically successful is returned with `expert = None`.
 

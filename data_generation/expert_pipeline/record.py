@@ -143,6 +143,50 @@ class DatasetWriter:
     def already_done(self, branch_id: str, source_ic_id: str) -> bool:
         return attempt_id(branch_id, source_ic_id) in self._completed
 
+    def clear_branch_attempts(self, branch_id: str) -> dict[str, int]:
+        """Remove prior attempts for one branch so generation can re-run it.
+
+        Does not delete other branches' accepted experts. Rewrites the manifest
+        and progress file without the cleared attempt ids.
+        """
+        prefix = f"{branch_id}__"
+        removed = {"failures": 0, "experts": 0, "manifest_rows": 0}
+        fail_dir = self.root / "diagnostics" / "failures"
+        if fail_dir.is_dir():
+            for p in list(fail_dir.glob(f"{prefix}*")):
+                p.unlink(missing_ok=True)
+                removed["failures"] += 1
+        branch_dir = self.root / branch_id
+        if branch_dir.is_dir():
+            for p in list(branch_dir.glob("*.pkl")):
+                p.unlink(missing_ok=True)
+                removed["experts"] += 1
+        keep_rows = []
+        if self.manifest_path.is_file():
+            for line in self.manifest_path.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                aid = str(row.get("attempt_id") or "")
+                if aid.startswith(prefix) or row.get("branch_id") == branch_id:
+                    removed["manifest_rows"] += 1
+                    continue
+                keep_rows.append(row)
+            text = "".join(json.dumps(_jsonable(r), ensure_ascii=False) + "\n" for r in keep_rows)
+            self._atomic_write_text(self.manifest_path, text)
+        self._completed = {aid for aid in self._completed if not str(aid).startswith(prefix)}
+        self._mark_done_flush()
+        self.rebuild_index()
+        return removed
+
+    def _mark_done_flush(self) -> None:
+        payload = {
+            "updated_utc": datetime.now(timezone.utc).isoformat(),
+            "completed_attempts": sorted(self._completed),
+            "n_completed": len(self._completed),
+        }
+        self._atomic_write_text(self.progress_path, json.dumps(payload, indent=2))
+
     def _atomic_write_bytes(self, path: Path, data: bytes) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         fd, tmp = tempfile.mkstemp(prefix=path.name + ".", dir=str(path.parent))
@@ -172,12 +216,7 @@ class DatasetWriter:
 
     def _mark_done(self, aid: str) -> None:
         self._completed.add(aid)
-        payload = {
-            "updated_utc": datetime.now(timezone.utc).isoformat(),
-            "completed_attempts": sorted(self._completed),
-            "n_completed": len(self._completed),
-        }
-        self._atomic_write_text(self.progress_path, json.dumps(payload, indent=2))
+        self._mark_done_flush()
 
     def write_success(self, record: dict[str, Any]) -> dict[str, Any]:
         branch_id = record["branch_id"]

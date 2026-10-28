@@ -1,8 +1,9 @@
 """Dataset version isolation for regenerated experts.
 
 ``data/unified_experts/`` remains the historical manifest. It is not a training
-source for the new Precision Oracle. New experts are written only under
-``data/experts_v2/`` and only when physical success is true.
+source for the new Precision Oracle. Production experts are written under
+``data/experts_v2_official/`` (see ``config/generation/experts_v2.yaml``).
+The first freeze ``data/experts_v2/`` (122) is retained as a superseded snapshot.
 """
 
 from __future__ import annotations
@@ -16,9 +17,13 @@ ROOT = Path(__file__).resolve().parents[2]
 DATASET_VERSION = "experts_v2"
 ORACLE_IMPLEMENTATION = "precision_state_machine_v23"
 SUCCESS_CRITERIA_VERSION = "SUCCESS_12S_and_SUCCESS_NEW_frozen"
-ACTIVE_DATASET = ROOT / "data" / "experts_v2"
+# Production namespace (matches experts_v2.yaml output_root).
+ACTIVE_DATASET = ROOT / "data" / "experts_v2_official"
+# First frozen generation (122); not the default admit path.
+FIRST_FREEZE_DATASET = ROOT / "data" / "experts_v2"
 LEGACY_MANIFEST = ROOT / "data" / "unified_experts" / "manifest.jsonl"
 LEGACY_DIRECT_HANDOFF_BRANCHES = {
+    "A_STABLE_DIRECT_HANDOFF",
     "B_STABLE_DIRECT_HANDOFF",
     "C_RECATCH_DIRECT_HANDOFF",
 }

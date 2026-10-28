@@ -55,6 +55,12 @@ from data_generation.oracles.precision.state_machine import (
     run_precision,
     run_staged_axial_slip,
 )
+from data_generation.oracles.precision.stage1_eligibility import (
+    Stage1NotEligible,
+    check_stage1_eligible,
+    require_stage1_eligible,
+)
+from data_generation.oracles.precision.entry_conditions import stage1_12s_gate
 
 __all__ = [
     "STABLE_THRESHOLDS",

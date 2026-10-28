@@ -162,7 +162,7 @@ def search_catch(
     return {"best": best, "sidewall": sidewall, "funnel": funnel, "future": future}
 
 
-def lift_and_validate(
+def run_stage1_catch_and_lift(
     sim,
     snap,
     ref,
@@ -171,7 +171,12 @@ def lift_and_validate(
     vz_up: float = 0.12,
     target_z: float = 0.55,
 ) -> dict:
-    """Replay catch → fast world lift → conditional pose_correct → SUCCESS_NEW."""
+    """Stage-1 only: catch ``capture_actions`` → fast world lift.
+
+    Stops at the elevated bilateral Stage-1 exit. Does **not** call
+    ``pose_correct_and_handoff`` (Precision / historical end-to-end search).
+    """
+    del ref  # ref reserved for post-Stage-1 Precision / historical handoff
     restore_ballistic(sim, snap)
     restore_drop(sim, None)
     arm(sim)
@@ -181,9 +186,23 @@ def lift_and_validate(
         prefix.append(a.copy())
         step_legal(sim, a)
         if latched(sim):
-            return {"SUCCESS_NEW": False, "stage": "catch", "reason": "GROUND_DROP"}
+            return {
+                "ok": False,
+                "SUCCESS_NEW": False,
+                "stage": "catch",
+                "reason": "GROUND_DROP",
+                "stage1_actions": prefix,
+                "pose_correct_called": False,
+            }
     if not pad_bilateral(sim)["bilateral"]:
-        return {"SUCCESS_NEW": False, "stage": "catch", "reason": "NO_BILATERAL"}
+        return {
+            "ok": False,
+            "SUCCESS_NEW": False,
+            "stage": "catch",
+            "reason": "NO_BILATERAL",
+            "stage1_actions": prefix,
+            "pose_correct_called": False,
+        }
     surf_brake = classify_contacts(sim)
     m_brake = measure(sim, U_TGT, P_TGT)
     brake_snap = make_snap(sim)
@@ -193,23 +212,91 @@ def lift_and_validate(
         prefix.append(np.asarray(a, np.float32).copy())
     if latched(sim) or not pad_bilateral(sim)["bilateral"]:
         return {
+            "ok": False,
             "SUCCESS_NEW": False,
             "stage": "lift",
             "reason": "LOST_LIFT",
             "surf_brake": surf_brake.get("grasp_kind"),
             "obj_z": lift.get("obj_z_end"),
+            "stage1_actions": prefix,
+            "pose_correct_called": False,
         }
     surf_elev = classify_contacts(sim)
     m_elev = measure(sim, U_TGT, P_TGT)
     elev_snap = make_snap(sim)
     if surf_elev.get("grasp_kind") == "end_face_pinch":
         return {
+            "ok": False,
             "SUCCESS_NEW": False,
             "stage": "lift",
             "reason": "END_FACE_AFTER_LIFT",
             "surf_elev": surf_elev.get("grasp_kind"),
             "e_theta": m_elev["e_theta_deg"],
+            "stage1_actions": prefix,
+            "elev_snap": elev_snap,
+            "pose_correct_called": False,
         }
+    return {
+        "ok": True,
+        "SUCCESS_NEW": False,  # not evaluated; Stage-1 uses SUCCESS_12S via eligibility
+        "stage": "stage1_exit",
+        "reason": "STAGE1_EXIT_READY",
+        "stage1_actions": prefix,
+        "elev_snap": elev_snap,
+        "brake_snap": brake_snap,
+        "surf_brake": {
+            "grasp_kind": surf_brake.get("grasp_kind"),
+            "opposing_sidewall": int(surf_brake.get("opposing_sidewall") or 0),
+            "n_sidewall": int(surf_brake.get("n_sidewall") or 0),
+            "n_end_face": int(surf_brake.get("n_end_face") or 0),
+            "contact_s_mean": surf_brake.get("contact_s_mean"),
+        },
+        "surf_elev": {
+            "grasp_kind": surf_elev.get("grasp_kind"),
+            "opposing_sidewall": int(surf_elev.get("opposing_sidewall") or 0),
+            "n_sidewall": int(surf_elev.get("n_sidewall") or 0),
+            "n_end_face": int(surf_elev.get("n_end_face") or 0),
+            "contact_s_mean": surf_elev.get("contact_s_mean"),
+        },
+        "m_brake": {k: m_brake[k] for k in ("e_theta_deg", "e_pos_mm", "obj_z")},
+        "m_elev": {k: m_elev[k] for k in ("e_theta_deg", "e_pos_mm", "obj_z")},
+        "lift": {
+            "reached": lift.get("reached_target_z"),
+            "obj_z_end": lift.get("obj_z_end"),
+            "vz_up": vz_up,
+        },
+        "capture_actions": [np.asarray(a, np.float32) for a in catch_out["capture_actions"]],
+        "mechanism": catch_out.get("mechanism"),
+        "params": catch_out.get("params"),
+        "cand": catch_out.get("cand"),
+        "pose_correct_called": False,
+    }
+
+
+def lift_and_validate(
+    sim,
+    snap,
+    ref,
+    catch_out: dict,
+    *,
+    vz_up: float = 0.12,
+    target_z: float = 0.55,
+) -> dict:
+    """Historical end-to-end: Stage-1 catch+lift → pose_correct_and_handoff → SUCCESS_NEW.
+
+    Production C2 generation must use ``run_stage1_catch_and_lift`` + independent
+    SUCCESS_12S eligibility, not this combined search path.
+    """
+    s1 = run_stage1_catch_and_lift(sim, snap, ref, catch_out, vz_up=vz_up, target_z=target_z)
+    if not s1.get("ok"):
+        return s1
+    prefix = list(s1["stage1_actions"])
+    elev_snap = s1["elev_snap"]
+    surf_brake = s1["surf_brake"]
+    surf_elev = s1["surf_elev"]
+    m_brake = s1["m_brake"]
+    m_elev = s1["m_elev"]
+    lift = s1["lift"]
 
     # Conditional pose correction + handoff; if DROP, try light in-hand reseat then retry once.
     pose_acts, meta = pose_correct_and_handoff(sim, ref, max_s=4.0)
@@ -262,28 +349,13 @@ def lift_and_validate(
         "stage": "handoff",
         "reason": meta.get("reason"),
         "prefix_actions": prefix,
+        "stage1_actions": list(s1["stage1_actions"]),
         "elev_snap": elev_snap,
-        "surf_brake": {
-            "grasp_kind": surf_brake.get("grasp_kind"),
-            "opposing_sidewall": int(surf_brake.get("opposing_sidewall") or 0),
-            "n_sidewall": int(surf_brake.get("n_sidewall") or 0),
-            "n_end_face": int(surf_brake.get("n_end_face") or 0),
-            "contact_s_mean": surf_brake.get("contact_s_mean"),
-        },
-        "surf_elev": {
-            "grasp_kind": surf_elev.get("grasp_kind"),
-            "opposing_sidewall": int(surf_elev.get("opposing_sidewall") or 0),
-            "n_sidewall": int(surf_elev.get("n_sidewall") or 0),
-            "n_end_face": int(surf_elev.get("n_end_face") or 0),
-            "contact_s_mean": surf_elev.get("contact_s_mean"),
-        },
-        "m_brake": {k: m_brake[k] for k in ("e_theta_deg", "e_pos_mm", "obj_z")},
-        "m_elev": {k: m_elev[k] for k in ("e_theta_deg", "e_pos_mm", "obj_z")},
-        "lift": {
-            "reached": lift.get("reached_target_z"),
-            "obj_z_end": lift.get("obj_z_end"),
-            "vz_up": vz_up,
-        },
+        "surf_brake": surf_brake,
+        "surf_elev": surf_elev,
+        "m_brake": m_brake,
+        "m_elev": m_elev,
+        "lift": lift,
         "handoff_meta": {
             "SUCCESS_NEW": bool(meta.get("SUCCESS_NEW")),
             "reason": meta.get("reason"),
@@ -299,6 +371,8 @@ def lift_and_validate(
         "capture_actions": [np.asarray(a, np.float32) for a in catch_out["capture_actions"]],
         "vrel_at_first_contact": catch_out.get("vrel_at_first_contact"),
         "max_contact_free_s": catch_out.get("max_contact_free_s"),
+        "pose_correct_called": True,
+        "ok": bool(meta.get("SUCCESS_NEW")),
     }
 
 
