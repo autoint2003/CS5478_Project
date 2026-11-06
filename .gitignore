@@ -33,9 +33,15 @@ mujoco_menagerie/
 
 # Datasets and training outputs. Historical demo_results now live at
 # results/archive/demo_results/, which is covered by results/.
+# Use results/** (not results/) so selected report packages can be re-included.
 data/
 demo_results/
-results/
+results/**
+
+# Keep the lightweight final consolidation report package versioned.
+!results/experiments/
+!results/experiments/final_consolidation/
+!results/experiments/final_consolidation/**
 
 # Training / evaluation runtime artifacts (local only)
 tb_logs/

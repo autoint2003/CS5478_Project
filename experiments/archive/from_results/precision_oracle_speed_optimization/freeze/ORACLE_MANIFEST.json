@@ -1,0 +1,140 @@
+{
+  "frozen_at": "2026-10-22T16:32:42.935297+00:00",
+  "oracle_dir": "data_generation\\oracles\\precision",
+  "files": [
+    {
+      "name": "__init__.py",
+      "sha16": "0b4ff457c030a880",
+      "bytes": 2678
+    },
+    {
+      "name": "axis_aware.py",
+      "sha16": "787e57ec83f4d290",
+      "bytes": 4019
+    },
+    {
+      "name": "contact_modes.py",
+      "sha16": "35fee6ebaaa51cd3",
+      "bytes": 4433
+    },
+    {
+      "name": "endpoint_only_axial_roll.py",
+      "sha16": "646043823f2d3ee0",
+      "bytes": 19046
+    },
+    {
+      "name": "finger_supported_vertical.py",
+      "sha16": "c9b66fbfe5eb5e14",
+      "bytes": 14139
+    },
+    {
+      "name": "finger_surface_support.py",
+      "sha16": "2078071b7060db5b",
+      "bytes": 15297
+    },
+    {
+      "name": "force_slip_control.py",
+      "sha16": "93c7587e38337b2b",
+      "bytes": 10165
+    },
+    {
+      "name": "orientation_planner.py",
+      "sha16": "fdf2be95ea66881d",
+      "bytes": 22336
+    },
+    {
+      "name": "precision_audit.py",
+      "sha16": "94bf8ec11b7921de",
+      "bytes": 6658
+    },
+    {
+      "name": "precision_dx.py",
+      "sha16": "39a89504e0684077",
+      "bytes": 42416
+    },
+    {
+      "name": "precision_dx_support_transfer.py",
+      "sha16": "ea9b9eeef7a45b73",
+      "bytes": 19339
+    },
+    {
+      "name": "precision_dz.py",
+      "sha16": "6319cc8f57ee6f99",
+      "bytes": 41511
+    },
+    {
+      "name": "precision_goals.py",
+      "sha16": "64364f0bae971d27",
+      "bytes": 8975
+    },
+    {
+      "name": "precision_handoff.py",
+      "sha16": "f8e01421298e73d9",
+      "bytes": 6360
+    },
+    {
+      "name": "precision_slip.py",
+      "sha16": "7bcc6bfe78618386",
+      "bytes": 35127
+    },
+    {
+      "name": "precision_types.py",
+      "sha16": "9648d097543772a4",
+      "bytes": 9866
+    },
+    {
+      "name": "primitives.py",
+      "sha16": "73a9f7a7928bddea",
+      "bytes": 25532
+    },
+    {
+      "name": "reverse_supported_rotation.py",
+      "sha16": "a31b3778618b2a61",
+      "bytes": 25170
+    },
+    {
+      "name": "rotation_speed_profile.py",
+      "sha16": "379fa7d4299cc991",
+      "bytes": 2723
+    },
+    {
+      "name": "sign_aware_axial.py",
+      "sha16": "1c751c9bde09a5d6",
+      "bytes": 16822
+    },
+    {
+      "name": "stable_grasp.py",
+      "sha16": "df1e9925d4cfdb7d",
+      "bytes": 6440
+    },
+    {
+      "name": "support_aware_rotation.py",
+      "sha16": "85d4d56e2a714e41",
+      "bytes": 22882
+    },
+    {
+      "name": "unified_precision_oracle.py",
+      "sha16": "83b77a29dd495b9d",
+      "bytes": 38564
+    }
+  ],
+  "git": {
+    "HEAD": "3c361e4bdc3d4a4e4a5531539cd45b9c1d001971",
+    "precision_dirty": true,
+    "porcelain": "?? data_generation/oracles/precision/"
+  },
+  "PrecisionConfig": {
+    "rate_tilt_cruise": 0.18,
+    "rate_tilt_peak": 0.24,
+    "rate_tilt_floor": 0.06,
+    "tilt_accel_s": 0.35,
+    "use_tilt_speed_profile": true,
+    "rate_protected_s1": 0.14,
+    "rate_establish_s1": 0.16,
+    "dx_horizontal_rate_cap": 0.08,
+    "dz_up_tol_deg": 12.0,
+    "dz_up_g_useful_min": 6.0,
+    "dz_return_pre_lift_s": 0.25,
+    "dz_safe_ex_mm": 6.0
+  }
+}

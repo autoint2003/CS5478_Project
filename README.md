@@ -52,8 +52,8 @@ Generation config: `config/generation/experts_v2.yaml` (seven branches; verified
 | `data_generation/` | Oracles, expert pipeline, recording, dataset construction code |
 | `evaluation/`, `training/`, `models/` | Success criteria, trainers, policy architectures |
 | `scripts/` | The commands above |
-| `experiments/` | Archived experiments and historical documents |
-| `results/` | Existing outputs (do not reorganize) |
+| `experiments/` | Experiment code archive (including code relocated from `results/`) |
+| `results/` | Experimental outputs only (reports, caches, checkpoints, videos) |
 | `data/` | Local manifests, gitignored |
 | `coursework/` | Course PDFs |
 
