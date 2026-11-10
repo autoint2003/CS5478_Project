@@ -42,6 +42,7 @@ UPDATES_DEFAULT = 40  # controlled comparison budget (not full re-epoch)
 
 
 def _load_bc_batches(device, max_per_skill: int = 8) -> list[dict]:
+    """Load BC samples that include real obs (state-conditioned). Skip zero-obs stubs."""
     man_path = OUT / "EXPERT_REPLAY_MANIFEST.json"
     if not man_path.is_file():
         return []
@@ -51,42 +52,58 @@ def _load_bc_batches(device, max_per_skill: int = 8) -> list[dict]:
         if not s.get("m111_valid"):
             continue
         by_sk[s["skill"]].append(s)
-    # class-aware: equal slots
     out = []
+    skipped_no_obs = 0
     for sk in SKILLS:
         for s in by_sk[sk][:max_per_skill]:
             z = np.load(s["sample_path"])
+            if "obs" not in z.files:
+                skipped_no_obs += 1
+                continue
+            obs = np.asarray(z["obs"], np.float32)
+            acts = np.asarray(z["actions"], np.float32)
+            toks = np.asarray(z["tokens"], np.int64)
+            if obs.ndim != 2 or obs.shape[0] == 0 or obs.shape[0] != len(toks):
+                skipped_no_obs += 1
+                continue
             out.append(
                 {
                     "skill": sk,
-                    "tokens": torch.as_tensor(z["tokens"], device=device, dtype=torch.long),
-                    "actions": torch.as_tensor(z["actions"], device=device, dtype=torch.float32),
+                    "tokens": torch.as_tensor(toks, device=device, dtype=torch.long),
+                    "actions": torch.as_tensor(acts, device=device, dtype=torch.float32),
+                    "obs": torch.as_tensor(obs, device=device, dtype=torch.float32),
                 }
             )
+    if skipped_no_obs:
+        print(
+            f"[p55] BC skipped {skipped_no_obs} samples without obs; "
+            "re-run build_replay.py to attach observations.",
+            flush=True,
+        )
     return out
 
 
 def _bc_loss(actor, batches: list[dict], device) -> tuple[torch.Tensor, float]:
+    """Causal teacher-forced CE on expert tokens with real obs and action prev."""
     if not batches:
         return torch.zeros((), device=device), 0.0
     losses = []
     for b in batches:
-        # Teacher-force last-step CE is weak for variable length; use mean CE over
-        # synthetic windows of zeros+prev (limited signal) — better: single-step CE
-        # on tokens with a dummy context of zeros (same as many offline BC stubs).
         toks = b["tokens"]
-        if len(toks) == 0:
+        acts = b["actions"]
+        obs = b.get("obs")
+        if obs is None or len(toks) == 0:
             continue
-        # Build a short context of ones for each token independently is too heavy;
-        # use mean CE under shared zero context (still provides gradient on logits).
-        T = min(int(len(toks)), 32)
-        obs = torch.zeros(T, 39, device=device)
-        prev = torch.zeros(T, 7, device=device)
-        logits, _res, _ = actor(obs, prev)
+        T = min(int(len(toks)), int(len(obs)), int(len(acts)), 32)
+        if T <= 0:
+            continue
+        o = obs[:T]
+        prev = torch.zeros(T, 7, device=device, dtype=torch.float32)
+        if T > 1:
+            prev[1:] = acts[: T - 1]
+        logits, _res, _ = actor(o, prev)
         logit = mask_handoff_logits(logits.float())
-        # align: use last logit repeatedly vs each token — crude but stable
-        last = logit[-1].unsqueeze(0).expand(T, -1)
-        losses.append(F.cross_entropy(last, toks[:T]))
+        losses.append(F.cross_entropy(logit, toks[:T]))
     if not losses:
         return torch.zeros((), device=device), 0.0
     loss = torch.stack(losses).mean()

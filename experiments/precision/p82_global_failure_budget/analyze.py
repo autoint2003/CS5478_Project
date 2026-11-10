@@ -7,6 +7,7 @@ from collections import Counter, defaultdict
 
 import numpy as np
 
+from experiments.precision.p61_reproducible_joint_eval.seeding import stable_u32
 from experiments.precision.p82_global_failure_budget.paths import OUT, SKILLS
 
 
@@ -50,7 +51,10 @@ def failure_budget(rows: list[dict]) -> dict:
         rs = by_skill.get(sk, [])
         per_class[sk] = {
             "n": len(rs),
-            "rates": {m: _boot_rate([r[m] for r in rs], seed=hash(sk + m) % 10000) for m in metrics},
+            "rates": {
+                m: _boot_rate([r[m] for r in rs], seed=stable_u32("p82", sk, m) % 10000)
+                for m in metrics
+            },
             "earliest_decisive": dict(Counter(r["earliest_decisive_failure"] for r in rs)),
         }
 

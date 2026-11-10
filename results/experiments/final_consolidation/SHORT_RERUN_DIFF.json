@@ -1,0 +1,71 @@
+{
+  "p83": {
+    "v2_activation_rate": 0.015625,
+    "v2_forced_episodes": 2,
+    "n_episodes": 128,
+    "msp_equal_weight": 0.2734375,
+    "old_case": "C",
+    "new_case": "D",
+    "old_p84": "nonC_mechanism_discovery_diagnostic",
+    "new_p84": "lowest_cost_causal_probe_or_stop",
+    "case_changed": true,
+    "p84_changed": true,
+    "mass": {
+      "C_cf": 0.1640625,
+      "nonC_sum_legacy": 0.5078125,
+      "nonC_mean": 0.16927083333333334,
+      "C_any": 0.21875,
+      "per_nonC": {
+        "A1": 0.1875,
+        "B1": 0.203125,
+        "D": 0.1171875
+      }
+    },
+    "need_stage2_old": false,
+    "need_stage2_new": true,
+    "new_reason_head": "Expanded panel still cannot reliably distinguish recoverable opportunities: C_cf_mass=0.164, nonC_any_mass=0.169; assumption sensitivity prefers {'nonC': 4}; LOO flip_rate=0.000. Do not expand broad baseline diagnostics indefinitely."
+  },
+  "p69_gate": {
+    "delta": {
+      "SUCCESS_RELAXED": 0.015625,
+      "r3_ready": 0.015625,
+      "handoff": 0.015625,
+      "correct_sidewall": 0.296875,
+      "min_pad_ge4": 0.0546875,
+      "pre_contact_e_pos_mm": -78.27433138509468
+    },
+    "old_proceed_to_ppo_file": true,
+    "old_soft_gate_recomputed": true,
+    "new_tight_gate": false,
+    "gate_flags": {
+      "succ_up": false,
+      "r3_up": false,
+      "geom_up": true,
+      "e_only": false
+    },
+    "changed": true
+  },
+  "p82": {
+    "n": 64,
+    "v2_activation_rate": 0.015625,
+    "v2_forced_episodes": 1,
+    "old_msp": 0.3125,
+    "new_msp": 0.3125,
+    "msp_changed": false,
+    "meta_updated": true
+  },
+  "blocked_eval": {
+    "blocked_set_size": 48,
+    "pool_size": 321,
+    "excluded_traj_only": 0,
+    "excluded_with_root": 0,
+    "extra_excluded_by_root": 0
+  },
+  "p55_bc": {
+    "m111_valid_samples_checked": 36,
+    "with_obs": 36,
+    "needs_build_replay_rebuild": false,
+    "rebuild_ok": true,
+    "note": "build_replay attached obs to all 36; train_comparison not re-run (longer)"
+  }
+}

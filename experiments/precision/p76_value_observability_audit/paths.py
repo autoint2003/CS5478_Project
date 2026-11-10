@@ -15,7 +15,8 @@ P64_OUT = ROOT / "results/experiments/p64_ppo_multiround"
 P64_STEP4_ACTOR = P64_OUT / "checkpoints/P64_step4_actor.pt"
 P64_STEP4_CRITIC = P64_OUT / "checkpoints/P64_step4_critic.pt"
 P74_AUDIT = ROOT / "results/experiments/p74_contact_learning_readiness/AUDIT_RAW.json"
-P73_CF = ROOT / "results/experiments/p73_first_contact_counterfactual"
+# P73 package path (was a dead/wrong counterfactual name)
+P73_CF = ROOT / "results/experiments/p73_first_contact_bilateral"
 
 SEED = 5476
 GAMMA = 1.0

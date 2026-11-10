@@ -16,7 +16,7 @@ from experiments.precision.p54_rebalanced_grpo64.build_dataset import build_p54_
 from experiments.precision.p57_post_recatch_stabilization.env_stabilize import StabilizeGrpoEnv
 from experiments.precision.p61_reproducible_joint_eval.seeding import rollout_seed, seed_all
 from experiments.precision.p63_transformer_critic_ppo.checkpointing import load_actor, load_critic
-from experiments.precision.p64_ppo_multiround.schedule import blocked_eval_ids
+from experiments.precision.p64_ppo_multiround.schedule import blocked_eval_ids, is_blocked_eval
 from experiments.precision.p82_global_failure_budget.collect import rollout_episode
 from experiments.precision.p83_recoverable_failure_mass.paths import (
     ACTOR_MD5,
@@ -73,7 +73,7 @@ def validate_and_expand(*, device: str = "cuda", target: int = N_STAGE1, force: 
     pool = build_p54_dataset(seed=5478)["schedule"]
     by = defaultdict(list)
     for s in pool:
-        if s.traj_id in blocked:
+        if is_blocked_eval(s.traj_id, blocked):
             continue
         by[s.skill].append(s)
 
@@ -122,6 +122,14 @@ def validate_and_expand(*, device: str = "cuda", target: int = N_STAGE1, force: 
     rows = trimmed
 
     cache_path.write_bytes(pickle.dumps(rows, protocol=pickle.HIGHEST_PROTOCOL))
+    n_forced_ep = sum(1 for r in rows if int(r.get("forced_steps") or 0) > 0)
+    v2_rate = float(n_forced_ep / len(rows)) if rows else 0.0
+    if rows and v2_rate < 0.05:
+        print(
+            f"[p83] WARNING: V2 activation_rate={v2_rate:.3f} "
+            f"({n_forced_ep}/{len(rows)}); MSP is ≈ Actor-only, not P64+V2 closed-loop.",
+            flush=True,
+        )
     report = _panel_report(
         rows,
         reused=bool(reused),
@@ -133,10 +141,17 @@ def validate_and_expand(*, device: str = "cuda", target: int = N_STAGE1, force: 
             "p82_reused_n": len(reused),
             "newly_collected_n": len(need),
             "blocked_eval_excluded": True,
+            "blocked_eval_uses_root_id": True,
             "final_test_excluded": True,
             "max_budget_per_class": N_STAGE2,
             "selection_not_outcome_based": True,
             "p82_freeze_actor_md5": (p82_freeze.get("baseline") or {}).get("actor", {}).get("md5"),
+            "v2_activation": {
+                "episodes_with_forced_gt0": n_forced_ep,
+                "n_episodes": len(rows),
+                "activation_rate": v2_rate,
+                "attribution": "Actor-only" if v2_rate < 0.05 else "P64+V2 mixed",
+            },
         },
     )
     _write_panel_validation(report)

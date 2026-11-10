@@ -47,6 +47,33 @@ LATEST_CKPT = CKPT_DIR / "P53_grpo64_latest.pt"
 PID_LOCK = OUT / "FULL_GRPO64_TRAIN.pid"
 
 
+def _pid_alive(pid: int) -> bool:
+    """Portable liveness check (os.kill(pid, 0) is unreliable on Windows)."""
+    import os
+    import sys
+
+    if pid <= 0:
+        return False
+    if sys.platform == "win32":
+        import ctypes
+
+        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+        handle = ctypes.windll.kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, int(pid))
+        if handle:
+            ctypes.windll.kernel32.CloseHandle(handle)
+            return True
+        return False
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
+        return False
+
+
 def _acquire_pid_lock() -> None:
     import os
 
@@ -55,12 +82,7 @@ def _acquire_pid_lock() -> None:
             old = int(PID_LOCK.read_text(encoding="utf-8").strip())
         except Exception:
             old = -1
-        # If process still alive, refuse
-        try:
-            os.kill(old, 0)
-            alive = True
-        except Exception:
-            alive = False
+        alive = _pid_alive(old)
         if alive and old != os.getpid():
             raise SystemExit(f"Another full-epoch trainer holds {PID_LOCK} pid={old}")
     PID_LOCK.write_text(str(os.getpid()), encoding="utf-8")

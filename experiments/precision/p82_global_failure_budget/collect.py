@@ -15,7 +15,11 @@ from experiments.precision.p57_post_recatch_stabilization.env_stabilize import S
 from experiments.precision.p61_reproducible_joint_eval.seeding import rollout_seed, seed_all
 from experiments.precision.p63_transformer_critic_ppo.checkpointing import load_actor, load_critic
 from experiments.precision.p63_transformer_critic_ppo.sampling import act_with_value
-from experiments.precision.p64_ppo_multiround.schedule import blocked_eval_ids, sample_stratified
+from experiments.precision.p64_ppo_multiround.schedule import (
+    blocked_eval_ids,
+    is_blocked_eval,
+    sample_stratified,
+)
 from experiments.precision.p66_c_curriculum_ppo.expert_drive import ensure_inner_capture_buffers
 from experiments.precision.p67_r3f_gate_diagnosis.gate_predicates import evaluate_predicates
 from experiments.precision.p68_precontact_geometry.geometry import relative_geometry
@@ -201,7 +205,7 @@ def collect_baseline(*, device: str = "cuda", force: bool = False) -> dict:
     pool = build_p54_dataset(seed=5478)["schedule"]
     by = defaultdict(list)
     for s in pool:
-        if s.traj_id in blocked:
+        if is_blocked_eval(s.traj_id, blocked):
             continue
         by[s.skill].append(s)
     rng = np.random.default_rng(SEED)
@@ -224,13 +228,33 @@ def collect_baseline(*, device: str = "cuda", force: bool = False) -> dict:
         )
 
     cache_path.write_bytes(pickle.dumps(rows, protocol=pickle.HIGHEST_PROTOCOL))
+    n_forced_ep = sum(1 for r in rows if int(r.get("forced_steps") or 0) > 0)
+    mean_forced = float(np.mean([int(r.get("forced_steps") or 0) for r in rows])) if rows else 0.0
+    v2_activation_rate = float(n_forced_ep / len(rows)) if rows else 0.0
     meta = {
         "n": len(rows),
         "per_class": {sk: sum(1 for r in rows if r["skill"] == sk) for sk in SKILLS},
         "blocked_eval_excluded": True,
+        "blocked_eval_uses_root_id": True,
         "reused_p81_baseline": False,
         "p81_cache_exists": p81.exists(),
+        "v2_activation": {
+            "episodes_with_forced_gt0": n_forced_ep,
+            "n_episodes": len(rows),
+            "activation_rate": v2_activation_rate,
+            "mean_forced_steps": mean_forced,
+            "note": (
+                "V2 require_no_contact; contact-at-start ICs yield ~Actor-only. "
+                "Do not attribute MSP to V2 closed-loop when activation_rate is near 0."
+            ),
+        },
     }
+    if rows and v2_activation_rate < 0.05:
+        print(
+            f"[p82] WARNING: V2 activation_rate={v2_activation_rate:.3f} "
+            f"({n_forced_ep}/{len(rows)}); panel is ≈ Actor-only.",
+            flush=True,
+        )
     (CACHE / "collection_meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
     return {"rows": rows, "cached": False, "meta": meta}
 

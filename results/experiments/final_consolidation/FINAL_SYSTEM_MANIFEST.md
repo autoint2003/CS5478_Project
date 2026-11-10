@@ -1,6 +1,6 @@
 # Final System Manifest — CS5478 Adaptive Grasp Recovery
 
-**Status:** Frozen after P84 Case D (`stop_consolidate_baseline`). No P85. Model behavior unchanged by this consolidation.
+**Status:** Frozen after P83 Case D post-audit revision + P84 Case D (`stop_consolidate_baseline`). No P85. Model behavior unchanged by this consolidation. See `POST_AUDIT_DECISION_REVISION.md`.
 
 ## Frozen stack
 
@@ -106,8 +106,12 @@ A separate blocked / fresh final-test IC set exists via `_fresh_final_starts` in
 
 ## Why this freeze (selection rationale)
 
-1. P70 V2 improved full-episode R3/SUCCESS vs Actor-only on its held panel without training (`do_not_train` for PPO).
+1. P70 V2 improved full-episode R3/SUCCESS vs Actor-only on **its own** held panel (C-focused P69 split; activation rate 1.0) without training (`do_not_train` for PPO). That evidence is **panel-specific**.
 2. Critic recalibration / sensing / obs expansion / history-conditioned policy / fixed-token bias / post-contact overlays all failed promotion gates or closed-loop transfer (P75–P81, P73).
-3. P82–P84 showed non-C failure mass is large but B1 modes are diffuse (P84 concentration gate fail) → stop optimization; consolidate.
+3. P83 post-audit Case D (fair mean non-C ≈ C_cf) + P84 B1 dispersion (concentration gate fail) → `stop_consolidate_baseline`; consolidate.
+
+### Critical evaluation caveat (P83/P82)
+
+On `panel_32.pkl`, V2 forced tokens in **2/128** episodes only (both B1, never contacted). Starts are typically already in pad contact, so V2’s `require_no_contact` gate never opens. **P83 MSP therefore measures ≈ P64 Actor-only behavior**, not active V2 closed-loop control. See `WORKFLOW_AUDIT.md`.
 
 This is **not** a claim of global optimality for M111 or V2.

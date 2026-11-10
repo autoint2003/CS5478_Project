@@ -25,10 +25,16 @@ def blocked_eval_ids() -> set[str]:
     return blocked
 
 
-def _is_blocked(tid: str, blocked: set[str]) -> bool:
+def is_blocked_eval(tid: str, blocked: set[str] | None = None) -> bool:
+    """True if traj_id or its physical twin root is in the eval block set."""
+    blocked = blocked if blocked is not None else blocked_eval_ids()
     if tid in blocked or root_id(tid) in blocked:
         return True
     return False
+
+
+# Back-compat alias used by sample_stratified
+_is_blocked = is_blocked_eval
 
 
 def sample_stratified(
@@ -42,7 +48,7 @@ def sample_stratified(
     blocked = blocked or set()
     by = defaultdict(list)
     for s in pool:
-        if _is_blocked(s.traj_id, blocked):
+        if is_blocked_eval(s.traj_id, blocked):
             continue
         by[s.skill].append(s)
     rng = np.random.default_rng(seed)
@@ -54,7 +60,7 @@ def sample_stratified(
         out.extend(cand[:per])
     # top-up if short
     if len(out) < n_ics:
-        rest = [s for s in pool if s not in out and not _is_blocked(s.traj_id, blocked)]
+        rest = [s for s in pool if s not in out and not is_blocked_eval(s.traj_id, blocked)]
         rng.shuffle(rest)
         out.extend(rest[: n_ics - len(out)])
     return out[:n_ics]

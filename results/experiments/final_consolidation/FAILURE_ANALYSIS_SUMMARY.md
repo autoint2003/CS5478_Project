@@ -41,8 +41,12 @@ Largest exclusive earliest failures on C: `no_opposing_after_fc` **12**, `no_e_p
 Equal-weight masses (P83):
 
 - C contact-formation mass = **0.1640625**
-- Combined A1/B1/D any-failure mass = **0.5078125**
-- No single non-C class ≥ 50% of that combined mass (P83 Case C)
+- Combined A1/B1/D any-failure mass (**legacy SUM**) = **0.5078125**
+- Mean A1/B1/D any-failure mass (**fair**) = **0.1692708…**
+- No single non-C class ≥ 50% of the combined SUM mass
+
+**Decision (post-audit revision):** Case **D** — opportunities indistinguishable; `stop_consolidate_baseline`.  
+Original Case C (SUM-based non-C dominance → P84 path) is archived; SUM/mean/C_cf are not homogeneous recoverability indicators.
 
 ---
 
@@ -62,6 +66,8 @@ Gate: ≥40% of B1 failures **and** ≥11 failed ICs (`ceil(0.4×26)=11`).
 **Result:** Case D — modes are diffuse; stop optimization direction. Max MSP failure-mass upper for largest mode = **0.0703125** (scenario upper bound, not realized gain).
 
 Online signature / recoverability: reported **not** credible for intervention (`answers.8_recoverability_credible: false`).
+
+**Provenance note:** P84 was run under the **superseded P83 Case C** recommendation. Artifacts are retained; B1 dispersion evidence remains valid and independently supports stop/consolidate (`POST_AUDIT_NOTE.md`).
 
 ---
 

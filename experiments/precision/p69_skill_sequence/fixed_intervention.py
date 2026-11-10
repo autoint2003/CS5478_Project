@@ -15,7 +15,7 @@ from experiments.precision.p57_post_recatch_stabilization.env_stabilize import S
 from experiments.precision.p61_reproducible_joint_eval.seeding import rollout_seed, seed_all
 from experiments.precision.p63_transformer_critic_ppo.checkpointing import load_actor, load_critic
 from experiments.precision.p63_transformer_critic_ppo.sampling import act_with_value
-from experiments.precision.p64_ppo_multiround.schedule import blocked_eval_ids
+from experiments.precision.p64_ppo_multiround.schedule import blocked_eval_ids, is_blocked_eval
 from experiments.precision.p67_r3f_gate_diagnosis.gate_predicates import evaluate_predicates
 from experiments.precision.p68_precontact_geometry.geometry import relative_geometry
 from experiments.precision.p69_skill_sequence.paths import (
@@ -28,6 +28,7 @@ from experiments.precision.p69_skill_sequence.paths import (
     SEED,
     T_MAX,
 )
+from experiments.precision.p70_geometry_to_r3f.obs_proxy import last_obs, obs_features
 
 
 def _lookup_starts(traj_ids: list[str]) -> list:
@@ -35,15 +36,15 @@ def _lookup_starts(traj_ids: list[str]) -> list:
     by_id = {
         s.traj_id: s
         for s in build_p54_dataset(seed=SEED)["schedule"]
-        if s.skill == "C" and s.traj_id not in blocked
+        if s.skill == "C" and not is_blocked_eval(s.traj_id, blocked)
     }
     return [by_id[t] for t in traj_ids if t in by_id]
 
 
 def _no_pad_contact_obs_available(env) -> bool:
-    """Deployable contact gate: use runtime pad counts (also present in tactile obs stream)."""
-    g = relative_geometry(env.env.sim)
-    return not g["has_pad_contact"]
+    """Deployable contact gate from Actor-observable tactile flags only (no privileged geom)."""
+    feat = obs_features(last_obs(env))
+    return not bool(feat["any_contact_obs"])
 
 
 def rollout_episode(
@@ -73,8 +74,9 @@ def rollout_episode(
     extra_fwd = 0  # forced tokens still call Actor for resid → same cost; count forced overrides
 
     while not done:
-        geo = relative_geometry(env.env.sim)
-        if not geo["has_pad_contact"]:
+        geo = relative_geometry(env.env.sim)  # metrics / logging only
+        obs_contact = bool(obs_features(last_obs(env))["any_contact_obs"])
+        if not obs_contact:
             last_no_contact = {
                 "t": int(env.t),
                 "e_pos_mm": float(geo["e_pos_mm"]),
@@ -97,12 +99,12 @@ def rollout_episode(
             extra_fwd += 0  # Actor forward already done for residual; override is free of extra GPU
         else:
             tok = int(_tok)
-            # stop intervention once sequence exhausted or contact
-            if intervening and (seq_i >= len(seq) or geo["has_pad_contact"]):
+            # stop intervention once sequence exhausted or deployable contact
+            if intervening and (seq_i >= len(seq) or obs_contact):
                 intervening = False
         _r, done, info = env.step(tok, resid)
         ga = relative_geometry(env.env.sim)
-        if first_contact_t is None and ga["has_pad_contact"]:
+        if first_contact_t is None and bool(obs_features(last_obs(env))["any_contact_obs"]):
             first_contact_t = int(env.t)
         ever_sw = ever_sw or ga["correct_sidewall"]
         max_pad = max(max_pad, ga["min_pad"])
@@ -192,14 +194,15 @@ def run_phase3(*, device: str = "cuda") -> dict:
         for k in ("SUCCESS_RELAXED", "r3_ready", "handoff", "correct_sidewall", "min_pad_ge4", "pre_contact_e_pos_mm")
     }
 
-    # Gate for Phase 4 (spec):
-    # - Proceed if R3F *progression* improves (r3/handoff OR contact-geometry gates).
+    # Gate for Phase 4 — tightened vs noise (ΔSUCCESS≈0.015 historically tripped soft gates):
+    # - Require meaningful SUCCESS lift AND R3F/geometry progression.
     # - Stop if ONLY e_pos improves without contact geometry or R3F.
-    r3_up = (delta["r3_ready"] or 0) > 0.01 or (delta["handoff"] or 0) > 0.01
-    geom_up = (delta["correct_sidewall"] or 0) > 0.05 or (delta["min_pad_ge4"] or 0) > 0.03
+    succ_up = (delta["SUCCESS_RELAXED"] or 0) > 0.05
+    r3_up = (delta["r3_ready"] or 0) > 0.05 or (delta["handoff"] or 0) > 0.05
+    geom_up = (delta["correct_sidewall"] or 0) > 0.08 or (delta["min_pad_ge4"] or 0) > 0.05
     e_improved = (delta["pre_contact_e_pos_mm"] or 0) < -5.0  # lower is better
     e_only = e_improved and not r3_up and not geom_up
-    proceed_ppo = bool((r3_up or geom_up) and not e_only)
+    proceed_ppo = bool(succ_up and (r3_up or geom_up) and not e_only)
 
     # Per-IC paired
     by_ic = {}
@@ -234,12 +237,24 @@ def run_phase3(*, device: str = "cuda") -> dict:
         "delta": delta,
         "per_ic": per_ic,
         "proceed_to_ppo": proceed_ppo,
+        "gate": {
+            "succ_up_thresh": 0.05,
+            "r3_up_thresh": 0.05,
+            "geom_sidewall_thresh": 0.08,
+            "geom_pad4_thresh": 0.05,
+            "succ_up": succ_up,
+            "r3_up": r3_up,
+            "geom_up": geom_up,
+            "e_only": e_only,
+        },
         "inference_cost": {
             "extra_actor_forwards_per_forced_step": 0,
             "note": "Forced token overrides Actor sample after one forward for residual; no extra GPU forward vs baseline.",
             "mean_forced_steps": intv.get("mean_forced_steps"),
         },
+        # Activation uses obs tactile contact only; geometry metrics remain privileged for reporting.
         "obs_only": True,
+        "contact_gate": "obs_features.any_contact_obs",
     }
     (OUT / "NO_TRAIN_INTERVENTION_RESULTS.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
 

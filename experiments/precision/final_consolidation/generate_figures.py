@@ -21,11 +21,11 @@ def fig01() -> None:
     ax.set_xlim(0, 10)
     ax.set_ylim(0, 5.5)
     ax.axis("off")
-    ax.set_title("Final frozen system (P64 Actor/Critic + P70 V2 + M111)", fontsize=12, pad=8)
+    ax.set_title("Final frozen system (P64 Actor/Critic; V2 pre-contact gate)", fontsize=12, pad=8)
     boxes = [
         (0.3, 3.6, 2.2, 1.4, "Observation\n(Actor 39-D)"),
         (3.0, 3.6, 2.4, 1.4, "P64 Actor\nM111 discrete\ntokens"),
-        (5.8, 3.6, 2.6, 1.4, "P70 V2\nadaptive pre-contact\n(ready_score)"),
+        (5.8, 3.6, 2.6, 1.4, "P70 V2 gate\n(require_no_contact;\nrare on P83 panel)"),
         (8.6, 3.6, 1.2, 1.4, "Env\nstep"),
         (3.0, 1.2, 2.4, 1.4, "P64 Critic\n(value; unused\nfor control)"),
         (5.8, 1.2, 2.6, 1.4, "Terminal metrics\nR3F + SUCCESS_\nRELAXED_12S"),
@@ -52,7 +52,7 @@ def fig01() -> None:
     ax.text(
         5.0,
         0.35,
-        "Overlays (P73/P81) and obsolete train branches are NOT on this path.",
+        "P83 MSP ≈ Actor-only (V2 activation ~2/128). Overlays (P73/P81) are NOT on this path.",
         fontsize=8,
         ha="center",
         color="#7a2e0b",
@@ -98,9 +98,9 @@ def fig03() -> None:
     stages = [
         "P54 IC pool\n(blocked eval\nexcluded)",
         "P64 PPO\nActor/Critic\ncheckpoints",
-        "P70 V2\npre-contact\ncontroller",
+        "P70 V2 gate\n(often inactive\non contact-start)",
         "Canonical rollout\np82.collect.\nrollout_episode",
-        "P83 panel\n32 ICs/class\nMSP report",
+        "P83 panel\n≈Actor-only MSP\n0.273",
     ]
     for i, s in enumerate(stages):
         x = 0.3 + i * 1.95
@@ -150,7 +150,7 @@ def fig04() -> None:
         0.5,
         -0.18,
         "Source: p83_recoverable_failure_mass/BASELINE_PANEL_VALIDATION.md\n"
-        "Not a pristine final-test result.",
+        "Not final-test; V2 nearly inactive → treat as ≈ P64 Actor-only.",
         transform=ax.transAxes,
         fontsize=7.5,
         va="top",

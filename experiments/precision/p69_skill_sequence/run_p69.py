@@ -37,7 +37,19 @@ def main():
     p3_path = OUT / "NO_TRAIN_INTERVENTION_RESULTS.json"
     if p3_path.is_file():
         try:
-            proceed_ppo = bool(json.loads(p3_path.read_text(encoding="utf-8")).get("proceed_to_ppo"))
+            p3blob = json.loads(p3_path.read_text(encoding="utf-8"))
+            proceed_ppo = bool(p3blob.get("proceed_to_ppo"))
+            gate = p3blob.get("gate") or {}
+            # Refuse stale soft-gate artifacts (pre-tightening) that lack succ_up
+            if proceed_ppo and "succ_up" not in gate:
+                print(
+                    "WARNING: refusing stale P69 Phase-3 gate without succ_up; "
+                    "re-run --phase 3 (or use --force_ppo only for override).",
+                    flush=True,
+                )
+                proceed_ppo = False
+            elif proceed_ppo and not gate.get("succ_up"):
+                proceed_ppo = False
         except Exception:  # noqa: BLE001
             proceed_ppo = False
 

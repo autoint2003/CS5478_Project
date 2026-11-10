@@ -11,7 +11,11 @@ def decide(panel, funnel, attr, mass, recov, scenarios, sens, *, stage: int = 1)
     OUT.mkdir(parents=True, exist_ok=True)
     fm = mass["comparisons"]
     c_cf = fm["A_C_contact_formation_mass"]
-    nonc = fm["B_combined_A1B1D_any_failure_mass"]
+    # Prefer mean of per-class non-C masses (fair); fall back to legacy sum/3
+    nonc = fm.get("B_mean_A1B1D_any_failure_mass")
+    if nonc is None:
+        nonc = fm["B_combined_A1B1D_any_failure_mass"] / 3.0
+    nonc_sum_legacy = fm["B_combined_A1B1D_any_failure_mass"]
     per = fm["C_individual_nonC_any_failure_mass"]
     a1, b1, d = per["A1"], per["B1"], per["D"]
     total_nonc = a1 + b1 + d
@@ -26,7 +30,7 @@ def decide(panel, funnel, attr, mass, recov, scenarios, sens, *, stage: int = 1)
     c_cons = c_sc.get("conservative")
     c_opt = c_sc.get("optimistic")
 
-    # Dominance checks on *raw* failure mass
+    # Dominance on fair mean masses (not 3× summed non-C vs single C)
     nonc_dominates_raw = nonc > c_cf * 1.25
     c_dominates_raw = c_cf > nonc * 1.25
     single_nonc_share = {k: (v / total_nonc if total_nonc else 0) for k, v in per.items()}
@@ -53,7 +57,8 @@ def decide(panel, funnel, attr, mass, recov, scenarios, sens, *, stage: int = 1)
     elif nonc_dominates_raw and single_dom_frac < 0.50:
         case = "C"
         reason = (
-            "Combined A1/B1/D failure mass dominates C contact-formation mass across bootstrap/LOO, "
+            "Mean A1/B1/D any-failure mass dominates C contact-formation mass across bootstrap/LOO "
+            f"(mean_nonC={nonc:.3f} vs C_cf={c_cf:.3f}; legacy 3-class sum={nonc_sum_legacy:.3f}), "
             "but no single non-C class reaches 50% of that mass and recoverability remains unknown. "
             "Recommend a narrowly scoped non-C diagnostic that does not assume a shared mechanism."
         )
@@ -104,7 +109,7 @@ def decide(panel, funnel, attr, mass, recov, scenarios, sens, *, stage: int = 1)
                 "with one matched full-episode contrast against frozen P64+V2 — without overlays."
             ),
             "supporting_evidence": [
-                f"P83 failure mass: nonC_any={nonc:.3f} > C_cf={c_cf:.3f}",
+                f"P83 failure mass (fair mean): nonC_any_mean={nonc:.3f} > C_cf={c_cf:.3f}",
                 f"Class masses A1={a1:.3f}, B1={b1:.3f}, D={d:.3f}",
                 "P81: C-local interventions can destroy overall MSP",
             ],

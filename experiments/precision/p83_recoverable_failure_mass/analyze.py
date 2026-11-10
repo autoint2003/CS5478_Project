@@ -179,9 +179,16 @@ def failure_mass(rows: list[dict], attr: dict) -> dict:
 
     # Aggregates
     c_cf = mass["C"]["FailureMass_group"]["contact_formation"]
+    c_any = mass["C"]["FailureMass_group"]["any_failure"]
+    # Legacy sum (3× class mass) kept for audit continuity — do NOT use for dominance.
     nonc_any = sum(mass[sk]["FailureMass_group"]["any_failure"] for sk in ("A1", "B1", "D"))
     nonc_cf = sum(mass[sk]["FailureMass_group"]["contact_formation"] for sk in ("A1", "B1", "D"))
     per_nonc = {sk: mass[sk]["FailureMass_group"]["any_failure"] for sk in ("A1", "B1", "D")}
+    # Fair per-class means (each FailureMass already includes the 0.25 class weight)
+    nonc_any_mean = float(np.mean(list(per_nonc.values()))) if per_nonc else 0.0
+    nonc_cf_mean = float(
+        np.mean([mass[sk]["FailureMass_group"]["contact_formation"] for sk in ("A1", "B1", "D")])
+    )
 
     # IC bootstrap on group masses
     def boot_group(sk, group_keys, seed=0):
@@ -205,11 +212,18 @@ def failure_mass(rows: list[dict], attr: dict) -> dict:
         "by_class": mass,
         "comparisons": {
             "A_C_contact_formation_mass": c_cf,
+            "A_C_any_failure_mass": c_any,
             "B_combined_A1B1D_any_failure_mass": nonc_any,
             "B_combined_A1B1D_contact_formation_mass": nonc_cf,
+            "B_mean_A1B1D_any_failure_mass": nonc_any_mean,
+            "B_mean_A1B1D_contact_formation_mass": nonc_cf_mean,
             "C_individual_nonC_any_failure_mass": per_nonc,
             "D_handoff_mass_all_classes": sum(mass[sk]["FailureMass_group"]["handoff"] for sk in SKILLS),
             "D_stabilization_mass_all_classes": sum(mass[sk]["FailureMass_group"]["stabilization"] for sk in SKILLS),
+            "dominance_note": (
+                "B_combined_* sums three class masses (up to 0.75) vs single-class C (max 0.25); "
+                "use B_mean_* vs A_C_* for fair dominance checks."
+            ),
         },
         "ic_bootstrap": {
             "C_contact_formation": boot_group("C", CONTACT_FORMATION, 11),

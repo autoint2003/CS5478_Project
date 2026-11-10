@@ -49,7 +49,9 @@ def _eval_ckpt(tag: str, ckpt: Path, starts: list, *, n: int, device_t, seed: in
     for st in starts:
         succ = rec = stab = hand = drop = 0
         for i in range(n):
-            torch.manual_seed(seed + hash(st.traj_id) % 100000 + i * 9973)
+            from experiments.precision.p61_reproducible_joint_eval.seeding import stable_u32
+
+            torch.manual_seed(seed + stable_u32("p60", st.traj_id, i) % 100000 + i * 9973)
             m = rollout_one(
                 env, actor, st, device_t, temperature=TEMPERATURE, gamma_return=GAMMA_RETURN
             )

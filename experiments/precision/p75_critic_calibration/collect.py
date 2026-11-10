@@ -17,7 +17,7 @@ from experiments.precision.p61_reproducible_joint_eval.seeding import rollout_se
 from experiments.precision.p63_transformer_critic_ppo.checkpointing import load_actor, load_critic
 from experiments.precision.p63_transformer_critic_ppo.gae import compute_gae, explained_variance
 from experiments.precision.p63_transformer_critic_ppo.sampling import act_with_value
-from experiments.precision.p64_ppo_multiround.schedule import blocked_eval_ids
+from experiments.precision.p64_ppo_multiround.schedule import blocked_eval_ids, is_blocked_eval
 from experiments.precision.p67_r3f_gate_diagnosis.gate_predicates import evaluate_predicates
 from experiments.precision.p68_precontact_geometry.geometry import relative_geometry
 from experiments.precision.p70_geometry_to_r3f.obs_proxy import last_obs
@@ -176,7 +176,7 @@ def _pick_ics(schedule, *, n_ep: int, c_frac: float, seed: int):
     blocked = blocked_eval_ids()
     by = {"A1": [], "B1": [], "C": [], "D": []}
     for s in schedule:
-        if s.traj_id in blocked:
+        if is_blocked_eval(s.traj_id, blocked):
             continue
         if s.skill in by:
             by[s.skill].append(s)

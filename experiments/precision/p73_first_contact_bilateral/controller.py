@@ -76,13 +76,12 @@ def select_token(
             dbg["forced"] = d2["forced"]
         return int(tok), st, dbg
 
-    # No rule / finished → V2 (usually Actor after contact)
+    # After first contact: never re-activate V2 (require_no_contact would allow
+    # latent re-entry if contact drops while env_t ≤ max_activate_step).
+    # Baseline / no-rule / finished overlays → Actor only.
     if rule is None or rule.name in ("none", "baseline") or st.post_done or not rule.sequence:
-        tok, st.v2, _d2 = select_v2_token(
-            env_t=env_t, obs=obs, actor_tok=actor_tok, st=st.v2, spec=v2
-        )
-        dbg["phase"] = "post_v2_or_actor"
-        return int(tok), st, dbg
+        dbg["phase"] = "post_contact_actor"
+        return int(actor_tok), st, dbg
 
     # Contact-loss abort
     if rule.abort_on_contact_loss and st.post_active and not feat["any_contact_obs"]:
@@ -98,10 +97,7 @@ def select_token(
         st.post_active = False
         st.stop_reason = "obs_bilateral"
         dbg["phase"] = "stop_obs_bilateral"
-        tok, st.v2, _ = select_v2_token(
-            env_t=env_t, obs=obs, actor_tok=actor_tok, st=st.v2, spec=v2
-        )
-        return int(tok), st, dbg
+        return int(actor_tok), st, dbg
 
     # Activate
     if not st.post_active:
@@ -110,10 +106,7 @@ def select_token(
             st.post_done = True
             st.stop_reason = "already_bilateral"
             dbg["phase"] = "skip_already_bilateral"
-            tok, st.v2, _ = select_v2_token(
-                env_t=env_t, obs=obs, actor_tok=actor_tok, st=st.v2, spec=v2
-            )
-            return int(tok), st, dbg
+            return int(actor_tok), st, dbg
         st.post_active = True
         st.post_i = 0
 

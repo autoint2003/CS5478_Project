@@ -155,29 +155,44 @@ class StabilizeGrpoEnv(GrpoRecoveryEnv):
                     weights=self.pose_weights,
                 )
             else:
-                ev = evaluate_handoff_with_axis(self.env.sim, ref, stabilize_n=8)
-                rel = evaluate_success_relaxed_12s(ev)
-                s12 = bool(rel["SUCCESS_12S"])
-                snew = bool(rel["SUCCESS_NEW"])
-                srel = bool(rel["SUCCESS_RELAXED_12S"])
-                reason = str(ev.get("reason") or "")
-                lost_after = (not s12) and (
-                    "LOST" in reason.upper() or "DROP" in reason.upper() or "GROUND" in reason.upper()
-                )
-                timeout_fail = (not s12) and not lost_after
-                fail_reason = None if srel else (reason or ("POSE_FAIL" if s12 else "NOMINAL_FAIL"))
-                r_term, bd_t = terminal_reward(
-                    drop=False,
-                    success_relaxed=srel,
-                    success_12s=s12,
-                    success_new=snew,
-                    lost_after_hand=lost_after,
-                    timeout_fail=timeout_fail,
-                    weights=self.pose_weights,
-                )
-                hand_diag["nominal_reason"] = reason
-                hand_diag["pre_pos_mm"] = ev.get("pre_pos_mm")
-                hand_diag["pre_theta"] = ev.get("pre_theta")
+                # Presentation renderers set defer_handoff_eval so the ~12s
+                # nominal climb/orientation return is played frame-by-frame
+                # instead of mutating the filmed sim inside one env.step.
+                if getattr(self, "defer_handoff_eval", False):
+                    hand_diag["deferred_handoff_eval"] = True
+                    r_term, bd_t = terminal_reward(
+                        drop=False,
+                        success_relaxed=False,
+                        success_12s=False,
+                        success_new=False,
+                        lost_after_hand=False,
+                        timeout_fail=False,
+                        weights=self.pose_weights,
+                    )
+                else:
+                    ev = evaluate_handoff_with_axis(self.env.sim, ref, stabilize_n=8)
+                    rel = evaluate_success_relaxed_12s(ev)
+                    s12 = bool(rel["SUCCESS_12S"])
+                    snew = bool(rel["SUCCESS_NEW"])
+                    srel = bool(rel["SUCCESS_RELAXED_12S"])
+                    reason = str(ev.get("reason") or "")
+                    lost_after = (not s12) and (
+                        "LOST" in reason.upper() or "DROP" in reason.upper() or "GROUND" in reason.upper()
+                    )
+                    timeout_fail = (not s12) and not lost_after
+                    fail_reason = None if srel else (reason or ("POSE_FAIL" if s12 else "NOMINAL_FAIL"))
+                    r_term, bd_t = terminal_reward(
+                        drop=False,
+                        success_relaxed=srel,
+                        success_12s=s12,
+                        success_new=snew,
+                        lost_after_hand=lost_after,
+                        timeout_fail=timeout_fail,
+                        weights=self.pose_weights,
+                    )
+                    hand_diag["nominal_reason"] = reason
+                    hand_diag["pre_pos_mm"] = ev.get("pre_pos_mm")
+                    hand_diag["pre_theta"] = ev.get("pre_theta")
             self.comp_sums["terminal"] += bd_t.terminal
             r_step += r_term
 

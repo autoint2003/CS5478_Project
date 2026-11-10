@@ -16,8 +16,8 @@ Canonical artifact roots under `results/experiments/`. Only entries with verifie
 | P80 | History-conditioned policy feasibility | Case B | `p80_policy_learning_feasibility/FINAL_REPORT.json` | Static tok_56 explains gains |
 | P81 | Static contact-stage bias | Case B | `p81_static_contact_bias/FINAL_REPORT.json`, `FULL_EPISODE_TRANSFER.md` | Matched +; full-ep MSP −0.25 |
 | P82 | Global failure budget | Freeze baseline; stop fixed-token | `p82_global_failure_budget/BASELINE_FREEZE.json`, evidence/decide | 16 ICs/class stage (reused into P83) |
-| P83 | Cross-class recoverable failure mass | Case C → non-C diagnostic | `p83_recoverable_failure_mass/*` | **Canonical report panel: 32/class** |
-| P84 | Non-C (B1) mechanism discovery | Case D → stop | `p84_nonC_mechanism_discovery/FINAL_REPORT.json` | Concentration gate fail |
+| P83 | Cross-class recoverable failure mass | **Case D** (post-audit revision) → `stop_consolidate_baseline`; original Case C archived | `p83_recoverable_failure_mass/P83_DECISION.json`, `P83_DECISION_ORIGINAL_CASE_C.json` | **Canonical report panel: 32/class**; V2 2/128 |
+| P84 | Non-C (B1) mechanism discovery | Case D → stop; **executed under superseded P83 Case C path** | `p84_nonC_mechanism_discovery/FINAL_REPORT.json`, `POST_AUDIT_NOTE.md` | B1 dispersion still valid; concentration gate fail |
 
 ## Frozen baseline pointer
 
@@ -30,4 +30,6 @@ Episode cache: `results/experiments/p83_recoverable_failure_mass/cache/panel_32.
 
 ## Stop decision pointer
 
-`results/experiments/p84_nonC_mechanism_discovery/FINAL_REPORT.json` → `p85: stop_consolidate_baseline`
+- **Revised P83:** `results/experiments/p83_recoverable_failure_mass/P83_DECISION.json` → `final_action: stop_consolidate_baseline`
+- **P84 empirical stop (unchanged artifacts):** `results/experiments/p84_nonC_mechanism_discovery/FINAL_REPORT.json` → `p85: stop_consolidate_baseline`
+- **Revision log:** `results/experiments/final_consolidation/POST_AUDIT_DECISION_REVISION.md`

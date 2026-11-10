@@ -20,6 +20,10 @@ Audit performed during final consolidation. **No training or new evaluation camp
 | Final-test not auto-evaluated | Pass | Constraint honored in consolidation |
 | P85 not launched | Pass | P84 decision `stop_consolidate_baseline` |
 
+## Workflow audit
+
+See `WORKFLOW_AUDIT.md` (2026-11-06 read-only review). No CRITICAL holes. **Must disclose:** P83 V2 inactive (2/128 forced); P83 MSP ≈ Actor-only; train-IC overlap; do not paste P70 V2 gains onto P83.
+
 ## Unresolved inconsistencies (reported, not silently repaired)
 
 1. **P70 vs P73 Actor-only / V2 SUCCESS rates differ** on their respective n=96 held panels (e.g. V0 SUCCESS 0.083 vs 0.135). Treat as separate campaigns; do not average or difference across them.

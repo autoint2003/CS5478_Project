@@ -1,0 +1,5 @@
+skill,traj_id,snapshot_hash,seed,rollout_i,n_steps,recatch,stable_hold,handoff,SUCCESS_RELAXED_12S,provenance,independent_label,selection_rule,behavior_label
+A1,A__slide_quota_400660__ef7cfa9e9ca57a40,b730f4b48532b8cd,3705230660,18,66,1,1,1,1,heldout_p64_step4_panel,0,median_n_steps_among_nontrivial_successes; tie-break full traj_id then seed; behavior_label=corrective,corrective
+B1,plan_b__slide_extra_260006,671abf032db53978,3235788579,3,69,1,1,1,1,heldout_p64_step4_panel,0,median_n_steps_among_nontrivial_successes; tie-break full traj_id then seed; behavior_label=corrective,corrective
+C,plan_c__gbi_041_7f94ea38dd,62b0ffd0cbfd03e6,1844945303,14,33,1,1,1,1,heldout_p64_step4_panel,0,median_n_steps_among_nontrivial_successes; tie-break full traj_id then seed; behavior_label=detach_recatch,detach_recatch
+D,p33_ball_train_0001_COMBINED_dx4_dz12,e02ffd0651dc97e3,2168866308,3,26,1,1,1,1,heldout_p64_step4_panel,0,median_n_steps_among_nontrivial_successes; tie-break full traj_id then seed; behavior_label=corrective,corrective

@@ -37,8 +37,8 @@ Figure: `fig01_final_system_architecture`, `fig03_train_eval_pipeline`.
 ## 5. Main results
 
 - **Canonical panel (P83):** A1 8/32, B1 6/32, C 4/32, D 17/32; MSP 35/128 = 0.2734375; bootstrap CI [0.1953, 0.3516].
-- Clearly label: **not** pristine final-test.
-- P70 V2 closed-loop lift on its held panel (SUCCESS/R3 ≈ 0.240 vs V0 ≈ 0.083) as the positive no-train controller result that entered the freeze — separately from P83.
+- Clearly label: **not** pristine final-test; **V2 inactive on 126/128 eps** (MSP ≈ Actor-only).
+- P70 V2 closed-loop lift on its held panel (SUCCESS/R3 ≈ 0.240 vs V0 ≈ 0.083) — **separate distribution**; do not claim it applies to P83.
 
 Figures: `fig04_p83_per_class_success`.
 
@@ -55,7 +55,7 @@ Figure: `fig07_matched_vs_full_episode`.
 
 ## 7. Failure analysis
 
-- C contact funnel; exclusive cross-class budget; B1 diffuse modes; P84 gate fail.
+- C contact funnel; exclusive cross-class budget (retain SUM 0.508 **and** fair mean 0.169); B1 diffuse modes; P84 gate fail; **P83 Case D post-audit revision**.
 - Distinguish evidence types (Failure Analysis Summary).
 
 Figures: `fig05_c_contact_formation_funnel`, `fig06_cross_class_failure_attribution`.
@@ -72,4 +72,4 @@ Figures: `fig05_c_contact_formation_funnel`, `fig06_cross_class_failure_attribut
 
 - Frozen system: P64 Actor/Critic + P70 V2 + original M111 + original R3F / SUCCESS_RELAXED_12S.
 - Selected because it is the best **validated deployable no-train** stack after failed closed-loop interventions and a failed concentration gate for further mechanism-specific optimization.
-- Optimization campaign closed at P84 Case D; no P85.
+- Optimization campaign closed at P83 Case D (post-audit) + P84 Case D; no P85; no new causal probe.

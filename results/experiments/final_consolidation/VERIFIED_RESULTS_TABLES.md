@@ -57,6 +57,8 @@ Source: `STATISTICAL_SENSITIVITY.md`.
 - `N_SEEDS = 1` per IC.
 - Blocked eval / final-test excluded; **this is not a pristine final-test result**.
 - Used for diagnostics after freeze; not an untouched holdout claim.
+- **V2 activation:** `forced_steps > 0` in only **2/128** episodes (B1 only). P83 rates are ≈ **P64 Actor-only**, not active V2. Source: `panel_32.pkl` + `WORKFLOW_AUDIT.md` ([frozen-path audit](3f39613c-53f3-4b2c-a38f-d31de7709092)).
+- Heavy overlap with P64 training IC exposure (~120/128).
 
 ---
 
@@ -174,13 +176,17 @@ Source: `FAILURE_MASS.md` comparisons
 | Quantity | Value |
 |---|---:|
 | A — C contact-formation mass | 0.1640625 |
-| B — combined A1/B1/D any-failure mass | 0.5078125 |
+| B — combined A1/B1/D any-failure mass (**legacy SUM**) | 0.5078125 |
+| B′ — **mean** A1/B1/D any-failure mass (fair) | 0.1692708… |
 | B — combined A1/B1/D contact-formation mass | 0.3671875 |
 | C — A1 / B1 / D individual any-failure mass | 0.1875 / 0.203125 / 0.1171875 |
 | D — handoff mass (all classes) | 0.09375 |
 | D — stabilization mass (all classes) | 0.0625 |
 
-P83 decision: Case **C** → narrowly scoped non-C diagnostic (P84).
+**Post-audit decision revision:** Case **D** → `stop_consolidate_baseline` (fair mean 0.169 vs C_cf 0.164).  
+Original Case **C** (driven by legacy SUM 0.508) archived in `P83_DECISION_ORIGINAL_CASE_C.json`.  
+SUM vs mean vs C_cf are **not** homogeneous recoverability metrics.  
+P83 MSP 0.2734375 with V2 activation **2/128** → ≈ Actor-only (not V2 closed-loop evidence).
 
 ### P84 B1 concentration gate
 
